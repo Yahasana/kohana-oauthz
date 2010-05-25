@@ -1,0 +1,250 @@
+<?php defined('SYSPATH') or die('No direct script access.');
+/**
+ *
+ * 5.  Accessing a Protected Resource . . . . . . . . . . . . . . . . 38
+     5.1.  The Authorization Request Header . . . . . . . . . . . . . 38
+     5.2.  Bearer Token Requests  . . . . . . . . . . . . . . . . . . 40
+       5.2.1.  URI Query Parameter  . . . . . . . . . . . . . . . . . 40
+       5.2.2.  Form-Encoded Body Parameter  . . . . . . . . . . . . . 41
+     5.3.  Cryptographic Tokens Requests  . . . . . . . . . . . . . . 42
+       5.3.1.  The 'hmac-sha256' Algorithm  . . . . . . . . . . . . . 42
+   6.  Identifying a Protected Resource . . . . . . . . . . . . . . . 45
+     6.1.  The WWW-Authenticate Response Header . . . . . . . . . . . 45
+       6.1.1.  The 'realm' Attribute  . . . . . . . . . . . . . . . . 46
+       6.1.2.  The 'authorization-uri' Attribute  . . . . . . . . . . 46
+       6.1.3.  The 'algorithms' Attribute . . . . . . . . . . . . . . 46
+       6.1.4.  The 'error' Attribute  . . . . . . . . . . . . . . . . 46
+ *
+ * @author      sumh <oalite@gmail.com>
+ * @package     Oauth
+ * @copyright   (c) 2009 OALite team
+ * @license     http://www.oalite.com/license.txt
+ * @version     $id$
+ * @link        http://www.oalite.com
+ * @see         Kohana_Controller
+ * @since       Available since Release 1.0
+ * *
+ */
+abstract class Oauth_Controller extends Kohana_Controller {
+
+    protected $_type = 'default';
+
+    /**
+     * Request  settings for OAuth
+     *
+     * @access  protected
+     * @var     mix    $_params
+     */
+    protected $_params;
+
+    /**
+     * Server  settings for OAuth
+     *
+     * @access  protected
+     * @var     mix    $_configs
+     */
+    protected $_configs;
+
+    /**
+     * Data store handler
+     *
+     * @access  protected
+     * @var     string    $oauth
+     */
+    protected $oauth  = NULL;
+
+    /**
+     * Verify the request to protected resource.
+     * if unauthorized, redirect action to invalid_request
+     *
+     * @access  public
+     * @return  void
+     */
+    public function before()
+    {
+        $this->_configs = Kohana::config('oauth_server')->{$this->_type};
+
+        $this->oauth = new Model_Oauth;
+
+        try {
+
+            if(empty($this->_configs['request_methods'][Request::$method]))
+            {
+                throw new Oauth_Exception('invalid_request_method');
+            }
+
+            $this->initialize();
+
+            $this->verification();
+        }
+        catch (Oauth_Exception $e)
+        {
+            $this->request->action = 'invalid_request';
+            $this->request->params(array('id' => 'error=\''.$e->getMessage().'\''));
+        }
+    }
+
+    /**********************************Server provider actions for user*******************/
+
+    public function action_xrds()
+    {
+        $this->request->headers['Content-Type'] = 'application/xrds+xml';
+        $this->request->response = View::factory('v_oauth_xrds');
+    }
+
+    /**********************************END actions*****************************************/
+
+    /**
+     * Unauthorized response
+     *
+     * @access	public
+     * @param	string	$error	default [ error='incorrect_client_credentials' ]
+     * @return	void
+     * @todo    Add list of error codes
+     */
+    public function action_invalid_request($error = 'error=\'incorrect_client_credentials\'')
+    {
+        //space-delimited list of the cryptographic algorithms supported by the resource server
+        $challenge = '';
+        foreach($this->_configs['secret_types'] as $key => $val)
+        {
+            if($val === TRUE)
+            {
+                $challenge .= $key.' ';
+            }
+        }
+
+        if($challenge !== '')
+        {
+            $error .= ',algorithms=\''.rtrim($challenge).'\'';
+        }
+
+        //space-delimited list of URIs (relative or absolute)
+        $challenge = '';
+        foreach($this->_configs['scopes'] as $key => $val)
+        {
+            if($val === TRUE)
+            {
+                $challenge .= $key.' ';
+            }
+        }
+
+        if($challenge !== '')
+        {
+            $error .= ',scope=\''.rtrim($challenge).'\'';
+        }
+
+        $this->request->status = 401;   #HTTP/1.1 401 Unauthorized
+        $this->request->headers['WWW-Authenticate'] = 'Token realm=\'Service\','.$error;
+        $this->request->response = NULL;
+    }
+
+    /**
+     * Load request parameters
+     *
+     * @access  protected
+     * @return  array
+     */
+    protected function initialize()
+    {
+        switch(Request::$method)
+        {
+            case 'HEAD':
+                $params = Oauth::parse_header();
+                $params['oauth_token'] = isset($params['token']) ? $params['token'] : NULL;
+                unset($params['token']);
+                break;
+            case 'PUT':
+            case 'POST':
+            case 'DELETE':
+                $params = Oauth::parse_post();
+                break;
+            case 'GET':
+                $params = Oauth::parse_query();
+                break;
+            default:
+                $params = array();
+                break;
+        }
+
+        foreach($this->_configs['request_params'] as $key => $val)
+        {
+            if($val === FALSE)
+            {
+                unset($params[$key]);
+            }
+        }
+
+        return $this->_params = $params;
+    }
+
+    /**
+     * MUST verify that the verification code, client identity, client secret,
+     * and redirection URI are all valid and match its stored association.
+     *
+     * @access  protected
+     * @throw   redirect_uri_mismatch, bad_verification_code, incorrect_client_credentials
+     * @return  boolean
+     * @todo    impletement timestamp, nonce, signature checking
+     */
+    protected function verification()
+    {
+        $params = $this->_params;
+
+        if(empty($params['oauth_token']))
+            throw new Oauth_Exception('incorrect_client_credentials');
+
+        $token = new Oauth_Token($params['oauth_token']);
+
+        if(isset($params['token_secret']))
+        {
+            $token->token_secret = $params['token_secret'];
+        }
+
+        // verify that timestamp is recentish
+        if(isset($params['timestamp']))
+        {
+            if (time() - $params['timestamp'] > Kohana::config('oauth_server')->get('duration'))
+            {
+                throw new Oauth_Exception('incorrect_client_credentials');
+            }
+            $token->timestamp = $params['timestamp'];
+        }
+
+        // verify that the nonce is uniqueish
+        if(isset($params['nonce']))
+        {
+            if ($this->oauth->lookup_nonce($params['oauth_token'], $params['nonce'], $params['timestamp']))
+            {
+                throw new Oauth_Exception('incorrect_client_credentials');
+            }
+            $token->nonce = $params['nonce'];
+        }
+
+        // verify the signature
+        if(isset($params['signature']))
+        {
+            $base_url = URL::base(FALSE, TRUE).$this->request->controller.'/'.$this->request->action;
+
+            $string = Oauth::normalize($params['method'], $base_url, $params);
+
+            if($params['algorithm'] == 'rsa-sha1' OR $params['algorithm'] == 'hmac-sha1')
+            {
+                $token->public_cert = '';
+                $token->private_cert = '';
+            }
+
+            if ( ! empty($params['algorithm']) OR ! Oauth::signature(
+                    $params['algorithm'], $string
+                )->check($token, $params['signature']))
+            {
+                throw new Oauth_Exception('bad_verification_code');
+            }
+            $token->signature = $params['signature'];
+            $token->algorithm = $params['algorithm'];
+        }
+
+        return TRUE;
+    }
+
+} //END Oauth Controller

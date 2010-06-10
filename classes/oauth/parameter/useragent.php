@@ -5,10 +5,16 @@ class Oauth_Parameter_Useragent extends Oauth_Parameter {
     /**
      * type
      *      REQUIRED.  The parameter value MUST be set to "user_agent".
-     *
+     */
+    public $type;
+
+    /**
      * client_id
      *      REQUIRED.  The client identifier as described in Section 3.1.
-     *
+     */
+    public $client_id;
+
+    /**
      * redirect_uri
      *      REQUIRED unless a redirection URI has been established between
      *      the client and authorization server via other means.  An
@@ -18,7 +24,10 @@ class Oauth_Parameter_Useragent extends Oauth_Parameter {
      *      to pre-register their redirection URI.  Authorization servers
      *      MAY restrict the redirection URI to not include a query
      *      component as defined by [RFC3986] section 3.
-     *
+     */
+    public $redirect_uri;
+
+    /**
      * state
      *      OPTIONAL.  An opaque value used by the client to maintain state
      *      between the request and callback.  The authorization server

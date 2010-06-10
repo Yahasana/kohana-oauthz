@@ -2,6 +2,39 @@
 
 class Oauth_Parameter_Reflesh extends Oauth_Parameter {
 
+    /**
+     * type
+     *      REQUIRED.  The parameter value MUST be set to "refresh".
+     */
+    public $type;
+
+    /**
+     * client_id
+     *      REQUIRED.  The client identifier as described in Section 2.1.
+     */
+    public $client_id;
+
+    /**
+     * client_secret
+     *      REQUIRED if the client was issued a secret.  The client secret.
+     */
+    public $client_secret;
+
+    /**
+     * refresh_token
+     *      REQUIRED.  The refresh token associated with the access token to be refreshed.
+     */
+    public $refresh_token;
+
+    /**
+     * format
+     *      OPTIONAL.  The response format requested by the client.  Value
+     *      MUST be one of "json", "xml", or "form".  Alternatively, the
+     *      client MAY use the HTTP "Accept" header field with the desired
+     *      media type.  Defaults to "json" if omitted and no "Accept"
+     *      header field is present.
+     */
+
     public function __construct(Model_Oauth $oauth)
     {
         $this->oauth = $oauth;

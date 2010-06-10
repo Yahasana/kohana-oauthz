@@ -2,6 +2,46 @@
 
 class Oauth_Parameter_Webserver extends Oauth_Parameter {
 
+    /**
+     * type
+     *     REQUIRED.  The parameter value MUST be set to "web_server".
+     */
+    public $type;
+
+    /**
+     * client_id
+     *     REQUIRED.  The client identifier as described in Section 2.1.
+     */
+    public $client_id;
+
+    /**
+     * client_secret
+     *     REQUIRED if the client identifier has a matching secret.  The
+     *     client secret as described in Section 2.1.
+     */
+    public $client_secret;
+
+    /**
+     * code
+     *     REQUIRED.  The verification code received from the
+     *     authorization server.
+     */
+    public $code;
+
+    /**
+     * redirect_uri
+     *     REQUIRED.  The redirection URI used in the initial request.
+     */
+    public $redirect_uri;
+
+    /**
+     * format
+     *     OPTIONAL.  The response format requested by the client.  Valu
+     *     MUST be one of "json", "xml", or "form".  Alternatively, the
+     *     client MAY use the HTTP "Accept" header field with the desire
+     *     media type.  Defaults to "json" if omitted and no "Accept"
+     *     header field is present.
+    */
     public function __construct(Model_Oauth $oauth)
     {
         $this->oauth = $oauth;
@@ -43,17 +83,17 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
             'secret_type' => '',
             'format'    => 'json' // OPTIONAL. "json", "xml", or "form"
         );
-            if($tmp = $this->get('secret_type'))
-            {
-                $base_string = URL::base(FALSE, TRUE).$this->request->uri;
-                $base_string = Oauth::normalize('GET', $base_string, $params);
+        if($tmp = $this->get('secret_type'))
+        {
+            $base_string = URL::base(FALSE, TRUE).$this->request->uri;
+            $base_string = Oauth::normalize('GET', $base_string, $params);
 
-                if (! Oauth_Signature::factory($tmp, $base_string)->check($token, $signature))
-                {
-                    return $params['redirect_uri'].'#error=bad_verification_code';
-                }
-                $params['secret_type'] = $tmp;
+            if (! Oauth_Signature::factory($tmp, $base_string)->check($token, $signature))
+            {
+                return $params['redirect_uri'].'#error=bad_verification_code';
             }
+            $params['secret_type'] = $tmp;
+        }
         return TRUE;
     }
 }

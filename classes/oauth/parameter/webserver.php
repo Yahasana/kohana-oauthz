@@ -2,9 +2,9 @@
 
 class Oauth_Parameter_Webserver extends Oauth_Parameter {
 
-
-    public function __construct()
+    public function __construct(Model_Oauth $oauth)
     {
+        $this->oauth = $oauth;
         $this->client_id = $this->get('client_id');
         $this->redirect_uri = $this->get('redirect_uri');
     }
@@ -29,7 +29,7 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
         if($tmp = $this->get('immediate'))
             $this->immediate = $tmp;
 
-            return TRUE;
+        return TRUE;
     }
 
     public function access_token_check($client)

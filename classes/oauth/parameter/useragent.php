@@ -57,8 +57,9 @@ class Oauth_Parameter_Useragent extends Oauth_Parameter {
      * @access    public
      * @return    void
      */
-    public function __construct()
+    public function __construct(Model_Oauth $oauth)
     {
+        $this->oauth = $oauth;
         $this->client_id = $this->get('client_id');
         $this->redirect_uri = $this->get('redirect_uri');
     }
@@ -74,7 +75,7 @@ class Oauth_Parameter_Useragent extends Oauth_Parameter {
             $this->format = $format;
         }
 
-            return TRUE;
+        return TRUE;
     }
 
     public function access_token_check($client)

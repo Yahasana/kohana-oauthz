@@ -117,9 +117,7 @@ class Oauth_Client_Controller extends Kohana_Controller {
         $base_string = Oauth::normalize('GET', $uri, $this->_params);
 
         //~ build signature string
-        $this->_params['token_secret'] =
-            Oauth_Signature::factory($this->_params['secret_type'], $base_string)
-            ->build(new Oauth_Client($this->_params['client_id'], $token->code), $token);
+        $this->_params['token_secret'] = Oauth::signature($this->_params['secret_type'], $base_string)->build($token);
 
         $uri = $uri.'?'.Oauth::build_query($this->_params);
         $this->request->redirect($uri);

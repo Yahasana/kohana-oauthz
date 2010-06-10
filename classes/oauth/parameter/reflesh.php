@@ -2,9 +2,9 @@
 
 class Oauth_Parameter_Reflesh extends Oauth_Parameter {
 
-
-    public function __construct()
+    public function __construct(Model_Oauth $oauth)
     {
+        $this->oauth = $oauth;
         $this->client_id = $this->get('client_id');
         $this->redirect_uri = $this->get('redirect_uri');
     }

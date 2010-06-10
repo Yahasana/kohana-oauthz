@@ -73,18 +73,31 @@ abstract class Oauth_Controller extends Kohana_Controller {
                 throw new Oauth_Exception('invalid_request_method');
             }
 
-            $this->initialize();
+            $params = new Oauth_Parameter_Token($this->oauth);
 
-            $this->verification();
+            foreach($this->_configs['request_params'] as $key => $val)
+            {
+                if($val === TRUE)
+                {
+                    $params->$key = $val;
+                }
+            }
+
+            if( ! $client = $this->oauth->lookup_token($params->oauth_token))
+            {
+                throw new Oauth_Exception('invalid_request_token');
+            }
+
+            $params->access_token_check($client);
         }
         catch (Oauth_Exception $e)
         {
+            $this->errors = $e->getMessage();
             $this->request->action = 'invalid_request';
-            $this->request->params(array('id' => 'error=\''.$e->getMessage().'\''));
         }
     }
 
-    /**********************************Server provider actions for user*******************/
+    /**********************************Server OAuth Discovery for user*******************/
 
     public function action_xrds()
     {
@@ -102,8 +115,10 @@ abstract class Oauth_Controller extends Kohana_Controller {
      * @return	void
      * @todo    Add list of error codes
      */
-    public function action_invalid_request($error = 'error=\'incorrect_client_credentials\'')
+    public function action_invalid_request()
     {
+        $error = 'error=\''.$this->errors.'\'';
+
         //space-delimited list of the cryptographic algorithms supported by the resource server
         $challenge = '';
         foreach($this->_configs['secret_types'] as $key => $val)
@@ -137,114 +152,6 @@ abstract class Oauth_Controller extends Kohana_Controller {
         $this->request->status = 401;   #HTTP/1.1 401 Unauthorized
         $this->request->headers['WWW-Authenticate'] = 'Token realm=\'Service\','.$error;
         $this->request->response = NULL;
-    }
-
-    /**
-     * Load request parameters
-     *
-     * @access  protected
-     * @return  array
-     */
-    protected function initialize()
-    {
-        switch(Request::$method)
-        {
-            case 'HEAD':
-                $params = Oauth::parse_header();
-                $params['oauth_token'] = isset($params['token']) ? $params['token'] : NULL;
-                unset($params['token']);
-                break;
-            case 'PUT':
-            case 'POST':
-            case 'DELETE':
-                $params = Oauth::parse_post();
-                break;
-            case 'GET':
-                $params = Oauth::parse_query();
-                break;
-            default:
-                $params = array();
-                break;
-        }
-
-        foreach($this->_configs['request_params'] as $key => $val)
-        {
-            if($val === FALSE)
-            {
-                unset($params[$key]);
-            }
-        }
-
-        return $this->_params = $params;
-    }
-
-    /**
-     * MUST verify that the verification code, client identity, client secret,
-     * and redirection URI are all valid and match its stored association.
-     *
-     * @access  protected
-     * @throw   redirect_uri_mismatch, bad_verification_code, incorrect_client_credentials
-     * @return  boolean
-     * @todo    impletement timestamp, nonce, signature checking
-     */
-    protected function verification()
-    {
-        $params = $this->_params;
-
-        if(empty($params['oauth_token']))
-            throw new Oauth_Exception('incorrect_client_credentials');
-
-        $token = new Oauth_Token($params['oauth_token']);
-
-        if(isset($params['token_secret']))
-        {
-            $token->token_secret = $params['token_secret'];
-        }
-
-        // verify that timestamp is recentish
-        if(isset($params['timestamp']))
-        {
-            if (time() - $params['timestamp'] > Kohana::config('oauth_server')->get('duration'))
-            {
-                throw new Oauth_Exception('incorrect_client_credentials');
-            }
-            $token->timestamp = $params['timestamp'];
-        }
-
-        // verify that the nonce is uniqueish
-        if(isset($params['nonce']))
-        {
-            if ($this->oauth->lookup_nonce($params['oauth_token'], $params['nonce'], $params['timestamp']))
-            {
-                throw new Oauth_Exception('incorrect_client_credentials');
-            }
-            $token->nonce = $params['nonce'];
-        }
-
-        // verify the signature
-        if(isset($params['signature']))
-        {
-            $base_url = URL::base(FALSE, TRUE).$this->request->controller.'/'.$this->request->action;
-
-            $string = Oauth::normalize($params['method'], $base_url, $params);
-
-            if($params['algorithm'] == 'rsa-sha1' OR $params['algorithm'] == 'hmac-sha1')
-            {
-                $token->public_cert = '';
-                $token->private_cert = '';
-            }
-
-            if ( ! empty($params['algorithm']) OR ! Oauth::signature(
-                    $params['algorithm'], $string
-                )->check($token, $params['signature']))
-            {
-                throw new Oauth_Exception('bad_verification_code');
-            }
-            $token->signature = $params['signature'];
-            $token->algorithm = $params['algorithm'];
-        }
-
-        return TRUE;
     }
 
 } //END Oauth Controller

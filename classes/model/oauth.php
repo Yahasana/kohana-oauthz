@@ -121,7 +121,7 @@ class Model_Oauth extends Kohana_Model {
             $secret = time() + time();
             $token = new OAuth_Token($code, md5(md5($secret)));
 
-            DB::insert('t_oauth_server_tokens')
+            DB::insert('t_oauth_tokens')
                 ->columns(array('access_token','token_type','token_secret','server_id'))
                 ->values(array($key, 'request', $secret, $server_id))
                 ->execute($this->_db);
@@ -142,26 +142,25 @@ class Model_Oauth extends Kohana_Model {
         //
     }
 
-    public function lookup_token($client, $token_type, $token)
+    public function lookup_token($oauth_token)
     {
         // implement me
-        $secret = DB::select('*')
-            ->from('t_oauth_server_tokens')
-            ->where('access_token' , '=', $token)
-            ->where('token_type' , '=', $token_type)
+        $token = DB::select('*')
+            ->from('t_oauth_tokens')
+            ->where('access_token' , '=', $oauth_token)
             ->execute($this->_db)
             ->current();
-        if($secret)
+        if($token)
         {
-            return new Oauth_Token($client_id, $secret->client_secret);
+            return new Oauth_Token($token);
         }
 
-        return new Oauth_Token;
+        return NULL;
     }
 
     public function reflesh_token(Oauth_Token $token)
     {
-        DB::delete('t_oauth_server_tokens')
+        DB::delete('t_oauth_tokens')
             ->where('token', '=', $token->key)
             ->execute($this->_db);
     }
@@ -196,7 +195,7 @@ class Model_Oauth extends Kohana_Model {
             $secret = time() + time();
             $token = new OAuth_Token($key, md5(md5($secret)));
 
-            DB::insert('t_oauth_server_tokens')
+            DB::insert('t_oauth_tokens')
                 ->columns(array('token','token_type','token_secret','server_id'))
                 ->values(array($key, 'request', $secret, $server_id))
                 ->execute($this->_db);
@@ -212,7 +211,7 @@ class Model_Oauth extends Kohana_Model {
         $secret = time() + time();
         $new_token = new OAuth_Token($key, md5(md5($secret)));
 
-        if(DB::update('t_oauth_server_tokens')
+        if(DB::update('t_oauth_tokens')
             ->set(array('token' => $key, 'token_type' => 'access', 'token_secret' => $secret))
             ->where('token', '=', $token->key)
             ->where('token_type', '=', 'request')

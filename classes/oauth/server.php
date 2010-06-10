@@ -48,13 +48,15 @@ class Oauth_Server extends Kohana_Controller {
         $this->request->response = $view->render();
     }
 
-    public function action_a()
+    public function action_auth()
     {
 
     }
 
-    public function access_b()
+    public function access_deny()
     {
-
+        $this->request->status = 302; #HTTP/1.1 302 Found
+        $this->request->headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        $this->request->headers['Location'] = 'http://example.com/rd#error=user_denied';
     }
 }

@@ -62,7 +62,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
                     $this->request->status = 200; #HTTP/1.1 200 OK
                     $this->request->response = $token;
                     $this->request->headers['Cache-Control'] = 'no-store';
-                    $this->request->headers['Content-Type'] = 'application/'.$token->format;
+                    $this->request->headers['Content-Type'] = $token->format;
                     return;
                 default:
                     throw new Oauth_Exception('incorrect_request_type');
@@ -123,7 +123,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
 
             $this->request->status = 200; #HTTP/1.1 200 OK
             $this->request->response = $token;
-            $this->request->headers['Content-Type'] = 'application/'.$token->format;
+            $this->request->headers['Content-Type'] = $token->format;
         }
         catch (Oauth_Exception $e)
         {

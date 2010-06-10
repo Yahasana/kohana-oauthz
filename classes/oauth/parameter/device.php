@@ -47,71 +47,71 @@ class Oauth_Parameter_Device extends Oauth_Parameter {
 
     public function oauth_token($client)
     {
-        $token = new Oauth_Token;
+        $response = new Oauth_Response;
 
         if($this->format)
         {
-            $token->format = $this->format;
+            $response->format = $this->format;
         }
 
         if( ! empty($client['scope']) AND ! isset($client['scope'][$this->scope]))
         {
-            $token->error = 'authorization_declined';
-            return $token;
+            $response->error = 'authorization_declined';
+            return $response;
         }
 
         // REQUIRED.  The verification code.
-        $token->code = $client['code'];
+        $response->code = $client['code'];
 
         // REQUIRED.  The end-user code.
-        $token->user_code = $client['user_code'];
+        $response->user_code = $client['user_code'];
 
         // REQUIRED.  The end-user verification URI on the authorization server.
-        $token->verification_uri = $client['verification_uri'];
+        $response->verification_uri = $client['verification_uri'];
 
         // OPTIONAL.  The duration in seconds of the verification code lifetime.
-        $token->expires_in = 300;
+        $response->expires_in = 300;
 
         /**
          *OPTIONAL.  The minimum amount of time in seconds that the
          * client SHOULD wait between polling requests to the token endpoint.
          */
-        $token->interval = 5;
+        $response->interval = 5;
 
-        return $token;
+        return $response;
     }
 
     public function access_token($client)
     {
-        $token = new Oauth_Token;
+        $response = new Oauth_Response;
 
         if($this->format)
         {
-            $token->format = $this->format;
+            $response->format = $this->format;
         }
 
         if($client['code'] !== $this->code)
         {
-            $token->error = 'bad_verification_code';
-            return $token;
+            $response->error = 'bad_verification_code';
+            return $response;
         }
 
         if($client['interval'] > 5)
         {
-            $token->error = 'slow_down';
-            return $token;
+            $response->error = 'slow_down';
+            return $response;
         }
 
         if($client['timestamp'] + 300 > time())
         {
-            $token->error = 'code_expired';
-            return $token;
+            $response->error = 'code_expired';
+            return $response;
         }
 
-        $token->expires_in = 3000;
-        $token->access_token = $client['access_token'];
-        $token->reflash_token = $client['reflash_token'];
+        $response->expires_in = 3000;
+        $response->access_token = $client['access_token'];
+        $response->reflash_token = $client['reflash_token'];
 
-        return $token;
+        return $response;
     }
 }

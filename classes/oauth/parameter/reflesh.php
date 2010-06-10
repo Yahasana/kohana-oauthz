@@ -46,31 +46,31 @@ class Oauth_Parameter_Reflesh extends Oauth_Parameter {
 
     public function oauth_token($client)
     {
-        $token = new Oauth_Token;
+        $response = new Oauth_Response;
 
         if($this->format)
         {
-            $token->format = $this->format;
+            $response->format = $this->format;
         }
 
         if($client['client_secret'] !== sha1($this->client_secret)
             OR $client['refresh_token'] !== $this->refresh_token)
         {
-            $token->error = 'incorrect_client_credentials';
-            return $token;
+            $response->error = 'incorrect_client_credentials';
+            return $response;
         }
 
         if($client['timestamp'] + 300 < time())
         {
-            $token->error = 'authorization_expired';
-            return $token;
+            $response->error = 'authorization_expired';
+            return $response;
         }
 
         // Grants Authorization
-        $token->expires_in = 3000;
-        $token->access_token = $client['access_token'];
+        $response->expires_in = 3000;
+        $response->access_token = $client['access_token'];
 
-        return $token;
+        return $response;
     }
 
     public function access_token($client)

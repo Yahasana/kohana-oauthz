@@ -57,16 +57,16 @@ class Oauth_Parameter_Assertion extends Oauth_Parameter {
 
     public function oauth_token($client)
     {
-        $token = new Oauth_Token;
+        $response = new Oauth_Response;
 
         if(! empty($this->assertion_format) AND $client['format'] !== $this->assertion_format)
         {
-            $token->error = 'unknown_format';
-            return $token;
+            $response->error = 'unknown_format';
+            return $response;
         }
         else
         {
-            $token->assertion_format = $this->assertion_format;
+            $response->assertion_format = $this->assertion_format;
         }
 
         if($client['assertion'] !== $this->assertion
@@ -74,16 +74,16 @@ class Oauth_Parameter_Assertion extends Oauth_Parameter {
             OR (! empty($this->client_secret) AND $client['client_secret'] !== sha1($this->client_secret))
             OR (! empty($client['scope']) AND ! isset($client['scope'][$this->scope]))
         {
-            $token->error = 'invalid_assertion';
-            return $token;
+            $response->error = 'invalid_assertion';
+            return $response;
         }
 
         // Grants Authorization
         // The authorization server SHOULD NOT issue a refresh token.
-        $token->expires_in = 3000;
-        $token->access_token = $client['access_token'];
+        $response->expires_in = 3000;
+        $response->access_token = $client['access_token'];
 
-        return $token;
+        return $response;
     }
 
     public function access_token($client)

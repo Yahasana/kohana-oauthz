@@ -109,7 +109,7 @@ class Oauth_Client_Controller extends Kohana_Controller {
     {
         if($uri === NULL) $uri = $this->_aut_uri;
 
-        $this->_params['code'] = $token->code;
+        $this->_params['code'] = $response->code;
         // $this->_params['token_secret'] = $token->access_token;
         $this->_params['redirect_uri'] = Kohana::config('oauth_provider')->get('oauth_callback');
 

@@ -11,7 +11,7 @@
  * @since      Available since Release 1.0
  * *
  */
-class Oauth_Token {
+class Oauth_Response {
 
     protected $format;
 
@@ -21,6 +21,7 @@ class Oauth_Token {
         {
             $this->$key = $val;
         }
+
         if(empty($this->format))
         {
             if($format = key(Request::accept_type()))

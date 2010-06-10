@@ -76,23 +76,23 @@ class Oauth_Parameter_Useragent extends Oauth_Parameter {
 
     public function oauth_token($client)
     {
-        $token = new Oauth_Token;
+        $response = new Oauth_Response;
 
         if($this->state)
         {
-            $token->state = $this->state;
+            $response->state = $this->state;
         }
 
         if($client['redirect_uri'] !== $this->redirect_uri)
         {
-            $token->error = 'redirect_uri_mismatch';
-            return $token;
+            $response->error = 'redirect_uri_mismatch';
+            return $response;
         }
 
         if( ! empty($client['scope']) AND ! isset($client['scope'][$this->scope]))
         {
-            $token->error = 'incorrect_client_credentials';
-            return $token;
+            $response->error = 'incorrect_client_credentials';
+            return $response;
         }
 
         if($this->immediate)
@@ -101,11 +101,11 @@ class Oauth_Parameter_Useragent extends Oauth_Parameter {
         }
 
         // Grants Authorization
-        $token->expires_in = 3000;
-        $token->access_token = $client['access_token'];
-        $token->reflash_token = $client['reflash_token'];
+        $response->expires_in = 3000;
+        $response->access_token = $client['access_token'];
+        $response->reflash_token = $client['reflash_token'];
 
-        return $token;
+        return $response;
     }
 
     public function access_token($client)

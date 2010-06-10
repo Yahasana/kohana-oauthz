@@ -30,7 +30,7 @@ abstract class Oauth_Controller extends Kohana_Controller {
     protected $_type = 'default';
 
     /**
-     * Request  settings for OAuth
+     * Request settings for OAuth
      *
      * @access  protected
      * @var     mix    $_params
@@ -38,7 +38,7 @@ abstract class Oauth_Controller extends Kohana_Controller {
     protected $_params;
 
     /**
-     * Server  settings for OAuth
+     * Server settings for OAuth
      *
      * @access  protected
      * @var     mix    $_configs
@@ -73,22 +73,22 @@ abstract class Oauth_Controller extends Kohana_Controller {
                 throw new Oauth_Exception('invalid_request_method');
             }
 
-            $params = new Oauth_Parameter_Token($this->oauth);
+            $parameter = new Oauth_Parameter_Token;
 
             foreach($this->_configs['request_params'] as $key => $val)
             {
                 if($val === TRUE)
                 {
-                    $params->$key = $val;
+                    $parameter->$key = $val;
                 }
             }
 
-            if( ! $client = $this->oauth->lookup_token($params->oauth_token))
+            if( ! $client = $this->oauth->lookup_token($parameter->oauth_token))
             {
                 throw new Oauth_Exception('invalid_request_token');
             }
 
-            $token = $params->access_token($client);
+            $token = $parameter->access_token($client);
         }
         catch (Oauth_Exception $e)
         {
@@ -102,7 +102,7 @@ abstract class Oauth_Controller extends Kohana_Controller {
     public function action_xrds()
     {
         $this->request->headers['Content-Type'] = 'application/xrds+xml';
-        $this->request->response = View::factory('v_oauth_xrds');
+        $this->request->response = View::factory('v_oauth_xrds')->render();
     }
 
     /**********************************END actions*****************************************/

@@ -59,36 +59,36 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
      */
     public function access_token($client)
     {
-        $token = new Oauth_Token;
+        $response = new Oauth_Response;
 
         if($this->format)
         {
-            $token->format = $this->format;
+            $response->format = $this->format;
         }
 
         if($client['access_token'] !== $this->oauth_token)
         {
-            $token->error = 'incorrect_oauth_token';
-            return $token;
+            $response->error = 'incorrect_oauth_token';
+            return $response;
         }
 
         if( ! empty($this->token_secret) AND $client['token_secret'] !== sha1($this->token_secret))
         {
-            $token->error = 'incorrect_oauth_token';
-            return $token;
+            $response->error = 'incorrect_oauth_token';
+            return $response;
         }
 
         if( ! empty($this->nonce) AND $client['nonce'] !== $this->nonce)
         {
-            $token->error = 'incorrect_nonce';
-            return $token;
+            $response->error = 'incorrect_nonce';
+            return $response;
         }
 
         if( ! empty($this->timestamp) AND
             $client['timestamp'] + Kohana::config('oauth_server')->get('duration') < $this->timestamp)
         {
-            $token->error = 'incorrect_nonce';
-            return $token;
+            $response->error = 'incorrect_nonce';
+            return $response;
         }
 
         // verify the signature
@@ -100,15 +100,15 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
 
             if($this->algorithm == 'rsa-sha1' OR $this->algorithm == 'hmac-sha1')
             {
-                $token->public_cert = '';
-                $token->private_cert = '';
+                $response->public_cert = '';
+                $response->private_cert = '';
             }
 
             if ( ! empty($this->algorithm)
                 OR ! Oauth::signature($this->algorithm, $string)->check($token, $this->signature))
             {
-                $token->error = 'incorrect_signature';
-                return $token;
+                $response->error = 'incorrect_signature';
+                return $response;
             }
         }
 

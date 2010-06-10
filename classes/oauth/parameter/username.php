@@ -62,33 +62,33 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
 
     public function oauth_token($client)
     {
-        $token = new Oauth_Token;
+        $response = new Oauth_Response;
 
         if($this->format)
         {
-            $token->format = $this->format;
+            $response->format = $this->format;
         }
 
         if($client['client_secret'] !== sha1($this->client_secret)
             OR $client['password'] !== sha1($this->password)
             OR $client['username'] !== $this->username)
         {
-            $token->error = 'incorrect_client_credentials';
-            return $token;
+            $response->error = 'incorrect_client_credentials';
+            return $response;
         }
 
         if( ! empty($client['scope']) AND ! isset($client['scope'][$this->scope]))
         {
-            $token->error = 'unauthorized_client';
-            return $token;
+            $response->error = 'unauthorized_client';
+            return $response;
         }
 
         // Grants Authorization
-        $token->expires_in = 3000;
-        $token->access_token = $client['access_token'];
-        $token->reflash_token = $client['reflash_token'];
+        $response->expires_in = 3000;
+        $response->access_token = $client['access_token'];
+        $response->reflash_token = $client['reflash_token'];
 
-        return $token;
+        return $response;
     }
 
     public function access_token($client)

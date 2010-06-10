@@ -52,24 +52,24 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
             switch(Oauth::get('type'))
             {
                 case 'user_agent':
-                    $token = $this->user_agent();
+                    $response = $this->user_agent();
                     break;
                 case 'web_server':
-                    $token = $this->user_server();
+                    $response = $this->user_server();
                     break;
                 case 'device_code':
-                    $token = $this->user_device();
+                    $response = $this->user_device();
                     $this->request->status = 200; #HTTP/1.1 200 OK
-                    $this->request->response = $token;
+                    $this->request->response = $response;
                     $this->request->headers['Cache-Control'] = 'no-store';
-                    $this->request->headers['Content-Type'] = $token->format;
+                    $this->request->headers['Content-Type'] = $response->format;
                     return;
                 default:
                     throw new Oauth_Exception('incorrect_request_type');
                     break;
             }
-            $this->request->response = $token;
-            // $this->request->redirect($token);
+            $this->request->response = $response;
+            // $this->request->redirect($response);
         }
         catch (Oauth_Exception $e)
         {
@@ -100,21 +100,21 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
             switch(Oauth::post('type'))
             {
                 case 'web_server':
-                    $token = $this->web_server();
+                    $response = $this->web_server();
                     break;
                 case 'refresh_token':
-                    $token = $this->reflesh_token();
+                    $response = $this->reflesh_token();
                     break;
                 case 'device_token':
-                    $token = $this->device_token();
+                    $response = $this->device_token();
                 case 'username':
-                    $token = $this->username();
+                    $response = $this->username();
                     break;
                 case 'client_credentials':
-                    $token = $this->client_credentials();
+                    $response = $this->client_credentials();
                     break;
                 case 'assertion':
-                    $token = $this->assertion();
+                    $response = $this->assertion();
                     break;
                 default:
                     throw new Oauth_Exception('incorrect_request_type');
@@ -122,8 +122,8 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
             }
 
             $this->request->status = 200; #HTTP/1.1 200 OK
-            $this->request->response = $token;
-            $this->request->headers['Content-Type'] = $token->format;
+            $this->request->response = $response;
+            $this->request->headers['Content-Type'] = $response->format;
         }
         catch (Oauth_Exception $e)
         {
@@ -138,39 +138,24 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
 
     protected function user_agent()
     {
-        $params = new Oauth_Parameter_Useragent;
+        $parameter = new Oauth_Parameter_Useragent;
 
-        if($client = $this->oauth->lookup_client($params->client_id))
+        if($client = $this->oauth->lookup_client($parameter->client_id))
         {
-            if(TRUE !== $error = $params->oauth_token())
-            {
-                return $params->redirect_uri.'#error='.$error;
-            }
+            $response = $parameter->oauth_token($client);
         }
         else
         {
-            return $params->redirect_uri.'#error=incorrect_client_credentials';
+            $response = new Oauth_Response(array('format' => 'form'));
+            $response->error = 'incorrect_client_credentials';
         }
 
-        if($token = $this->oauth->access_token($params->client_id))
+        if(empty($response->error))
         {
-            if(! empty($params->state))
-                $token->state = $params->state;
-
-            $token->redirect_uri = $params->redirect_uri;
-
-            return $token;
+            $response = $this->oauth->access_token($parameter->client_id);
         }
 
-
-        return $params->redirect_uri.'#'.Oauth::build_query(array(
-            'access_token'      => $client->access_token, // REQUIRED.  The access token.
-            'expires_in'        => $client->expires_in,   // OPTIONAL.  The duration in seconds of the access token lifetime.
-            'refresh_token'      => $client->refresh_token,// OPTIONAL.  The refresh token.
-            'state'             => $params->state,
-            'access_token_secret'=> $client->access_token_secret,// REQUIRED if requested by the client.
-        ));
-        return $params->redirect_uri.'#error=user_denied';
+        return $parameter->redirect_uri.'#'.$response;
     }
 
     /**
@@ -182,143 +167,138 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
      */
     protected function user_server()
     {
-        $params = new Oauth_Parameter_Webserver;
+        $parameter = new Oauth_Parameter_Webserver;
 
-        if($client = $this->oauth->lookup_client($params->client_id))
+        if($client = $this->oauth->lookup_client($parameter->client_id))
         {
-            if(TRUE !== $error = $params->oauth_token())
-            {
-                return $params->redirect_uri.'#error='.$error;
-            }
+            $response = $parameter->oauth_token($client);
         }
         else
         {
-            return $params->redirect_uri.'#error=incorrect_client_credentials';
+            $response = new Oauth_Response(array('format' => 'form'));
+            $response->error = 'incorrect_client_credentials';
         }
+
+        return $parameter->redirect_uri.'#'.$response;
     }
 
     protected function user_device()
     {
-        $params = new Oauth_Parameter_Device;
+        $parameter = new Oauth_Parameter_Device;
 
-        //
-        return array(
-            'code' => 'get_from_query', // REQUIRED.  The verification code.
-            'user_code' => 'get_from_query', // REQUIRED.  The user code.
-            'verification_uri' => '', // REQUIRED.  The end-user verification URI on the authorization server.
-            'expires_in' => 'web_server',   // OPTIONAL.  The duration in seconds of the access token lifetime.
-            'interval'=> 'web_server',// OPTIONAL.  The minimum amount of time in seconds that the client SHOULD wait between polling requests to the token endpoint.
-        );
-        // MUST be set to "authorization_declined".
-        throw new Oauth_Exception('authorization_declined');
+        if($client = $this->oauth->lookup_server($parameter->client_id))
+        {
+            $response = $parameter->access_token($client);
+        }
+        else
+        {
+            $response = new Oauth_Response;
+            $response->error = 'incorrect_client_credentials';
+        }
+
+        return $response;
     }
 
     protected function web_server()
     {
-        $params = new Oauth_Parameter_Webserver(TRUE);
+        $parameter = new Oauth_Parameter_Webserver(TRUE);
 
-        if($client = $this->oauth->lookup_server($params->client_id))
+        if($client = $this->oauth->lookup_server($parameter->client_id))
         {
-            if(TRUE !== $error = $params->access_token($client))
-            {
-                throw new Oauth_Exception($error);
-            }
-            else
-            {
-                return array(
-                    'access_token'      => 'web_server', // REQUIRED.  The access token.
-                    'expires_in'      => 'web_server',   // OPTIONAL.  The duration in seconds of the access token lifetime.
-                    'refresh_token'      => 'web_server',// OPTIONAL.  The refresh token.
-                    'access_token_secret'=> 'web_server',// REQUIRED if requested by the client.
-                    'scope'             => '' //OPTIONAL.  The scope of the access token as a list of space-delimited strings.
-                );
-            }
+            $response = $parameter->access_token($client);
         }
         else
         {
-            // MUST be set to either "redirect_uri_mismatch", "bad_verification_code", "incorrect_client_credentials"
-            throw new Oauth_Exception('');
+            $response = new Oauth_Response;
+            $response->error = 'incorrect_client_credentials';
         }
+
+        return $response;
     }
 
     protected function device_token()
     {
-        $params = new Oauth_Parameter_Device;
+        $parameter = new Oauth_Parameter_Device;
 
-        return array(
-            'access_token'      => 'web_server', // REQUIRED.  The access token.
-            'expires_in'      => 'web_server',   // OPTIONAL.  The duration in seconds of the access token lifetime.
-            'refresh_token'      => 'web_server',// OPTIONAL.  The refresh token.
-            'access_token_secret'=> 'web_server', // REQUIRED if requested by the client.
-            'scope'             => '' //OPTIONAL.  The scope of the access token as a list of space-delimited strings.
-        );
-        // MUST be set to "invalid_assertion" or "unknown_format"
-        throw new Oauth_Exception('invalid_assertion');
+        if($client = $this->oauth->lookup_server($parameter->client_id))
+        {
+            $response = $parameter->access_token($client);
+        }
+        else
+        {
+            $response = new Oauth_Response;
+            $response->error = 'incorrect_client_credentials';
+        }
+
+        return $response;
     }
 
     protected function username()
     {
-        $params = new Oauth_Parameter_Username;
+        $parameter = new Oauth_Parameter_Username;
 
-        return array(
-            'access_token'      => 'web_server', // REQUIRED.  The access token.
-            'expires_in'      => 'web_server',   // OPTIONAL.  The duration in seconds of the access token lifetime.
-            'refresh_token'      => 'web_server',// OPTIONAL.  The refresh token.
-            'access_token_secret'=> 'web_server',// REQUIRED if requested by the client.
-            'scope'             => '' //OPTIONAL.  The scope of the access token as a list of space-delimited strings.
-        );
-        // MUST be set to either "incorrect_client_credentials" or "unauthorized_client"
-        throw new Oauth_Exception('');
+        if($client = $this->oauth->lookup_server($parameter->client_id))
+        {
+            $response = $parameter->access_token($client);
+        }
+        else
+        {
+            $response = new Oauth_Response;
+            $response->error = 'incorrect_client_credentials';
+        }
+
+        return $response;
     }
 
     protected function client_credentials()
     {
-        $params = new Oauth_Parameter_Credentials;
+        $parameter = new Oauth_Parameter_Credentials;
 
-        return array(
-            'access_token'      => 'web_server', // REQUIRED.  The access token.
-            'expires_in'        => 'web_server',   // OPTIONAL.  The duration in seconds of the access token lifetime.
-            'refresh_token'      => 'web_server',// OPTIONAL.  The refresh token.
-            'access_token_secret'=> 'web_server',// REQUIRED if requested by the client.
-            'scope'             => '' //OPTIONAL.  The scope of the access token as a list of space-delimited strings.
-        );
-        // MUST be set to "incorrect_client_credentials"
-        throw new Oauth_Exception('incorrect_client_credentials');
+        if($client = $this->oauth->lookup_server($parameter->client_id))
+        {
+            $response = $parameter->access_token($client);
+        }
+        else
+        {
+            $response = new Oauth_Response;
+            $response->error = 'incorrect_client_credentials';
+        }
+
+        return $response;
     }
 
     protected function assertion()
     {
-        $params = new Oauth_Parameter_Assertion;
+        $parameter = new Oauth_Parameter_Assertion;
 
-        // The authorization server SHOULD NOT issue a refresh token.
-        return array(
-            'access_token'      => 'web_server', // REQUIRED.  The access token.
-            'expires_in'      => 'web_server',   // OPTIONAL.  The duration in seconds of the access token lifetime.
-            'access_token_secret'=> 'web_server',// REQUIRED if requested by the client.
-            'scope'             => '' //OPTIONAL.  The scope of the access token as a list of space-delimited strings.
-        );
-        // MUST be set to "invalid_assertion" or "unknown_format"
-        throw new Oauth_Exception('invalid_assertion');
+        if($client = $this->oauth->lookup_server($parameter->client_id))
+        {
+            $response = $parameter->access_token($client);
+        }
+        else
+        {
+            $response = new Oauth_Response;
+            $response->error = 'incorrect_client_credentials';
+        }
+
+        return $response;
     }
 
     protected function reflesh_token()
     {
-        $params = new Oauth_Parameter_Reflesh;
+        $parameter = new Oauth_Parameter_Reflesh;
 
-        /**
-         * MAY issue a new refresh token in which case the client MUST NOT use
-         * the previous refresh token and replace it with the newly issued
-         * refresh token.
-         */
-        return array(
-            'access_token'      => 'web_server', // REQUIRED.  The access token.
-            'expires_in'      => 'web_server',   // OPTIONAL.  The duration in seconds of the access token lifetime.
-            'refresh_token'      => 'web_server',// OPTIONAL.  The refresh token.
-            'access_token_secret'=> 'web_server', // REQUIRED if requested by the client.
-            'scope'             => '' //OPTIONAL.  The scope of the access token as a list of space-delimited strings.
-        );
-        // MUST be set to either "incorrect_credentials", "authorization_expired", or "unsupported_secret_type"
-        throw new Oauth_Exception('');
+        if($client = $this->oauth->lookup_server($parameter->client_id))
+        {
+            $response = $parameter->access_token($client);
+        }
+        else
+        {
+            $response = new Oauth_Response;
+            $response->error = 'incorrect_client_credentials';
+        }
+
+        return $response;
     }
 
 } //END Oauth Server Controller

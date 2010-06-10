@@ -33,6 +33,16 @@ abstract class Oauth_Parameter {
         return class_exists($class) ? new $class($oauth) : new stdClass;
     }
 
+    /**
+     * Authorization check
+     *
+     * @author	sumh <oalite@gmail.com>
+     * @date	2010-06-10 13:00:13
+     * @access	public
+     * @param	string	$client	default [ ) ]
+     * @return	Oauth_Token
+     */
+
     abstract public function authorization_check($client);
 
     abstract public function access_token_check($client);

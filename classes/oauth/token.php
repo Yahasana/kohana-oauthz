@@ -29,20 +29,27 @@ class Oauth_Token {
             }
             else
             {
-                $this->format = 'application/json';
+                $this->format = 'json';
             }
         }
     }
 
     protected function json()
     {
-        $json = get_object_vars($this);
-        foreach($json as $key => $val)
+        if(empty($this->error))
         {
-            if(empty($val))
+            $json = get_object_vars($this);
+            foreach($json as $key => $val)
             {
-                unset($json[$key]);
+                if(empty($val))
+                {
+                    unset($json[$key]);
+                }
             }
+        }
+        else
+        {
+            $json = array('error' => $this->error);
         }
         return json_encode($json);
     }
@@ -55,27 +62,42 @@ class Oauth_Token {
         $oauth = $doc->createElement('OAuth');
         $doc->appendChild($oauth);
 
-        foreach(get_object_vars($this) as $key => $val)
+        if(empty($this->error))
         {
-            if(empty($val)) continue;
+            foreach(get_object_vars($this) as $key => $val)
+            {
+                if(empty($val)) continue;
 
-            $node = $doc->createElement($key);
-            $node->appendChild($doc->createTextNode($val));
+                $node = $doc->createElement($key);
+                $node->appendChild($doc->createTextNode($val));
+                $oauth->appendChild($node);
+            }
+        }
+        else
+        {
+            $node = $doc->createElement('error');
+            $node->appendChild($doc->createTextNode($this->error));
             $oauth->appendChild($node);
         }
-
         return $doc->saveXML();
     }
 
     protected function form()
     {
-        $form = get_object_vars($this);
-        foreach($form as $key => $val)
+        if(empty($this->error))
         {
-            if(empty($val))
+            $form = get_object_vars($this);
+            foreach($form as $key => $val)
             {
-                unset($form[$key]);
+                if(empty($val))
+                {
+                    unset($form[$key]);
+                }
             }
+        }
+        else
+        {
+            $form = array('error' => $this->error);
         }
         return Oauth::build_query($form);
     }
@@ -83,12 +105,19 @@ class Oauth_Token {
     protected function html()
     {
         $text = '<dl>';
-        $form = get_object_vars($this);
-        foreach($form as $key => $val)
+        if(empty($this->error))
         {
-            if(empty($val)) continue;
+            $form = get_object_vars($this);
+            foreach($form as $key => $val)
+            {
+                if(empty($val)) continue;
 
-            $text .= '<dt>'.$key.'</dt><dd>'.$val.'</dd>';
+                $text .= '<dt>'.$key.'</dt><dd>'.$val.'</dd>';
+            }
+        }
+        else
+        {
+            $text .= '<dt>error</dt><dd>'.$this->error.'</dd>';
         }
         return $text.'</dl>';
     }
@@ -101,14 +130,12 @@ class Oauth_Token {
      */
     public function __toString()
     {
-        if( ! empty($this->error))
-            return 'error='.$this->error;
         $format = $this->format;
         $this->format = NULL;
         switch($format)
         {
             case 'xml':
-            case 'xhtml':
+            case 'application/xhtml+xml':
                 $res = $this->xml();
                 $this->format = 'application/xml';
                 break;
@@ -116,8 +143,7 @@ class Oauth_Token {
                 $res = $this->form();
                 $this->format = 'application/x-www-form-urlencoded';
                 break;
-            case 'text':
-            case 'html':
+            case 'text/html':
                 $res = $this->html();
                 $this->format = 'text/html';
                 break;

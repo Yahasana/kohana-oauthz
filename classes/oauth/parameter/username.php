@@ -22,18 +22,6 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
     public $client_secret;
 
     /**
-     * username
-     *      REQUIRED.  The end-user’s username.
-     */
-    public $username;
-
-    /**
-     * password
-     *      REQUIRED.  The end-user’s password.
-     */
-    public $password;
-
-    /**
      * scope
      *      OPTIONAL.  The scope of the access request expressed as a list
      *      of space-delimited strings.  The value of the "scope" parameter
@@ -49,26 +37,56 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
      *      header field is present.
      */
 
-    public function __construct(Model_Oauth $oauth)
+    public function __construct($flag = FALSE)
     {
-        $this->oauth = $oauth;
+        $this->type = $this->get('type');
         $this->client_id = $this->get('client_id');
-        $this->redirect_uri = $this->get('redirect_uri');
+        $this->client_secret = $this->get('client_secret');
+        if($flag === FALSE)
+        {
+            // REQUIRED.  The end-user’s username.
+            $this->username = $this->get('username');
+
+            // REQUIRED.  The end-user’s password.
+            $this->password = $this->get('password');
+        }
+        $this->scope = $this->get('scope');
+        $this->format = $this->get('format');
     }
 
-    public function authorization_check($client)
+    public function oauth_token($client)
     {
-        if(! $tmp = $this->get('redirect_uri') or $tmp != $client['redirect_uri'])
-            return $this->error = 'redirect_uri_mismatch';
-        else if($format = $this->get('format') and Kohana::config('oalite_server.default')->format[$format] === TRUE)
+        $token = new Oauth_Token;
+
+        if($this->format)
         {
-            $this->format = $format;
+            $token->format = $this->format;
         }
 
-            return TRUE;
+        if($client['redirect_uri'] !== $this->redirect_uri)
+        {
+            $token->error = 'redirect_uri_mismatch';
+            return $token;
+        }
+
+        if( ! empty($client['scope']) AND ! isset($client['scope'][$this->scope]))
+        {
+            $token->error = 'unauthorized_client';
+            return $token;
+        }
+
+        if($this->immediate)
+        {
+            // TODO
+        }
+
+        // Grants Authorization
+        $token->code = $client['code'];
+
+        return $token;
     }
 
-    public function access_token_check($client)
+    public function access_token($client)
     {
         $params = array(
             'type'      => 'web_server',

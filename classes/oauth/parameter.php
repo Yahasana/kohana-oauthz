@@ -19,33 +19,35 @@ abstract class Oauth_Parameter {
     public $error;
 
     /**
-     * factory for create different request types' parameter object
+     * Factory for create different request types' parameter object
      *
-     * @author  sumh <oalite@gmail.com>
-     * @date    2010-05-14 15:03:15
      * @access  public
      * @param   string    $type
-     * @return  void
+     * @return  Oauth_Parameter
      */
-    public static function factory($type, Model_Oauth $oauth = NULL)
+    public static function factory($type, $flag = FALSE)
     {
         $class = 'Oauth_Parameter_'.$type;
-        return class_exists($class) ? new $class($oauth) : new stdClass;
+        return class_exists($class) ? new $class($flag) : new stdClass;
     }
 
     /**
-     * Authorization check
+     * Authorization check and populate $client into token
      *
-     * @author	sumh <oalite@gmail.com>
-     * @date	2010-06-10 13:00:13
      * @access	public
-     * @param	string	$client	default [ ) ]
+     * @param	string	$client
      * @return	Oauth_Token
      */
+    abstract public function oauth_token($client);
 
-    abstract public function authorization_check($client);
-
-    abstract public function access_token_check($client);
+    /**
+     * Verify the request parameter and populate $client into token
+     *
+     * @access	public
+     * @param	string	$client
+     * @return	Oauth_Token
+     */
+    abstract public function access_token($client);
 
     public static function get($key = NULL, $default = NULL)
     {
@@ -94,7 +96,7 @@ abstract class Oauth_Parameter {
      * Build HTTP Query
      *
      * @access  public
-     * @param   array    $params
+     * @param   arra    $params
      * @return  string  HTTP query
      */
     public static function build_query(array $params)
@@ -114,7 +116,7 @@ abstract class Oauth_Parameter {
      * Explode the oauth parameter from $_POST and returns the parsed
      *
      * @access  public
-     * @param   string    $query
+     * @param   string  $query
      * @return  array
      */
     public static function parse_post($post)

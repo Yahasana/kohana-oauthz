@@ -88,7 +88,7 @@ abstract class Oauth_Controller extends Kohana_Controller {
                 throw new Oauth_Exception('invalid_request_token');
             }
 
-            $params->access_token_check($client);
+            $token = $params->access_token($client);
         }
         catch (Oauth_Exception $e)
         {

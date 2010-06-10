@@ -35,14 +35,14 @@ class Oauth_Parameter_Reflesh extends Oauth_Parameter {
      *      header field is present.
      */
 
-    public function __construct(Model_Oauth $oauth)
+    public function __construct($flag = FALSE)
     {
         $this->oauth = $oauth;
         $this->client_id = $this->get('client_id');
         $this->redirect_uri = $this->get('redirect_uri');
     }
 
-    public function authorization_check($client)
+    public function oauth_token($client)
     {
         if(! $tmp = $this->get('redirect_uri') or $tmp != $client['redirect_uri'])
             return $this->error = 'redirect_uri_mismatch';
@@ -54,7 +54,7 @@ class Oauth_Parameter_Reflesh extends Oauth_Parameter {
             return TRUE;
     }
 
-    public function access_token_check($client)
+    public function access_token($client)
     {
         $params = array(
             'type'      => 'web_server',

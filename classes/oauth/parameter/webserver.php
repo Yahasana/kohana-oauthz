@@ -3,97 +3,138 @@
 class Oauth_Parameter_Webserver extends Oauth_Parameter {
 
     /**
-     * type
-     *     REQUIRED.  The parameter value MUST be set to "web_server".
+     * REQUIRED.  The parameter value MUST be set to "web_server".
+     *
+     * @access	public
+     * @var		string	$type
      */
     public $type;
 
     /**
-     * client_id
-     *     REQUIRED.  The client identifier as described in Section 2.1.
+     * REQUIRED.  The client identifier as described in Section 2.1.
+     *
+     * @access	public
+     * @var		string	$client_id
      */
     public $client_id;
 
     /**
-     * client_secret
-     *     REQUIRED if the client identifier has a matching secret.  The
-     *     client secret as described in Section 2.1.
-     */
-    public $client_secret;
-
-    /**
-     * code
-     *     REQUIRED.  The verification code received from the
-     *     authorization server.
-     */
-    public $code;
-
-    /**
-     * redirect_uri
-     *     REQUIRED.  The redirection URI used in the initial request.
+     * REQUIRED.  The redirection URI used in the initial request.
+     *
+     * @access	public
+     * @var		string	$redirect_uri
      */
     public $redirect_uri;
 
     /**
-     * format
-     *     OPTIONAL.  The response format requested by the client.  Valu
-     *     MUST be one of "json", "xml", or "form".  Alternatively, the
-     *     client MAY use the HTTP "Accept" header field with the desire
-     *     media type.  Defaults to "json" if omitted and no "Accept"
-     *     header field is present.
-    */
-    public function __construct(Model_Oauth $oauth)
+     * Load oauth parameters from GET or POST
+     *
+     * @access	public
+     * @param	string	$flag	default [ FALSE ]
+     * @return	void
+     */
+    public function __construct($flag = FALSE)
     {
-        $this->oauth = $oauth;
+        $this->type     = $this->get('type');
         $this->client_id = $this->get('client_id');
         $this->redirect_uri = $this->get('redirect_uri');
+
+        // Client Requests Authorization
+        if($flag === FALSE)
+        {
+            // OPTIONAL.  An opaque value used by the client to maintain state between the request and callback.
+            $this->state = $this->get('state');
+
+            // OPTIONAL.  The scope of the access request expressed as a list of space-delimited strings.
+            $this->scope = $this->get('scope');
+
+            // OPTIONAL.  The parameter value must be set to "true" or "false".
+            $this->immediate = $this->get('immediate');
+        }
+        // Client Requests Access Token
+        else
+        {
+            // REQUIRED if the client identifier has a matching secret.
+            $this->client_secret = $this->get('client_secret');
+
+            // REQUIRED.  The verification code received from the authorization server.
+            $this->code = $this->get('code');
+
+            /**
+             * format
+             *     OPTIONAL.  The response format requested by the client.  Valu
+             *     MUST be one of "json", "xml", or "form".  Alternatively, the
+             *     client MAY use the HTTP "Accept" header field with the desire
+             *     media type.  Defaults to "json" if omitted and no "Accept"
+             *     header field is present.
+             */
+            $this->format = $this->get('format');
+        }
     }
 
-    public function authorization_check($client)
+    public function oauth_token($client)
     {
-        if(! $tmp = $this->get('redirect_uri') or $tmp != $client['redirect_uri'])
-            return $this->error = 'redirect_uri_mismatch';
+        $token = new Oauth_Token;
 
-        else if($format = $this->get('format') and Kohana::config('oalite_server.default')->format[$format] === TRUE)
+        if($this->state)
         {
-            $this->format = $format;
+            $token->state = $this->state;
         }
 
-        if($tmp = $this->get('state'))
-            $this->state = $tmp;
+        if($client['redirect_uri'] !== $this->redirect_uri)
+        {
+            $token->error = 'redirect_uri_mismatch';
+            return $token;
+        }
 
-        // OPTIONAL.  The scope of the access token as a list of space-delimited strings.
-        if($tmp = $this->get('scope'))
-            $this->scope = $tmp;
+        if( ! empty($client['scope']) AND ! isset($client['scope'][$this->scope]))
+        {
+            $token->error = 'incorrect_client_credentials';
+            return $token;
+        }
 
-        if($tmp = $this->get('immediate'))
-            $this->immediate = $tmp;
+        if($this->immediate)
+        {
+            // TODO
+        }
 
-        return TRUE;
+        // Grants Authorization
+        $token->code = $client['code'];
+
+        return $token;
     }
 
-    public function access_token_check($client)
+    public function access_token($client)
     {
-        $params = array(
-            'type'      => 'web_server',
-            'client_id' => 'get_from_query',
-            'client_secret' => $this->post('client_secret'),
-            'code'  => $this->post('code'),
-            'redirect_uri'  => '',
-            'secret_type' => '',
-            'format'    => 'json' // OPTIONAL. "json", "xml", or "form"
-        );
-        if($tmp = $this->get('secret_type'))
-        {
-            $base_string = URL::base(FALSE, TRUE).$this->request->uri;
-            $base_string = Oauth::normalize('GET', $base_string, $params);
+        $token = new Oauth_Token;
 
-            if (! Oauth_Signature::factory($tmp, $base_string)->check($token, $signature))
-            {
-                return $params['redirect_uri'].'#error=bad_verification_code';
-            }
-            $params['secret_type'] = $tmp;
+        if($this->format)
+        {
+            $token->format = $this->format;
         }
-        return TRUE;
+
+        if($client['redirect_uri'] !== $this->redirect_uri)
+        {
+            $token->error = 'redirect_uri_mismatch';
+            return $token;
+        }
+
+        if($client['client_secret'] !== sha1($this->client_secret))
+        {
+            $token->error = 'incorrect_client_credentials';
+            return $token;
+        }
+
+        if($client['code'] !== $this->code)
+        {
+            $token->error = 'bad_verification_code';
+            return $token;
+        }
+
+        $token->expires_in = 3000;
+        $token->access_token = $client['access_token'];
+        $token->reflash_token = $client['reflash_token'];
+
+        return $token;
     }
 }

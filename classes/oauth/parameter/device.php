@@ -30,40 +30,88 @@ class Oauth_Parameter_Device extends Oauth_Parameter {
      *      header field is present.
      */
 
-    public function __construct(Model_Oauth $oauth)
+    public function __construct($flag = FALSE)
     {
-        $this->oauth = $oauth;
+        $this->type = $this->get('type');
         $this->client_id = $this->get('client_id');
-        $this->redirect_uri = $this->get('redirect_uri');
+        $this->format = $this->get('format');
+        if($flag === FALSE)
+        {
+            $this->scope = $this->get('scope');
+        }
+        else
+        {
+            $this->code = $this->get('code');
+        }
     }
 
-    public function authorization_check($client)
+    public function oauth_token($client)
     {
-        $params = array(
-            'type'      => 'web_server',
-            'client_id' => 'get_from_query',
-            'scope'     => '', // OPTIONAL.  The scope of the access token as a list of space-delimited strings.
-            'format'    => 'json' // OPTIONAL. "json", "xml", or "form"
-        );
-        if(! $tmp = $this->get('redirect_uri') or $tmp != $client['redirect_uri'])
-            return $this->error = 'redirect_uri_mismatch';
-        else if($format = $this->get('format') and Kohana::config('oalite_server.default')->format[$format] === TRUE)
+        $token = new Oauth_Token;
+
+        if($this->format)
         {
-            $this->format = $format;
+            $token->format = $this->format;
         }
 
-        return TRUE;
+        if( ! empty($client['scope']) AND ! isset($client['scope'][$this->scope]))
+        {
+            $token->error = 'authorization_declined';
+            return $token;
+        }
+
+        // REQUIRED.  The verification code.
+        $token->code = $client['code'];
+
+        // REQUIRED.  The end-user code.
+        $token->user_code = $client['user_code'];
+
+        // REQUIRED.  The end-user verification URI on the authorization server.
+        $token->verification_uri = $client['verification_uri'];
+
+        // OPTIONAL.  The duration in seconds of the verification code lifetime.
+        $token->expires_in = 300;
+
+        /**
+         *OPTIONAL.  The minimum amount of time in seconds that the
+         * client SHOULD wait between polling requests to the token endpoint.
+         */
+        $token->interval = 5;
+
+        return $token;
     }
 
-    public function access_token_check($client)
+    public function access_token($client)
     {
-        $params = array(
-            'type'      => 'device_token',
-            'client_id' => 'get_from_query',
-            'code' => $this->post('client_secret'),
-            'secret_type' => '',
-            'format'    => 'json' // OPTIONAL. "json", "xml", or "form"
-        );
-        return TRUE;
+        $token = new Oauth_Token;
+
+        if($this->format)
+        {
+            $token->format = $this->format;
+        }
+
+        if($client['code'] !== $this->code)
+        {
+            $token->error = 'bad_verification_code';
+            return $token;
+        }
+
+        if($client['interval'] > 5)
+        {
+            $token->error = 'slow_down';
+            return $token;
+        }
+
+        if($client['timestamp'] + 300 > time())
+        {
+            $token->error = 'code_expired';
+            return $token;
+        }
+
+        $token->expires_in = 3000;
+        $token->access_token = $client['access_token'];
+        $token->reflash_token = $client['reflash_token'];
+
+        return $token;
     }
 }

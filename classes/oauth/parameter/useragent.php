@@ -55,40 +55,61 @@ class Oauth_Parameter_Useragent extends Oauth_Parameter {
      *      identity or approval status, it MUST deny the request without
      *      prompting the end-user.  Defaults to "false" if omitted.
      *
-     * secret_type
-     *      OPTIONAL.  The access token secret type as described by
-     *      Section 5.3.  If omitted, the authorization server will issue a
-     *      bearer token (an access token without a matching secret) as
-     *      described by Section 5.2.
-     *
-     * @author    sumh <oalite@gmail.com>
-     * @date      2010-05-14 16:35:35
      * @access    public
      * @return    void
      */
-    public function __construct(Model_Oauth $oauth)
+    public function __construct($flag = FALSE)
     {
-        $this->oauth = $oauth;
+        $this->type     = $this->get('type');
         $this->client_id = $this->get('client_id');
         $this->redirect_uri = $this->get('redirect_uri');
+
+        // OPTIONAL.  An opaque value used by the client to maintain state between the request and callback.
+        $this->state = $this->get('state');
+
+        // OPTIONAL.  The scope of the access request expressed as a list of space-delimited strings.
+        $this->scope = $this->get('scope');
+
+        // OPTIONAL.  The parameter value must be set to "true" or "false".
+        $this->immediate = $this->get('immediate');
     }
 
-    public function authorization_check($client)
+    public function oauth_token($client)
     {
-        if(! $tmp = $this->get('redirect_uri') or $tmp != $client['redirect_uri'])
+        $token = new Oauth_Token;
+
+        if($this->state)
         {
-            return $this->error = 'redirect_uri_mismatch';
-        }
-        else if($format = $this->get('format') and Kohana::config('oalite_server.default')->format[$format] === TRUE)
-        {
-            $this->format = $format;
+            $token->state = $this->state;
         }
 
-        return TRUE;
+        if($client['redirect_uri'] !== $this->redirect_uri)
+        {
+            $token->error = 'redirect_uri_mismatch';
+            return $token;
+        }
+
+        if( ! empty($client['scope']) AND ! isset($client['scope'][$this->scope]))
+        {
+            $token->error = 'incorrect_client_credentials';
+            return $token;
+        }
+
+        if($this->immediate)
+        {
+            // TODO
+        }
+
+        // Grants Authorization
+        $token->expires_in = 3000;
+        $token->access_token = $client['access_token'];
+        $token->reflash_token = $client['reflash_token'];
+
+        return $token;
     }
 
-    public function access_token_check($client)
+    public function access_token($client)
     {
-        return TRUE;
+        return new Oauth_Token;
     }
 }

@@ -10,7 +10,7 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
      */
     public $oauth_token;
 
-    public function __construct(Model_Oauth $oauth)
+    public function __construct($flag = FALSE)
     {
         $this->oauth = $oauth;
         switch(Request::$method)
@@ -38,7 +38,14 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
         }
     }
 
-    public function authorization_check($client)
+    /**
+     * No need to authorization any more
+     *
+     * @access	public
+     * @param	string	$client
+     * @return	boolean
+     */
+    public function oauth_token($client)
     {
         return TRUE;
     }
@@ -52,7 +59,7 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
      * @return  boolean
      * @todo    impletement timestamp, nonce, signature checking
      */
-    public function access_token_check($client)
+    public function access_token($client)
     {
         $params = array(
             'oauth_token'   => 'web_server',

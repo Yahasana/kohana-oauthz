@@ -142,7 +142,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
 
         if($client = $this->oauth->lookup_client($params->client_id))
         {
-            if(TRUE !== $error = $params->authorization_check())
+            if(TRUE !== $error = $params->oauth_token())
             {
                 return $params->redirect_uri.'#error='.$error;
             }
@@ -186,7 +186,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
 
         if($client = $this->oauth->lookup_client($params->client_id))
         {
-            if(TRUE !== $error = $params->authorization_check())
+            if(TRUE !== $error = $params->oauth_token())
             {
                 return $params->redirect_uri.'#error='.$error;
             }
@@ -215,11 +215,11 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
 
     protected function web_server()
     {
-        $params = new Oauth_Parameter_Webserver;
+        $params = new Oauth_Parameter_Webserver(TRUE);
 
         if($client = $this->oauth->lookup_server($params->client_id))
         {
-            if(TRUE !== $error = $params->access_token_check($client))
+            if(TRUE !== $error = $params->access_token($client))
             {
                 throw new Oauth_Exception($error);
             }
@@ -277,7 +277,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
 
         return array(
             'access_token'      => 'web_server', // REQUIRED.  The access token.
-            'expires_in'      => 'web_server',   // OPTIONAL.  The duration in seconds of the access token lifetime.
+            'expires_in'        => 'web_server',   // OPTIONAL.  The duration in seconds of the access token lifetime.
             'refresh_token'      => 'web_server',// OPTIONAL.  The refresh token.
             'access_token_secret'=> 'web_server',// REQUIRED if requested by the client.
             'scope'             => '' //OPTIONAL.  The scope of the access token as a list of space-delimited strings.

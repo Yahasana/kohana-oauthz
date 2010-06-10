@@ -38,33 +38,44 @@ class Oauth_Parameter_Credentials extends Oauth_Parameter {
 
     public function __construct($flag = FALSE)
     {
-        $this->oauth = $oauth;
+        $this->type = $type;
         $this->client_id = $this->get('client_id');
-        $this->redirect_uri = $this->get('redirect_uri');
+        $this->client_secret = $this->get('client_secret');
+        $this->scope = $this->get('scope');
+        $this->format = $this->get('format');
     }
 
     public function oauth_token($client)
     {
-        if(! $tmp = $this->get('redirect_uri') or $tmp != $client['redirect_uri'])
-            return $this->error = 'redirect_uri_mismatch';
-        else if($format = $this->get('format') and Kohana::config('oalite_server.default')->format[$format] === TRUE)
+        $token = new Oauth_Token;
+
+        if($this->format)
         {
-            $this->format = $format;
+            $token->format = $this->format;
         }
 
-        return TRUE;
+        if($client['client_secret'] !== sha1($this->client_secret))
+        {
+            $token->error = 'incorrect_client_credentials';
+            return $token;
+        }
+
+        if( ! empty($client['scope']) AND ! isset($client['scope'][$this->scope]))
+        {
+            $token->error = 'incorrect_client_credentials';
+            return $token;
+        }
+
+        // Grants Authorization
+        $token->expires_in = 3000;
+        $token->access_token = $client['access_token'];
+        $token->reflash_token = $client['reflash_token'];
+
+        return $token;
     }
 
     public function access_token($client)
     {
-        $params = array(
-            'type'      => 'web_server',
-            'client_id' => 'get_from_query',
-            'client_secret' => $this->post('client_secret'),
-            'scope'     => '', // OPTIONAL.  The scope of the access token as a list of space-delimited strings.
-            'secret_type' => '',
-            'format'    => 'json' // OPTIONAL. "json", "xml", or "form"
-        );
-        return TRUE;
+        return new Oauth_Token;
     }
 }

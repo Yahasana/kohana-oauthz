@@ -46,35 +46,48 @@ class Oauth_Parameter_Assertion extends Oauth_Parameter {
 
     public function __construct($flag = FALSE)
     {
-        $this->oauth = $oauth;
+        $this->type = $this->get('type');
+        $this->assertion_format = $this->get('username');
+        $this->assertion = $this->get('password');
         $this->client_id = $this->get('client_id');
-        $this->redirect_uri = $this->get('redirect_uri');
+        $this->client_secret = $this->get('client_secret');
+        $this->scope = $this->get('scope');
+        $this->format = $this->get('format');
     }
 
     public function oauth_token($client)
     {
-        if(! $tmp = $this->get('redirect_uri') or $tmp != $client['redirect_uri'])
-            return $this->error = 'redirect_uri_mismatch';
-        else if($format = $this->get('format') and Kohana::config('oalite_server.default')->format[$format] === TRUE)
+        $token = new Oauth_Token;
+
+        if(! empty($this->assertion_format) AND $client['format'] !== $this->assertion_format)
         {
-            $this->format = $format;
+            $token->error = 'unknown_format';
+            return $token;
+        }
+        else
+        {
+            $token->assertion_format = $this->assertion_format;
         }
 
-        return TRUE;
+        if($client['assertion'] !== $this->assertion
+            OR (! empty($this->client_id) AND $client['client_id'] !== $this->client_id)
+            OR (! empty($this->client_secret) AND $client['client_secret'] !== sha1($this->client_secret))
+            OR (! empty($client['scope']) AND ! isset($client['scope'][$this->scope]))
+        {
+            $token->error = 'invalid_assertion';
+            return $token;
+        }
+
+        // Grants Authorization
+        // The authorization server SHOULD NOT issue a refresh token.
+        $token->expires_in = 3000;
+        $token->access_token = $client['access_token'];
+
+        return $token;
     }
 
     public function access_token($client)
     {
-        $params = array(
-            'type'      => 'web_server',
-            'format' => 'get_from_query',
-            'assertion' => $this->post('client_secret'),
-            'client_id' => 'get_from_query',
-            'client_secret' => $this->post('client_secret'),
-            'scope'     => '', // OPTIONAL.  The scope of the access token as a list of space-delimited strings.
-            'secret_type' => '',
-            'format'    => 'json' // OPTIONAL. "json", "xml", or "form"
-        );
-        return TRUE;
+        return new Oauth_Token;
     }
 }

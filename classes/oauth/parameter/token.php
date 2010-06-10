@@ -12,7 +12,6 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
 
     public function __construct($flag = FALSE)
     {
-        $this->oauth = $oauth;
         switch(Request::$method)
         {
             case 'HEAD':
@@ -43,86 +42,76 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
      *
      * @access	public
      * @param	string	$client
-     * @return	boolean
+     * @return	Oauth_Token
      */
     public function oauth_token($client)
     {
-        return TRUE;
+        return new Oauth_Token;
     }
 
     /**
      * MUST verify that the verification code, client identity, client secret,
      * and redirection URI are all valid and match its stored association.
      *
-     * @access  protected
-     * @throw   redirect_uri_mismatch, bad_verification_code, incorrect_client_credentials
-     * @return  boolean
+     * @access  public
+     * @return  Oauth_Token
      * @todo    impletement timestamp, nonce, signature checking
      */
     public function access_token($client)
     {
-        $params = array(
-            'oauth_token'   => 'web_server',
-            'timestamp'     => 'get_from_query',
-            'nonce'         => $this->post('client_secret'),
-            'signature'     => $this->post('code'),
-            'algorithm'     => '',
-            'format'        => 'json' // OPTIONAL. "json", "xml", or "form"
-        );
+        $token = new Oauth_Token;
 
-        if(empty($params['oauth_token']))
-            throw new Oauth_Exception('incorrect_client_credentials');
-
-        $token = new Oauth_Token($params['oauth_token']);
-
-        if(isset($params['token_secret']))
+        if($this->format)
         {
-            $token->token_secret = $params['token_secret'];
+            $token->format = $this->format;
         }
 
-        // verify that timestamp is recentish
-        if(isset($params['timestamp']))
+        if($client['access_token'] !== $this->oauth_token)
         {
-            if (time() - $params['timestamp'] > Kohana::config('oauth_server')->get('duration'))
-            {
-                throw new Oauth_Exception('incorrect_client_credentials');
-            }
-            $token->timestamp = $params['timestamp'];
+            $token->error = 'incorrect_oauth_token';
+            return $token;
         }
 
-        // verify that the nonce is uniqueish
-        if(isset($params['nonce']))
+        if( ! empty($this->token_secret) AND $client['token_secret'] !== sha1($this->token_secret))
         {
-            if ($this->oauth->lookup_nonce($params['oauth_token'], $params['nonce'], $params['timestamp']))
-            {
-                throw new Oauth_Exception('incorrect_client_credentials');
-            }
-            $token->nonce = $params['nonce'];
+            $token->error = 'incorrect_oauth_token';
+            return $token;
+        }
+
+        if( ! empty($this->nonce) AND $client['nonce'] !== $this->nonce)
+        {
+            $token->error = 'incorrect_nonce';
+            return $token;
+        }
+
+        if( ! empty($this->timestamp) AND
+            $client['timestamp'] + Kohana::config('oauth_server')->get('duration') < $this->timestamp)
+        {
+            $token->error = 'incorrect_nonce';
+            return $token;
         }
 
         // verify the signature
-        if(isset($params['signature']))
+        if( ! empty($this->signature))
         {
             $base_url = URL::base(FALSE, TRUE).$this->request->controller.'/'.$this->request->action;
 
-            $string = Oauth::normalize($params['method'], $base_url, $params);
+            $string = Oauth::normalize(Request::$method, $base_url, $params);
 
-            if($params['algorithm'] == 'rsa-sha1' OR $params['algorithm'] == 'hmac-sha1')
+            if($this->algorithm == 'rsa-sha1' OR $this->algorithm == 'hmac-sha1')
             {
                 $token->public_cert = '';
                 $token->private_cert = '';
             }
 
-            if ( ! empty($params['algorithm']) OR ! Oauth::signature(
-                    $params['algorithm'], $string
-                )->check($token, $params['signature']))
+            if ( ! empty($this->algorithm)
+                OR ! Oauth::signature($this->algorithm, $string)->check($token, $this->signature))
             {
-                throw new Oauth_Exception('bad_verification_code');
+                $token->error = 'incorrect_signature';
+                return $token;
             }
-            $token->signature = $params['signature'];
-            $token->algorithm = $params['algorithm'];
         }
 
-        return TRUE;
+        return new Oauth_Token;
     }
 }

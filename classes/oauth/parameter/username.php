@@ -22,6 +22,18 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
     public $client_secret;
 
     /**
+     * username
+     *       REQUIRED.  The end-user’s username.
+     */
+    public $username;
+
+    /**
+     * password
+     *      REQUIRED.  The end-user’s password.
+     */
+    public $password;
+
+    /**
      * scope
      *      OPTIONAL.  The scope of the access request expressed as a list
      *      of space-delimited strings.  The value of the "scope" parameter
@@ -42,14 +54,8 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
         $this->type = $this->get('type');
         $this->client_id = $this->get('client_id');
         $this->client_secret = $this->get('client_secret');
-        if($flag === FALSE)
-        {
-            // REQUIRED.  The end-user’s username.
-            $this->username = $this->get('username');
-
-            // REQUIRED.  The end-user’s password.
-            $this->password = $this->get('password');
-        }
+        $this->username = $this->get('username');
+        $this->password = $this->get('password');
         $this->scope = $this->get('scope');
         $this->format = $this->get('format');
     }
@@ -63,9 +69,11 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
             $token->format = $this->format;
         }
 
-        if($client['redirect_uri'] !== $this->redirect_uri)
+        if($client['client_secret'] !== sha1($this->client_secret)
+            OR $client['password'] !== sha1($this->password)
+            OR $client['username'] !== $this->username)
         {
-            $token->error = 'redirect_uri_mismatch';
+            $token->error = 'incorrect_client_credentials';
             return $token;
         }
 
@@ -75,29 +83,16 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
             return $token;
         }
 
-        if($this->immediate)
-        {
-            // TODO
-        }
-
         // Grants Authorization
-        $token->code = $client['code'];
+        $token->expires_in = 3000;
+        $token->access_token = $client['access_token'];
+        $token->reflash_token = $client['reflash_token'];
 
         return $token;
     }
 
     public function access_token($client)
     {
-        $params = array(
-            'type'      => 'web_server',
-            'client_id' => 'get_from_query',
-            'client_secret' => $this->post('client_secret'),
-            'username'  => $this->post('username'),
-            'password'  => '',
-            'scope'     => '', // OPTIONAL.  The scope of the access token as a list of space-delimited strings.
-            'secret_type' => '',
-            'format'    => 'json' // OPTIONAL. "json", "xml", or "form"
-        );
-        return TRUE;
+        return new Oauth_Token;
     }
 }

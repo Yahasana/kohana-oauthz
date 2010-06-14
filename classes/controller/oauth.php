@@ -14,15 +14,10 @@
  */
 class Controller_Oauth extends Oauth_Server_Controller {
 
-    public function action_index()
+    public function action_authorize()
     {
-        //~ are you sure to access your infomation data from webservice sp.example.com
-        //~ Yes - send request token to sp.example.com
-        //~ $uri = 'http://localhost/oauth/request';
-        $token = parent::request_token();
-
-        //~ $uri = 'http://localhost/oauth/authorize';
-        parent::goto_authorize($token);
+        $view = new View('v_oauth_authorize', array('authorized' => TRUE));
+        $this->request->response = $view->render();
     }
 
     public function action_okay()

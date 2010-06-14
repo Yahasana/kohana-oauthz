@@ -3,14 +3,6 @@
 class Oauth_Parameter_Webserver extends Oauth_Parameter {
 
     /**
-     * REQUIRED.  The parameter value MUST be set to "web_server".
-     *
-     * @access	public
-     * @var		string	$type
-     */
-    public $type;
-
-    /**
      * REQUIRED.  The client identifier as described in Section 2.1.
      *
      * @access	public
@@ -35,30 +27,26 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
      */
     public function __construct($flag = FALSE)
     {
-        $this->type     = $this->get('type');
-        $this->client_id = $this->get('client_id');
-        $this->redirect_uri = $this->get('redirect_uri');
+        $this->client_id = Oauth::get('client_id');
+        $this->redirect_uri = Oauth::get('redirect_uri');
 
         // Client Requests Authorization
         if($flag === FALSE)
         {
             // OPTIONAL.  An opaque value used by the client to maintain state between the request and callback.
-            $this->state = $this->get('state');
+            $this->state = Oauth::get('state');
 
             // OPTIONAL.  The scope of the access request expressed as a list of space-delimited strings.
-            $this->scope = $this->get('scope');
-
-            // OPTIONAL.  The parameter value must be set to "true" or "false".
-            $this->immediate = $this->get('immediate');
+            $this->scope = Oauth::get('scope');
         }
         // Client Requests Access Token
         else
         {
             // REQUIRED if the client identifier has a matching secret.
-            $this->client_secret = $this->get('client_secret');
+            $this->client_secret = Oauth::get('client_secret');
 
             // REQUIRED.  The verification code received from the authorization server.
-            $this->code = $this->get('code');
+            $this->code = Oauth::get('code');
 
             /**
              * format
@@ -68,7 +56,7 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
              *     media type.  Defaults to "json" if omitted and no "Accept"
              *     header field is present.
              */
-            $this->format = $this->get('format');
+            $this->format = Oauth::get('format');
         }
     }
 
@@ -91,11 +79,6 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
         {
             $response->error = 'incorrect_client_credentials';
             return $response;
-        }
-
-        if($this->immediate)
-        {
-            // TODO
         }
 
         // Grants Authorization

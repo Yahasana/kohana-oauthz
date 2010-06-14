@@ -69,14 +69,13 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
                     break;
             }
             $this->request->response = $response;
-            // $this->request->redirect($response);
+            //$this->request->redirect($response);
         }
         catch (Oauth_Exception $e)
         {
             $this->request->status = 400; #HTTP/1.1 400 Bad Request
             $this->request->headers['Content-Type'] = 'application/json';
             $this->request->response = json_encode(array('error' => $e->getMessage()));
-            // $this->render('v_oauth_authorize', array('error' => $e->getMessage()));
         }
     }
 
@@ -97,7 +96,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
     public function action_token()
     {
         try {
-            switch(Oauth::post('type'))
+            switch(Oauth::get('type'))
             {
                 case 'web_server':
                     $response = $this->web_server();

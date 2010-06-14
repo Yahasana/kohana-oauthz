@@ -49,20 +49,6 @@ abstract class Oauth_Parameter {
      */
     abstract public function access_token($client);
 
-    public static function get($key = NULL, $default = NULL)
-    {
-        if ($key === NULL)
-        {
-            $default = Request::$method === 'POST' ? $_POST : $_GET;
-        }
-        else
-        {
-            $data = Request::$method === 'POST' ? $_POST : $_GET;
-            if(isset($data[$key])) $default = $data[$key];
-        }
-        return $default;
-    }
-
     public static $headers = NULL;
 
     /**

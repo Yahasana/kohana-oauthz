@@ -96,14 +96,20 @@ class Model_Oauth extends Kohana_Model {
     public function lookup_client($client_id)
     {
         // implement me
-        if($client_id  AND $secret = DB::select('client_secret','server_id')
+        if($client_id  AND $client = DB::select('client_secret','server_id','redirect_uri','user_id')
             ->from('t_oauth_servers')
             ->where('client_id' , '=', $client_id)
             ->execute($this->_db)
             ->current())
         {
-            $client = new Oauth_Client($client_id, $secret->client_secret);
-            $client->server_id = $secret->server_id;
+            $client['code'] = uniqid();
+            $access_token = sha1(md5(time()));
+            $token_secret = md5(sha1(time()));
+            $refresh_token = sha1(sha1(mt_rand()));
+            DB::insert('t_oauth_tokens', array('server_id','code','user_id','access_token','token_secret','timestamp','expire_in','refresh_token'))
+                ->values(array($client['server_id'], $client['code'], $client['user_id'], $access_token, $token_secret, date('Y-m-d H:i:s'), 3600, $refresh_token))
+                ->execute($this->_db);
+
             return $client;
         }
         return NULL;

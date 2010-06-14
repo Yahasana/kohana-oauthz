@@ -87,7 +87,7 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
         if( ! empty($this->timestamp) AND
             $client['timestamp'] + Kohana::config('oauth_server')->get('duration') < $this->timestamp)
         {
-            $response->error = 'incorrect_nonce';
+            $response->error = 'incorrect_timestamp';
             return $response;
         }
 

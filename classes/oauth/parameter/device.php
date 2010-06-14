@@ -3,12 +3,6 @@
 class Oauth_Parameter_Device extends Oauth_Parameter {
 
     /**
-     * type
-     *      REQUIRED.  The parameter value MUST be set to "device_code".
-     */
-    public $type;
-
-    /**
      * client_id
      *      REQUIRED.  The client identifier as described in Section 2.1.
      */
@@ -32,16 +26,15 @@ class Oauth_Parameter_Device extends Oauth_Parameter {
 
     public function __construct($flag = FALSE)
     {
-        $this->type = $this->get('type');
-        $this->client_id = $this->get('client_id');
-        $this->format = $this->get('format');
+        $this->client_id = Oauth::get('client_id');
+        $this->format = Oauth::get('format');
         if($flag === FALSE)
         {
-            $this->scope = $this->get('scope');
+            $this->scope = Oauth::get('scope');
         }
         else
         {
-            $this->code = $this->get('code');
+            $this->code = Oauth::get('code');
         }
     }
 

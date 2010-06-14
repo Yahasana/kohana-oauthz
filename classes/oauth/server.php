@@ -53,7 +53,7 @@ class Oauth_Server extends Kohana_Controller {
 
     }
 
-    public function access_deny()
+    public function action_access_deny()
     {
         $this->request->status = 302; #HTTP/1.1 302 Found
         $this->request->headers['Content-Type'] = 'application/x-www-form-urlencoded';

@@ -3,12 +3,6 @@
 class Oauth_Parameter_Assertion extends Oauth_Parameter {
 
     /**
-     * type
-     *      REQUIRED.  The parameter value MUST be set to "assertion".
-     */
-    public $type;
-
-    /**
      * assertion_format
      *      REQUIRED.  The format of the assertion as defined by the
      *      authorization server.  The value MUST be an absolute URI.
@@ -46,13 +40,12 @@ class Oauth_Parameter_Assertion extends Oauth_Parameter {
 
     public function __construct($flag = FALSE)
     {
-        $this->type = $this->get('type');
-        $this->assertion_format = $this->get('username');
-        $this->assertion = $this->get('password');
-        $this->client_id = $this->get('client_id');
-        $this->client_secret = $this->get('client_secret');
-        $this->scope = $this->get('scope');
-        $this->format = $this->get('format');
+        $this->assertion_format = Oauth::get('username');
+        $this->assertion = Oauth::get('password');
+        $this->client_id = Oauth::get('client_id');
+        $this->client_secret = Oauth::get('client_secret');
+        $this->scope = Oauth::get('scope');
+        $this->format = Oauth::get('format');
     }
 
     public function oauth_token($client)

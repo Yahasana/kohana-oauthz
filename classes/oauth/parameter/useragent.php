@@ -3,12 +3,6 @@
 class Oauth_Parameter_Useragent extends Oauth_Parameter {
 
     /**
-     * type
-     *      REQUIRED.  The parameter value MUST be set to "user_agent".
-     */
-    public $type;
-
-    /**
      * client_id
      *      REQUIRED.  The client identifier as described in Section 3.1.
      */
@@ -60,18 +54,17 @@ class Oauth_Parameter_Useragent extends Oauth_Parameter {
      */
     public function __construct($flag = FALSE)
     {
-        $this->type     = $this->get('type');
-        $this->client_id = $this->get('client_id');
-        $this->redirect_uri = $this->get('redirect_uri');
+        $this->client_id = Oauth::get('client_id');
+        $this->redirect_uri = Oauth::get('redirect_uri');
 
         // OPTIONAL.  An opaque value used by the client to maintain state between the request and callback.
-        $this->state = $this->get('state');
+        $this->state = Oauth::get('state');
 
         // OPTIONAL.  The scope of the access request expressed as a list of space-delimited strings.
-        $this->scope = $this->get('scope');
+        $this->scope = Oauth::get('scope');
 
         // OPTIONAL.  The parameter value must be set to "true" or "false".
-        $this->immediate = $this->get('immediate');
+        $this->immediate = Oauth::get('immediate');
     }
 
     public function oauth_token($client)

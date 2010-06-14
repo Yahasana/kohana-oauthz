@@ -3,12 +3,6 @@
 class Oauth_Parameter_Credentials extends Oauth_Parameter {
 
     /**
-     * type
-     *     REQUIRED.  The parameter value MUST be set to "client_credentials".
-     */
-    public $type;
-
-    /**
      * client_id
      *     REQUIRED.  The client identifier as described in Section 2.1.
      */
@@ -38,11 +32,10 @@ class Oauth_Parameter_Credentials extends Oauth_Parameter {
 
     public function __construct($flag = FALSE)
     {
-        $this->type = $type;
-        $this->client_id = $this->get('client_id');
-        $this->client_secret = $this->get('client_secret');
-        $this->scope = $this->get('scope');
-        $this->format = $this->get('format');
+        $this->client_id = Oauth::get('client_id');
+        $this->client_secret = Oauth::get('client_secret');
+        $this->scope = Oauth::get('scope');
+        $this->format = Oauth::get('format');
     }
 
     public function oauth_token($client)

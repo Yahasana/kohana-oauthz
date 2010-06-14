@@ -43,21 +43,37 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
      *      header field is present.
      */
 
-    public function __construct($flag = FALSE)
+    public function __construct($args = NULL)
     {
-        $this->client_id = Oauth::get('client_id');
-        $this->client_secret = Oauth::get('client_secret');
-        $this->username = Oauth::get('username');
-        $this->password = Oauth::get('password');
-        $this->scope = Oauth::get('scope');
-        $this->format = Oauth::get('format');
+        $params = Oauth::parse_query();
+        $this->client_id        = Arr::get($params, 'client_id');
+        $this->client_secret    = Arr::get($params, 'client_secret');
+        $this->username         = Arr::get($params, 'username');
+        $this->password         = Arr::get($params, 'password');
+
+        // OPTIONAL.  An opaque value used by the client to maintain state between the request and callback.
+        if(NULL !== $state = Arr::get($params, 'state'))
+            $this->state = $state;
+
+        // OPTIONAL.  The scope of the access request expressed as a list of space-delimited strings.
+        if(NULL !== $scope = Arr::get($params, 'scope'))
+            $this->scope = $scope;
+
+        // OPTIONAL.  The scope of the access request expressed as a list of space-delimited strings.
+        if(NULL !== $format = Arr::get($params, 'format'))
+            $this->format = $format;
     }
 
     public function oauth_token($client)
     {
         $response = new Oauth_Response;
 
-        if($this->format)
+        if(property_exists($this, 'state'))
+        {
+            $response->state = $this->state;
+        }
+
+        if(property_exists($this, 'format'))
         {
             $response->format = $this->format;
         }
@@ -70,7 +86,7 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
             return $response;
         }
 
-        if( ! empty($client['scope']) AND ! isset($client['scope'][$this->scope]))
+        if(property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
         {
             $response->error = 'unauthorized_client';
             return $response;
@@ -86,6 +102,6 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
 
     public function access_token($client)
     {
-        return new Oauth_Token;
+        return new Oauth_Response;
     }
 }

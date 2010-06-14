@@ -12,17 +12,17 @@
  * @since      Available since Release 1.0
  * *
  */
-class Controller_Consumer extends Oauth_Consumer_Controller {
+class Controller_Authorize extends Oauth_Server_Controller {
 
     public function action_index()
     {
         //~ are you sure to access your infomation data from webservice sp.example.com
         //~ Yes - send request token to sp.example.com
         //~ $uri = 'http://localhost/oauth/request';
-        $token = parent::request_token();
+        //$token = parent::request_token();
 
         //~ $uri = 'http://localhost/oauth/authorize';
-        parent::goto_authorize($token);
+        parent::action_authorize();
     }
 
     public function action_okay()

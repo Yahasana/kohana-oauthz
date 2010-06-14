@@ -14,7 +14,7 @@
  */
 class Model_Oauth extends Kohana_Model {
 
-    protected $_id = 'default';
+    protected $_db = 'default';
 
     public function reg_server($server)
     {
@@ -61,7 +61,7 @@ class Model_Oauth extends Kohana_Model {
         //
     }
 
-    public function lookup_server($client_id, $redirect_uri = NULL)
+    public function lookup_server($client_id)
     {
         //
     }
@@ -69,7 +69,7 @@ class Model_Oauth extends Kohana_Model {
     public function unique_server($redirect_uri)
     {
         // Check if the username already exists in the database
-        return ! DB::select(array(DB::expr('COUNT(server_id)'), 'total'))
+        return ! DB::select(array(DB::expr('COUNT(1)'), 'total'))
             ->from('t_oauth_servers')
             ->where('redirect_uri', '=', $redirect_uri)
             ->where('user_id', '=', $user_id)
@@ -95,7 +95,6 @@ class Model_Oauth extends Kohana_Model {
 
     public function lookup_client($client_id)
     {
-        // implement me
         if($client_id  AND $client = DB::select('client_secret','server_id','redirect_uri','user_id')
             ->from('t_oauth_servers')
             ->where('client_id' , '=', $client_id)
@@ -106,8 +105,8 @@ class Model_Oauth extends Kohana_Model {
             $access_token = sha1(md5(time()));
             $token_secret = md5(sha1(time()));
             $refresh_token = sha1(sha1(mt_rand()));
-            DB::insert('t_oauth_tokens', array('server_id','code','user_id','access_token','token_secret','timestamp','expire_in','refresh_token'))
-                ->values(array($client['server_id'], $client['code'], $client['user_id'], $access_token, $token_secret, date('Y-m-d H:i:s'), 3600, $refresh_token))
+            DB::insert('t_oauth_tokens', array('client_id','code','user_id','access_token','token_secret','timestamp','expire_in','refresh_token'))
+                ->values(array($client_id, $client['code'], $client['user_id'], $access_token, $token_secret, date('Y-m-d H:i:s'), 3600, $refresh_token))
                 ->execute($this->_db);
 
             return $client;
@@ -115,37 +114,25 @@ class Model_Oauth extends Kohana_Model {
         return NULL;
     }
 
-    public function new_code(Oauth_Client $client)
+    public function lookup_code($code)
     {
-        if($server_id = DB::select('server_id')->from('t_oauth_servers')
-            ->where('client_id' , '=', $client->client_id)
-            ->where('redirect_uri' , '=', $client->redirect_uri)
+        if($code  AND $token = DB::select('client_id', 'code', 'nonce',
+            'access_token','token_secret','timestamp','refresh_token','expire_in')
+            ->from('t_oauth_tokens')
+            ->where('code' , '=', $code)
             ->execute($this->_db)
-            ->get('server_id'))
+            ->current())
         {
-            $code = Text::random(); // 8 character random string
-            $secret = time() + time();
-            $token = new OAuth_Token($code, md5(md5($secret)));
-
-            DB::insert('t_oauth_tokens')
-                ->columns(array('access_token','token_type','token_secret','server_id'))
-                ->values(array($key, 'request', $secret, $server_id))
-                ->execute($this->_db);
-
-            // return a new token attached to this client
             return $token;
         }
         return NULL;
     }
 
-    public function lookup_code()
+    public function audit_token($token)
     {
-        //
-    }
-
-    public function new_token()
-    {
-        //
+        DB::insert('t_oauth_audits', array('access_token'))
+            ->values(array($token->access_token))
+            ->execute($this->_db);
     }
 
     public function lookup_token($oauth_token)
@@ -158,7 +145,7 @@ class Model_Oauth extends Kohana_Model {
             ->current();
         if($token)
         {
-            return new Oauth_Token($token);
+            return $token;
         }
 
         return NULL;

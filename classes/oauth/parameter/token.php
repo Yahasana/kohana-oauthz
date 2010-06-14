@@ -10,27 +10,30 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
      */
     public $oauth_token;
 
-    public function __construct($flag = FALSE)
+    public function __construct($args = NULL)
     {
         switch(Request::$method)
         {
             case 'HEAD':
-                $params = parent::parse_header();
+                $params = Oauth::parse_header();
                 $params['oauth_token'] = isset($params['token']) ? $params['token'] : NULL;
                 unset($params['token']);
                 break;
             case 'PUT':
             case 'POST':
             case 'DELETE':
-                $params = parent::parse_post();
+                $params = $_POST;
                 break;
             case 'GET':
-                $params = parent::parse_query();
+                $params = Oauth::parse_query();
                 break;
             default:
                 $params = array();
                 break;
         }
+
+        if(is_array($args)) $params += $args;
+
         foreach($params as $key => $val)
         {
             $this->$key = $val;
@@ -46,7 +49,7 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
      */
     public function oauth_token($client)
     {
-        return new Oauth_Token;
+        return new Oauth_Response;
     }
 
     /**
@@ -61,7 +64,12 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
     {
         $response = new Oauth_Response;
 
-        if($this->format)
+        if(property_exists($this, 'state'))
+        {
+            $response->state = $this->state;
+        }
+
+        if(property_exists($this, 'format'))
         {
             $response->format = $this->format;
         }
@@ -72,19 +80,19 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
             return $response;
         }
 
-        if( ! empty($this->token_secret) AND $client['token_secret'] !== sha1($this->token_secret))
+        if(property_exists($this, 'token_secret') AND $client['token_secret'] !== sha1($this->token_secret))
         {
             $response->error = 'incorrect_oauth_token';
             return $response;
         }
 
-        if( ! empty($this->nonce) AND $client['nonce'] !== $this->nonce)
+        if(property_exists($this, 'nonce') AND $client['nonce'] !== $this->nonce)
         {
             $response->error = 'incorrect_nonce';
             return $response;
         }
 
-        if( ! empty($this->timestamp) AND
+        if(property_exists($this,'timestamp') AND
             $client['timestamp'] + Kohana::config('oauth_server')->get('duration') < $this->timestamp)
         {
             $response->error = 'incorrect_timestamp';
@@ -92,9 +100,9 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
         }
 
         // verify the signature
-        if( ! empty($this->signature))
+        if(property_exists($this, 'signature') AND property_exists($this, 'algorithm'))
         {
-            $base_url = URL::base(FALSE, TRUE).$this->request->controller.'/'.$this->request->action;
+            $base_url = URL::base(FALSE, TRUE).Request::$current->uri;
 
             $string = Oauth::normalize(Request::$method, $base_url, $params);
 
@@ -104,14 +112,13 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
                 $response->private_cert = '';
             }
 
-            if ( ! empty($this->algorithm)
-                OR ! Oauth::signature($this->algorithm, $string)->check($token, $this->signature))
+            if (! Oauth::signature($this->algorithm, $string)->check($token, $this->signature))
             {
                 $response->error = 'incorrect_signature';
                 return $response;
             }
         }
 
-        return new Oauth_Token;
+        return new Oauth_Response;
     }
 }

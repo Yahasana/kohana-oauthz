@@ -30,19 +30,24 @@ class Oauth_Parameter_Credentials extends Oauth_Parameter {
      *     header field is present.
      */
 
-    public function __construct($flag = FALSE)
+    public function __construct($args = NULL)
     {
-        $this->client_id = Oauth::get('client_id');
-        $this->client_secret = Oauth::get('client_secret');
-        $this->scope = Oauth::get('scope');
-        $this->format = Oauth::get('format');
+        $params = Oauth::parse_query();
+        $this->client_id = Arr::get($params, 'client_id');
+        $this->client_secret = Arr::get($params, 'client_secret');
+
+        if(NULL !== $scope = Arr::get($params, 'scope'))
+            $this->scope = $scope;
+
+        if(NULL !== $format = Arr::get($params, 'format'))
+            $this->format = $format;
     }
 
     public function oauth_token($client)
     {
         $response = new Oauth_Response;
 
-        if($this->format)
+        if(property_exists($this, 'format'))
         {
             $response->format = $this->format;
         }
@@ -53,7 +58,7 @@ class Oauth_Parameter_Credentials extends Oauth_Parameter {
             return $response;
         }
 
-        if( ! empty($client['scope']) AND ! isset($client['scope'][$this->scope]))
+        if(property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
         {
             $response->error = 'incorrect_client_credentials';
             return $response;
@@ -69,6 +74,6 @@ class Oauth_Parameter_Credentials extends Oauth_Parameter {
 
     public function access_token($client)
     {
-        return new Oauth_Token;
+        return new Oauth_Response;
     }
 }

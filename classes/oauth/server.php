@@ -19,7 +19,7 @@ class Oauth_Server extends Kohana_Controller {
         $this->oauth = new Model_Oauth;
     }
 
-    public function action_server()
+    public function action_register()
     {
         if(isset($_POST['pass']))
         {
@@ -29,14 +29,20 @@ class Oauth_Server extends Kohana_Controller {
                 ->rule('password', 'min_length', array('6'))
                 ->rule('confirm',  'matches', array('password'))
                 ->rule('redirect_uri', array($this->oauth, 'unique_server'));
-
-            if(empty($_POST['client_id']))
+            if($post->check())
             {
-                $this->oauth->reg_server($_POST);
+                if(empty($_POST['client_id']))
+                {
+                    $this->oauth->reg_server($_POST);
+                }
+                else
+                {
+                    $this->oauth->update_server($_POST);
+                }
             }
             else
             {
-                $this->oauth->update_server($_POST);
+                $data['errors'] = $post->errors();
             }
         }
 

@@ -3,11 +3,11 @@
 class Oauth_Parameter_Assertion extends Oauth_Parameter {
 
     /**
-     * assertion_format
+     * assertion_type
      *      REQUIRED.  The format of the assertion as defined by the
      *      authorization server.  The value MUST be an absolute URI.
      */
-    public $assertion_format;
+    public $assertion_type;
 
     /**
      * assertion
@@ -38,34 +38,43 @@ class Oauth_Parameter_Assertion extends Oauth_Parameter {
      *      header field is present.
      */
 
-    public function __construct($flag = FALSE)
+    public function __construct($args = NULL)
     {
-        $this->assertion_format = Oauth::get('username');
-        $this->assertion = Oauth::get('password');
-        $this->client_id = Oauth::get('client_id');
-        $this->client_secret = Oauth::get('client_secret');
-        $this->scope = Oauth::get('scope');
-        $this->format = Oauth::get('format');
+        $params = Oauth::parse_query();
+        $this->assertion_type = Arr::get($params, 'username');
+        $this->assertion = Arr::get($params, 'password');
+
+        if(NULL !== $client_id = Arr::get($params, 'client_id'))
+            $this->client_id = $client_id;
+
+        if(NULL !== $client_secret = Arr::get($params, 'client_secret'))
+            $this->client_secret = $client_secret;
+
+        if(NULL !== $scope = Arr::get($params, 'scope'))
+            $this->scope = $scope;
+
+        if(NULL !== $format = Arr::get($params, 'format'))
+            $this->format = $format;
     }
 
     public function oauth_token($client)
     {
         $response = new Oauth_Response;
 
-        if(! empty($this->assertion_format) AND $client['format'] !== $this->assertion_format)
+        if($client['format'] !== $this->assertion_type)
         {
             $response->error = 'unknown_format';
             return $response;
         }
         else
         {
-            $response->assertion_format = $this->assertion_format;
+            $response->assertion_type = $this->assertion_type;
         }
 
         if($client['assertion'] !== $this->assertion
-            OR (! empty($this->client_id) AND $client['client_id'] !== $this->client_id)
-            OR (! empty($this->client_secret) AND $client['client_secret'] !== sha1($this->client_secret))
-            OR (! empty($client['scope']) AND ! isset($client['scope'][$this->scope]))
+            OR (property_exists($this, 'client_id') AND $client['client_id'] !== $this->client_id)
+            OR (property_exists($this, 'client_secret') AND $client['client_secret'] !== sha1($this->client_secret))
+            OR (property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
         {
             $response->error = 'invalid_assertion';
             return $response;
@@ -81,6 +90,6 @@ class Oauth_Parameter_Assertion extends Oauth_Parameter {
 
     public function access_token($client)
     {
-        return new Oauth_Token;
+        return new Oauth_Response;
     }
 }

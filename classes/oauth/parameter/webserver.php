@@ -25,28 +25,36 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
      * @param	string	$flag	default [ FALSE ]
      * @return	void
      */
-    public function __construct($flag = FALSE)
+    public function __construct($args = NULL)
     {
-        $this->client_id = Oauth::get('client_id');
-        $this->redirect_uri = Oauth::get('redirect_uri');
-
         // Client Requests Authorization
-        if($flag === FALSE)
+        if($args === NULL)
         {
+            $params = Oauth::parse_query();
+
+            $this->client_id = Arr::get($params, 'client_id');
+            $this->redirect_uri = Arr::get($params, 'redirect_uri');
+
             // OPTIONAL.  An opaque value used by the client to maintain state between the request and callback.
-            $this->state = Oauth::get('state');
+            if(NULL !== $state = Arr::get($params, 'state'))
+                $this->state = $state;
 
             // OPTIONAL.  The scope of the access request expressed as a list of space-delimited strings.
-            $this->scope = Oauth::get('scope');
+            if(NULL !== $scope = Arr::get($params, 'scope'))
+                $this->scope = $scope;
         }
         // Client Requests Access Token
         else
         {
+            $params = $_POST;
+
+            $this->client_id = Arr::get($params, 'client_id');
+
             // REQUIRED if the client identifier has a matching secret.
-            $this->client_secret = Oauth::get('client_secret');
+            $this->client_secret = Arr::get($params, 'client_secret');
 
             // REQUIRED.  The verification code received from the authorization server.
-            $this->code = Oauth::get('code');
+            $this->code = Arr::get($params, 'code');
 
             /**
              * format
@@ -56,7 +64,8 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
              *     media type.  Defaults to "json" if omitted and no "Accept"
              *     header field is present.
              */
-            $this->format = Oauth::get('format');
+            if(NULL !== $format = Arr::get($params, 'format'))
+                $this->format = $format;
         }
     }
 
@@ -64,9 +73,14 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
     {
         $response = new Oauth_Response;
 
-        if($this->state)
+        if(property_exists($this, 'state'))
         {
             $response->state = $this->state;
+        }
+
+        if(property_exists($this, 'format'))
+        {
+            $response->format = $this->format;
         }
 
         if($client['redirect_uri'] !== $this->redirect_uri)
@@ -75,7 +89,7 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
             return $response;
         }
 
-        if( ! empty($client['scope']) AND ! isset($client['scope'][$this->scope]))
+        if(property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
         {
             $response->error = 'incorrect_client_credentials';
             return $response;
@@ -91,22 +105,22 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
     {
         $response = new Oauth_Response;
 
-        if($this->format)
+        if(property_exists($this, 'format'))
         {
             $response->format = $this->format;
         }
 
-        if($client['redirect_uri'] !== $this->redirect_uri)
-        {
-            $response->error = 'redirect_uri_mismatch';
-            return $response;
-        }
+        // if($client['redirect_uri'] !== $this->redirect_uri)
+        // {
+            // $response->error = 'redirect_uri_mismatch';
+            // return $response;
+        // }
 
-        if($client['client_secret'] !== sha1($this->client_secret))
-        {
-            $response->error = 'incorrect_client_credentials';
-            return $response;
-        }
+        // if($client['client_secret'] !== sha1($this->client_secret))
+        // {
+            // $response->error = 'incorrect_client_credentials';
+            // return $response;
+        // }
 
         if($client['code'] !== $this->code)
         {
@@ -116,7 +130,7 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
 
         $response->expires_in = 3000;
         $response->access_token = $client['access_token'];
-        $response->reflash_token = $client['reflash_token'];
+        $response->refresh_token = $client['refresh_token'];
 
         return $response;
     }

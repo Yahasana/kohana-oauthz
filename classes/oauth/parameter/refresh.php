@@ -1,6 +1,6 @@
 <?php
 
-class Oauth_Parameter_Reflesh extends Oauth_Parameter {
+class Oauth_Parameter_Refresh extends Oauth_Parameter {
 
     /**
      * client_id
@@ -29,19 +29,31 @@ class Oauth_Parameter_Reflesh extends Oauth_Parameter {
      *      header field is present.
      */
 
-    public function __construct($flag = FALSE)
+    public function __construct($args = NULL)
     {
-        $this->client_id = Oauth::get('client_id');
-        $this->client_secret = Oauth::get('client_secret');
-        $this->refresh_token = Oauth::get('refresh_token');
-        $this->format = Oauth::get('format');
+        $params = Oauth::parse_query();
+        $this->client_id = Arr::get($params, 'client_id');
+        $this->client_secret = Arr::get($params, 'client_secret');
+        $this->refresh_token = Arr::get($params, 'refresh_token');
+
+        // OPTIONAL.  An opaque value used by the client to maintain state between the request and callback.
+        if(NULL !== $state = Arr::get($params, 'state'))
+            $this->state = $state;
+
+        if(NULL !== $format = Arr::get($params, 'format'))
+            $this->format = $format;
     }
 
     public function oauth_token($client)
     {
         $response = new Oauth_Response;
 
-        if($this->format)
+        if(property_exists($this, 'state'))
+        {
+            $response->state = $this->state;
+        }
+
+        if(property_exists($this, 'format'))
         {
             $response->format = $this->format;
         }
@@ -68,6 +80,6 @@ class Oauth_Parameter_Reflesh extends Oauth_Parameter {
 
     public function access_token($client)
     {
-        return new Oauth_Token;
+        return new Oauth_Response;
     }
 }

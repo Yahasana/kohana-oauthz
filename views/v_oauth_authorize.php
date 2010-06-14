@@ -3,15 +3,15 @@
 <title>OAuth Test Client</title>
 </head>
 <body>
-<div><a href="index.php">server</a> | <a href="client.php">client</a></div>
+<div><a href="/server">server</a> | <a href="/client">client</a></div>
 <h1>OAuth Test Client</h1>
 <h2>Instructions for Use</h2>
-<p>This is a test client that will let you test your OAuth server code. Enter the appropriate information below to test.</p>
 <p>Note: we don't store any of the information you type in.</p>
-<?php if($authorized) { ?>
-do you want to let the <?php echo $oauth_callback; ?> to access your information?
-<br /><a href="http://localhost/oauth/access?<?php echo $params; ?>" title="">Approve access</a>
-<a href="http://localhost/oauth/revoke?<?php echo $params; ?>" title="">Deny access</a>
+<?php if($authorized) {
+    $redirect_uri = Oauth::parse_query($query, 'redirect_uri');
+?>do you want to let the <?php echo $redirect_uri; ?> to access your information?
+<br /><a href="http://docs/oauth/access<?php echo $query; ?>" title="">Approve access</a>
+<a href="<?php echo $redirect_uri; ?>?error=user_denied" title="">Deny access</a>
 <?php } else { ?>
 <form method="POST" name="oauth_client">
 <input type="hidden" name="oauth_consumer_key" value="<?php echo $oauth_consumer_key; ?>" />

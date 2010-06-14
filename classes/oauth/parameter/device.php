@@ -24,11 +24,12 @@ class Oauth_Parameter_Device extends Oauth_Parameter {
      *      header field is present.
      */
 
-    public function __construct($flag = FALSE)
+    public function __construct($args = NULL)
     {
+        $params = Oauth::parse_query();
         $this->client_id = Oauth::get('client_id');
         $this->format = Oauth::get('format');
-        if($flag === FALSE)
+        if($args === FALSE)
         {
             $this->scope = Oauth::get('scope');
         }

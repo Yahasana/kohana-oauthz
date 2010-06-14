@@ -46,7 +46,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
      * @access    public
      * @return    void
      */
-    public function action_authorize()
+    public function action_access()
     {
         try {
             switch(Oauth::get('type'))
@@ -68,8 +68,8 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
                     throw new Oauth_Exception('incorrect_request_type');
                     break;
             }
-            $this->request->response = $response;
-            //$this->request->redirect($response);
+            // $this->request->response = $response;
+            $this->request->redirect($response);
         }
         catch (Oauth_Exception $e)
         {
@@ -102,7 +102,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
                     $response = $this->web_server();
                     break;
                 case 'refresh_token':
-                    $response = $this->reflesh_token();
+                    $response = $this->refresh_token();
                     break;
                 case 'device_token':
                     $response = $this->device_token();
@@ -154,7 +154,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
             $response = $this->oauth->access_token($parameter->client_id);
         }
 
-        return $parameter->redirect_uri.'#'.$response;
+        return $parameter->redirect_uri.'?'.$response->query();
     }
 
     /**
@@ -178,7 +178,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
             $response->error = 'incorrect_client_credentials';
         }
 
-        return $parameter->redirect_uri.'#'.$response;
+        return $parameter->redirect_uri.'?'.$response->query();
     }
 
     protected function user_device()
@@ -202,9 +202,11 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
     {
         $parameter = new Oauth_Parameter_Webserver(TRUE);
 
-        if($client = $this->oauth->lookup_server($parameter->client_id))
+        if($client = $this->oauth->lookup_code($parameter->code))
         {
             $response = $parameter->access_token($client);
+
+            $this->oauth->audit_token($response);
         }
         else
         {
@@ -283,9 +285,9 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         return $response;
     }
 
-    protected function reflesh_token()
+    protected function refresh_token()
     {
-        $parameter = new Oauth_Parameter_Reflesh;
+        $parameter = new Oauth_Parameter_Refresh;
 
         if($client = $this->oauth->lookup_server($parameter->client_id))
         {

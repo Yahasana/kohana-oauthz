@@ -16,13 +16,14 @@ class Controller_Oauth extends Oauth_Server_Controller {
 
     public function action_authorize()
     {
-        $view = new View('v_oauth_authorize', array('authorized' => TRUE));
+        $query = URL::query();
+        $view = new View('v_oauth_authorize', array('authorized' => TRUE, 'query'=>$query));
         $this->request->response = $view->render();
     }
 
     public function action_okay()
     {
-        echo 'ha ha hahahha!';
+        echo $this->request->referrer;
     }
 
     public function action_test()
@@ -30,5 +31,5 @@ class Controller_Oauth extends Oauth_Server_Controller {
         extract(array('hel'=>'helo'),EXTR_PREFIX_ALL,'this->');
         $this->request->response = $this->_hel;
     }
-
+    
 } //END Controller Consumer

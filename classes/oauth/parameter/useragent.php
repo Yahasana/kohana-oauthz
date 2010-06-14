@@ -36,42 +36,29 @@ class Oauth_Parameter_Useragent extends Oauth_Parameter {
      *      and each string adds an additional access range to the
      *      requested scope.
      *
-     * immediate
-     *      OPTIONAL.  The parameter value must be set to "true" or
-     *      "false".  If set to "true", the authorization server MUST NOT
-     *      prompt the end-user to authenticate or approve access.
-     *      Instead, the authorization server attempts to establish the
-     *      end-user's identity via other means (e.g. browser cookies) and
-     *      checks if the end-user has previously approved an identical
-     *      access request by the same client and if that access grant is
-     *      still active.  If the authorization server does not support an
-     *      immediate check or if it is unable to establish the end-user's
-     *      identity or approval status, it MUST deny the request without
-     *      prompting the end-user.  Defaults to "false" if omitted.
-     *
      * @access    public
      * @return    void
      */
-    public function __construct($flag = FALSE)
+    public function __construct($args = NULL)
     {
-        $this->client_id = Oauth::get('client_id');
-        $this->redirect_uri = Oauth::get('redirect_uri');
+        $params = Oauth::parse_query();
+        $this->client_id = Arr::get($params, 'client_id');
+        $this->redirect_uri = Arr::get($params, 'redirect_uri');
 
         // OPTIONAL.  An opaque value used by the client to maintain state between the request and callback.
-        $this->state = Oauth::get('state');
+        if(NULL !== $state = Arr::get($params, 'state'))
+            $this->state = $state;
 
         // OPTIONAL.  The scope of the access request expressed as a list of space-delimited strings.
-        $this->scope = Oauth::get('scope');
-
-        // OPTIONAL.  The parameter value must be set to "true" or "false".
-        $this->immediate = Oauth::get('immediate');
+        if(NULL !== $scope = Arr::get($params, 'scope'))
+            $this->scope = $scope;
     }
 
     public function oauth_token($client)
     {
         $response = new Oauth_Response;
 
-        if($this->state)
+        if(property_exists($this, 'state'))
         {
             $response->state = $this->state;
         }
@@ -82,15 +69,10 @@ class Oauth_Parameter_Useragent extends Oauth_Parameter {
             return $response;
         }
 
-        if( ! empty($client['scope']) AND ! isset($client['scope'][$this->scope]))
+        if(property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
         {
             $response->error = 'incorrect_client_credentials';
             return $response;
-        }
-
-        if($this->immediate)
-        {
-            // TODO
         }
 
         // Grants Authorization
@@ -103,6 +85,6 @@ class Oauth_Parameter_Useragent extends Oauth_Parameter {
 
     public function access_token($client)
     {
-        return new Oauth_Token;
+        return new Oauth_Response;
     }
 }

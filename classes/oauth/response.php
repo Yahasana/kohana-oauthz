@@ -13,7 +13,7 @@
  */
 class Oauth_Response {
 
-    protected $format;
+    public $format = 'json';
 
     public function __construct(array $params = array())
     {
@@ -22,6 +22,7 @@ class Oauth_Response {
             $this->$key = $val;
         }
 
+        /*
         if(empty($this->format))
         {
             if($format = key(Request::accept_type()))
@@ -33,9 +34,10 @@ class Oauth_Response {
                 $this->format = 'json';
             }
         }
+        */
     }
 
-    protected function json()
+    public function json()
     {
         if(empty($this->error))
         {
@@ -55,7 +57,7 @@ class Oauth_Response {
         return json_encode($json);
     }
 
-    protected function xml()
+    public function xml()
     {
         $doc = new DOMDocument('1.0', 'UTF-8');
         $doc->formatOutput = true;
@@ -83,7 +85,7 @@ class Oauth_Response {
         return $doc->saveXML();
     }
 
-    protected function form()
+    public function query()
     {
         if(empty($this->error))
         {
@@ -103,7 +105,7 @@ class Oauth_Response {
         return Oauth::build_query($form);
     }
 
-    protected function html()
+    public function html()
     {
         $text = '<dl>';
         if(empty($this->error))
@@ -141,7 +143,7 @@ class Oauth_Response {
                 $this->format = 'application/xml';
                 break;
             case 'form':
-                $res = $this->form();
+                $res = $this->query();
                 $this->format = 'application/x-www-form-urlencoded';
                 break;
             case 'text/html':

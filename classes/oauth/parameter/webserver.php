@@ -38,10 +38,6 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
             // OPTIONAL.  An opaque value used by the client to maintain state between the request and callback.
             if(NULL !== $state = Arr::get($params, 'state'))
                 $this->state = $state;
-
-            // OPTIONAL.  The scope of the access request expressed as a list of space-delimited strings.
-            if(NULL !== $scope = Arr::get($params, 'scope'))
-                $this->scope = $scope;
         }
         // Client Requests Access Token
         else
@@ -55,6 +51,10 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
 
             // REQUIRED.  The verification code received from the authorization server.
             $this->code = Arr::get($params, 'code');
+
+            // OPTIONAL.  The scope of the access request expressed as a list of space-delimited strings.
+            if(NULL !== $scope = Arr::get($params, 'scope'))
+                $this->scope = $scope;
 
             /**
              * format
@@ -83,15 +83,15 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
             $response->format = $this->format;
         }
 
-        if($client['redirect_uri'] !== $this->redirect_uri)
+        if(property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
         {
-            $response->error = 'redirect_uri_mismatch';
+            $response->error = 'invalid_client_credentials';
             return $response;
         }
 
-        if(property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
+        if($client['redirect_uri'] !== $this->redirect_uri)
         {
-            $response->error = 'incorrect_client_credentials';
+            $response->error = 'redirect_uri_mismatch';
             return $response;
         }
 
@@ -118,13 +118,13 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
 
         // if($client['client_secret'] !== sha1($this->client_secret))
         // {
-            // $response->error = 'incorrect_client_credentials';
+            // $response->error = 'invalid_client_credentials';
             // return $response;
         // }
 
         if($client['code'] !== $this->code)
         {
-            $response->error = 'bad_verification_code';
+            $response->error = 'bad_authorization_code';
             return $response;
         }
 

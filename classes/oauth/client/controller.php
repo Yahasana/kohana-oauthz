@@ -69,6 +69,9 @@ class Oauth_Client_Controller extends Kohana_Controller {
             'redirect_uri'  => $this->_params['redirect_uri']
         );
 
+        if( ! empty($this->_params['state']))
+            $params['state'] = $this->_params['state'];
+
         $this->request->redirect($uri.'?'.Oauth::build_query($params));
     }
 
@@ -87,9 +90,9 @@ class Oauth_Client_Controller extends Kohana_Controller {
                 CURLOPT_POST        => TRUE,
                 CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=utf-8'),
                 CURLOPT_POSTFIELDS  => Oauth::build_query(array(
-                    'type'      => 'web_server',
-                    'code'      => $params['code'],
-                    'client_id' => $this->_params['client_id'],
+                    'grant_type'    => $this->_params['grant_type'],
+                    'code'          => $params['code'],
+                    'client_id'     => $this->_params['client_id'],
                 ))
             ));
 

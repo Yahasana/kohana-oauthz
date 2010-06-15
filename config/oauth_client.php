@@ -11,6 +11,7 @@ return array(
         'redirect_uri'  => 'http://docs/client/do',
         // parameters for oauth request
         'type'          => 'web_server',
+        'grant_type'    => 'authorization_code',
         'client_id'     => 'OA_4bfbc43769917',
         'client_secret' => '',
         'state'         => '',

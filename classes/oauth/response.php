@@ -53,6 +53,9 @@ class Oauth_Response {
         else
         {
             $json = array('error' => $this->error);
+
+            if(property_exists($this, 'state') AND $this->state)
+                $json['state']  = $this->state;
         }
         return json_encode($json);
     }
@@ -81,6 +84,13 @@ class Oauth_Response {
             $node = $doc->createElement('error');
             $node->appendChild($doc->createTextNode($this->error));
             $oauth->appendChild($node);
+
+            if(property_exists($this, 'state') AND $this->state)
+            {
+                $node = $doc->createElement('state');
+                $node->appendChild($doc->createTextNode($this->state));
+                $oauth->appendChild($node);
+            }
         }
         return $doc->saveXML();
     }
@@ -101,6 +111,9 @@ class Oauth_Response {
         else
         {
             $form = array('error' => $this->error);
+
+            if(property_exists($this, 'state') AND $this->state)
+                $form['state']  = $this->state;
         }
         return Oauth::build_query($form);
     }
@@ -121,6 +134,9 @@ class Oauth_Response {
         else
         {
             $text .= '<dt>error</dt><dd>'.$this->error.'</dd>';
+
+            if(property_exists($this, 'state') AND $this->state)
+                $text .= '<dt>state</dt><dd>'.$this->state.'</dd>';
         }
         return $text.'</dl>';
     }
@@ -156,5 +172,10 @@ class Oauth_Response {
                 break;
         }
         return $res;
+    }
+
+    public function __set($key, $val)
+    {
+        if( ! empty($val)) $this->$key = $val;
     }
 }

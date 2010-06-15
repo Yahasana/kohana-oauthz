@@ -41,7 +41,7 @@ return array(
             'access_token'  => '',
             'expires_in'    => '',
             'refresh_token' => '',
-            'access_token_secret'  => '',
+            'token_secret'  => '',
             'scope'         => '',
         ),
 

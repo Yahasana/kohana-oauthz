@@ -86,7 +86,7 @@ class Oauth_Parameter_Device extends Oauth_Parameter {
 
         if($client['code'] !== $this->code)
         {
-            $response->error = 'bad_verification_code';
+            $response->error = 'bad_authorization_code';
             return $response;
         }
 

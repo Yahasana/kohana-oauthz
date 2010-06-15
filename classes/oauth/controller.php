@@ -76,7 +76,7 @@ abstract class Oauth_Controller extends Kohana_Controller {
         try {
             if(empty($this->_configs['request_methods'][Request::$method]))
             {
-                throw new Oauth_Exception('invalid_request_method');
+                throw new Oauth_Exception('unauthorized_client');
             }
 
             $params = $this->_configs['request_params'];
@@ -92,7 +92,7 @@ abstract class Oauth_Controller extends Kohana_Controller {
 
             if( ! $client = $this->oauth->lookup_token($parameter->oauth_token))
             {
-                throw new Oauth_Exception('invalid_request_token');
+                throw new Oauth_Exception('unauthorized_client');
             }
 
             $token = $parameter->access_token($client);
@@ -107,7 +107,7 @@ abstract class Oauth_Controller extends Kohana_Controller {
         catch (Oauth_Exception $e)
         {
             $this->errors = $e->getMessage();
-            $this->request->action = 'invalid_request';
+            $this->request->action = 'invalid_credentials';
         }
     }
 
@@ -125,11 +125,11 @@ abstract class Oauth_Controller extends Kohana_Controller {
      * Unauthorized response
      *
      * @access	public
-     * @param	string	$error	default [ error='incorrect_client_credentials' ]
+     * @param	string	$error	default [ error='invalid_client_credentials' ]
      * @return	void
      * @todo    Add list of error codes
      */
-    public function action_invalid_request()
+    public function action_invalid_credentials()
     {
         $error = 'error=\''.$this->errors.'\'';
 

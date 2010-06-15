@@ -61,7 +61,7 @@ class Oauth_Parameter_Refresh extends Oauth_Parameter {
         if($client['client_secret'] !== sha1($this->client_secret)
             OR $client['refresh_token'] !== $this->refresh_token)
         {
-            $response->error = 'incorrect_client_credentials';
+            $response->error = 'invalid_client_credentials';
             return $response;
         }
 

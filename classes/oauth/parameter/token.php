@@ -10,6 +10,13 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
      */
     public $oauth_token;
 
+    /**
+     * Load request parameters from Authorization header, URI-Query parameters, Form-Encoded Body
+     *
+     * @access	public
+     * @param	string	$args	default [ NULL ]
+     * @return	void
+     */
     public function __construct($args = NULL)
     {
         switch(Request::$method)
@@ -64,38 +71,39 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
     {
         $response = new Oauth_Response;
 
-        if(property_exists($this, 'state'))
-        {
-            $response->state = $this->state;
-        }
-
         if(property_exists($this, 'format'))
         {
             $response->format = $this->format;
         }
 
+        if(property_exists($this, 'error'))
+        {
+            $response->error = $this->error;
+            return $response;
+        }
+
         if($client['access_token'] !== $this->oauth_token)
         {
-            $response->error = 'incorrect_oauth_token';
+            $response->error = 'invalid_oauth_token';
             return $response;
         }
 
         if(property_exists($this, 'token_secret') AND $client['token_secret'] !== sha1($this->token_secret))
         {
-            $response->error = 'incorrect_oauth_token';
+            $response->error = 'invalid_oauth_token';
             return $response;
         }
 
         if(property_exists($this, 'nonce') AND $client['nonce'] !== $this->nonce)
         {
-            $response->error = 'incorrect_nonce';
+            $response->error = 'invalid_nonce';
             return $response;
         }
 
         if(property_exists($this,'timestamp') AND
             $client['timestamp'] + Kohana::config('oauth_server')->get('duration') < $this->timestamp)
         {
-            $response->error = 'incorrect_timestamp';
+            $response->error = 'invalid_timestamp';
             return $response;
         }
 
@@ -114,11 +122,11 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
 
             if (! Oauth::signature($this->algorithm, $string)->check($token, $this->signature))
             {
-                $response->error = 'incorrect_signature';
+                $response->error = 'invalid_signature';
                 return $response;
             }
         }
 
-        return new Oauth_Response;
+        return $response;
     }
 }

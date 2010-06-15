@@ -1,3 +1,4 @@
+
 /******************** Add Table: t_oauth_authorizeds ************************/
 
 /* Build Table Structure */
@@ -62,6 +63,23 @@ CREATE TABLE t_oauth_clients
 		COMMENT 'diferent client levels have different max request times'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+/******************** Add Table: t_oauth_audits ************************/
+
+/* Build Table Structure */
+CREATE TABLE t_oauth_audits
+(
+	access_token VARCHAR(128) NOT NULL,
+	`timestamp` TIMESTAMP NOT NULL,
+	nonce VARCHAR(64) NULL,
+	token_secret VARCHAR(128) NULL,
+	secret_type VARCHAR(32) NULL
+) DEFAULT CHARSET=utf8;
+
+/* Table Items: t_oauth_audits */
+
+/* Set Comments */
+ALTER TABLE t_oauth_audits COMMENT = 'Audit the access token';
+
 /******************** Add Table: t_oauth_logs ************************/
 
 /* Build Table Structure */
@@ -106,13 +124,12 @@ CREATE TABLE t_oauth_servers
 (
 	server_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	user_id BIGINT UNSIGNED NULL,
-	client_id VARCHAR(64) NOT NULL,
+	client_id VARCHAR(128) NOT NULL,
 	enabled TINYINT UNSIGNED NOT NULL DEFAULT 1,
 	redirect_uri VARCHAR(256) NOT NULL,
 	issue_date DATETIME NULL,
 	`timestamp` TIMESTAMP NOT NULL,
-	secrect_type VARCHAR(64) NOT NULL,
-	client_secrect VARCHAR(128) NOT NULL,
+	client_secret VARCHAR(128) NOT NULL,
 	secret_type VARCHAR(64) NOT NULL,
 	scope VARCHAR(512) NULL,
 	private_cert VARCHAR(512) NULL
@@ -132,7 +149,7 @@ CREATE UNIQUE INDEX idx_t_oauth_servers_client_id ON t_oauth_servers (client_id)
 CREATE TABLE t_oauth_tokens
 (
 	token_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	server_id BIGINT UNSIGNED NOT NULL,
+	client_id VARCHAR(128) NOT NULL,
 	code VARCHAR(128) NOT NULL,
 	user_id INTEGER NOT NULL,
 	access_token VARCHAR(64) NOT NULL,
@@ -140,7 +157,8 @@ CREATE TABLE t_oauth_tokens
 	`timestamp` TIMESTAMP NOT NULL,
 	expire_in INTEGER UNSIGNED NOT NULL DEFAULT 300,
 	refresh_token VARCHAR(64) NULL,
-	secret_type VARCHAR(64) NULL
+	secret_type VARCHAR(64) NULL,
+	nonce VARCHAR(64) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /* Table Items: t_oauth_tokens */
@@ -149,17 +167,17 @@ CREATE TABLE t_oauth_tokens
 ALTER TABLE t_oauth_tokens COMMENT = 'Table used to verify signed requests sent to a server by the consumer.When the verification is succesful then the associated user id is returned. ';
 
 /* Add Indexes for: t_oauth_tokens */
-CREATE INDEX idx_t_oauth_tokens_server_id ON t_oauth_tokens (server_id);
+CREATE INDEX idx_t_oauth_tokens_server_id ON t_oauth_tokens (client_id);
 
 
 /************ Add Foreign Keys to Database ***************/
 
-/************ Foreign Key: fk_oauth_consumer_tokens_oauth_consumer_registries ***************/
-ALTER TABLE t_oauth_client_tokens ADD CONSTRAINT fk_oauth_consumer_tokens_oauth_consumer_registries
+/************ Foreign Key: fk_t_oauth_client_tokens_t_oauth_clients ***************/
+ALTER TABLE t_oauth_client_tokens ADD CONSTRAINT fk_t_oauth_client_tokens_t_oauth_clients
 	FOREIGN KEY (client_id) REFERENCES t_oauth_clients (id)
 	ON UPDATE CASCADE ON DELETE CASCADE;
 
-/************ Foreign Key: fk_oauth_server_tokens_oauth_server_registries ***************/
-ALTER TABLE t_oauth_tokens ADD CONSTRAINT fk_oauth_server_tokens_oauth_server_registries
-	FOREIGN KEY (server_id) REFERENCES t_oauth_servers (server_id)
+/************ Foreign Key: fk_t_oauth_tokens_t_oauth_servers ***************/
+ALTER TABLE t_oauth_tokens ADD CONSTRAINT fk_t_oauth_tokens_t_oauth_servers
+	FOREIGN KEY (client_id) REFERENCES t_oauth_servers (client_id)
 	ON UPDATE CASCADE ON DELETE CASCADE;

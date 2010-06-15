@@ -114,16 +114,30 @@ class Model_Oauth extends Kohana_Model {
         return NULL;
     }
 
+    public function list_client($user_id)
+    {
+        return DB::select('*')->from('t_oauth_clients')
+            ->where('user_id', '=', $user_id)
+            ->execute($this->_db);
+    }
+
     public function lookup_code($code)
     {
-        if($code  AND $token = DB::select('client_id', 'code', 'nonce',
+        if($code  AND $token = DB::select('token_id', 'client_id', 'code', 'nonce',
             'access_token','token_secret','timestamp','refresh_token','expire_in')
             ->from('t_oauth_tokens')
             ->where('code' , '=', $code)
             ->execute($this->_db)
             ->current())
         {
-            return $token;
+            if(strtotime($token['timestamp']) > time() - 60)
+            {
+                DB::update('t_oauth_tokens')
+                    ->set(array('code' => uniqid()))
+                    ->where('token_id' , '=', $token['token_id'])
+                    ->execute($this->_db);
+                return $token;
+            }
         }
         return NULL;
     }

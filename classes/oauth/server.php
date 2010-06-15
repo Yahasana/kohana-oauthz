@@ -46,7 +46,7 @@ class Oauth_Server extends Kohana_Controller {
             }
         }
 
-        $data['servers'] = $this->oauth->list_server('3');
+        $data['servers'] = $this->oauth->list_server('0');
 
         $view = new View('template');
         $view->content = new View('v_oauth_server', $data);
@@ -54,9 +54,14 @@ class Oauth_Server extends Kohana_Controller {
         $this->request->response = $view->render();
     }
 
-    public function action_auth()
+    public function action_client()
     {
+        $data['clients'] = $this->oauth->list_client('0');
 
+        $view = new View('template');
+        $view->content = new View('v_oauth_client', $data);
+
+        $this->request->response = $view->render();
     }
 
     public function action_access_deny()

@@ -71,7 +71,7 @@ class Oauth_Parameter_Useragent extends Oauth_Parameter {
 
         if(property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
         {
-            $response->error = 'incorrect_client_credentials';
+            $response->error = 'invalid_client_credentials';
             return $response;
         }
 

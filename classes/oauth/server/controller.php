@@ -68,7 +68,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
                     throw new Oauth_Exception('incorrect_request_type');
                     break;
             }
-            // $this->request->response = $response;
+            $this->request->headers['Content-Type'] = 'application/x-www-form-urlencoded';
             $this->request->redirect($response);
         }
         catch (Oauth_Exception $e)
@@ -96,9 +96,9 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
     public function action_token()
     {
         try {
-            switch(Oauth::get('type'))
+            switch(Oauth::get('grant_type'))
             {
-                case 'web_server':
+                case 'authorization_code':
                     $response = $this->web_server();
                     break;
                 case 'refresh_token':
@@ -106,14 +106,15 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
                     break;
                 case 'device_token':
                     $response = $this->device_token();
-                case 'username':
-                    $response = $this->username();
                     break;
-                case 'client_credentials':
+                case 'user_basic_credentials':
                     $response = $this->client_credentials();
                     break;
                 case 'assertion':
                     $response = $this->assertion();
+                    break;
+                case 'none':
+                    $response = $this->username();
                     break;
                 default:
                     throw new Oauth_Exception('incorrect_request_type');
@@ -146,10 +147,10 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Response(array('format' => 'form'));
-            $response->error = 'incorrect_client_credentials';
+            $response->error = 'invalid_client_credentials';
         }
 
-        if(empty($response->error))
+        if( ! property_exists($response, 'error'))
         {
             $response = $this->oauth->access_token($parameter->client_id);
         }
@@ -162,7 +163,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
      *
      * @author    sumh <oalite@gmail.com>
      * @access    protected
-     * @return    string    redirect_uri#[code,state|error=MUST be set to "redirect_uri_mismatch", "bad_verification_code", "incorrect_client_credentials"]
+     * @return    string    redirect_uri#[code,state|error=MUST be set to "redirect_uri_mismatch", "bad_authorization_code", "invalid_client_credentials"]
      */
     protected function user_server()
     {
@@ -175,7 +176,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Response(array('format' => 'form'));
-            $response->error = 'incorrect_client_credentials';
+            $response->error = 'invalid_client_credentials';
         }
 
         return $parameter->redirect_uri.'?'.$response->query();
@@ -192,7 +193,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Response;
-            $response->error = 'incorrect_client_credentials';
+            $response->error = 'invalid_client_credentials';
         }
 
         return $response;
@@ -211,7 +212,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Response;
-            $response->error = 'incorrect_client_credentials';
+            $response->error = 'invalid_client_credentials';
         }
 
         return $response;
@@ -228,7 +229,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Response;
-            $response->error = 'incorrect_client_credentials';
+            $response->error = 'invalid_client_credentials';
         }
 
         return $response;
@@ -245,7 +246,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Response;
-            $response->error = 'incorrect_client_credentials';
+            $response->error = 'invalid_client_credentials';
         }
 
         return $response;
@@ -262,7 +263,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Response;
-            $response->error = 'incorrect_client_credentials';
+            $response->error = 'invalid_client_credentials';
         }
 
         return $response;
@@ -279,7 +280,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Response;
-            $response->error = 'incorrect_client_credentials';
+            $response->error = 'invalid_client_credentials';
         }
 
         return $response;
@@ -296,7 +297,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Response;
-            $response->error = 'incorrect_client_credentials';
+            $response->error = 'invalid_client_credentials';
         }
 
         return $response;

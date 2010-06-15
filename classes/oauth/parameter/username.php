@@ -82,7 +82,7 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
             OR $client['password'] !== sha1($this->password)
             OR $client['username'] !== $this->username)
         {
-            $response->error = 'incorrect_client_credentials';
+            $response->error = 'invalid_client_credentials';
             return $response;
         }
 

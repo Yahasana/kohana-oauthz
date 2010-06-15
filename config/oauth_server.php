@@ -55,11 +55,11 @@ return array(
 
         // cryptographic token or bear token
         'request_params'    => array(
-          //'token'     => 'oauth_token',
-            'nonce'     => TRUE,
-            'timestamp' => TRUE,
-            'algorithm' => TRUE,
-            'signature' => TRUE
+            'oauth_token'   => TRUE,
+            'nonce'         => FALSE,
+            'timestamp'     => FALSE,
+            'algorithm'     => FALSE,
+            'signature'     => FALSE
         ),
 
         'secret_types'  => array(

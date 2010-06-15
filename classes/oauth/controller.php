@@ -27,15 +27,29 @@
  */
 abstract class Oauth_Controller extends Kohana_Controller {
 
+    /**
+     * Config group name
+     *
+     * @access	protected
+     * @var		string	$_type
+     */
     protected $_type = 'default';
 
     /**
-     * Request settings for OAuth
+     * Data store handler
      *
      * @access  protected
-     * @var     mix    $_params
+     * @var     string    $oauth
      */
-    protected $_params;
+    protected $oauth;
+
+    /**
+     * Request token for OAuth
+     *
+     * @access  protected
+     * @var     mix    $token
+     */
+    protected $token;
 
     /**
      * Server settings for OAuth
@@ -45,13 +59,6 @@ abstract class Oauth_Controller extends Kohana_Controller {
      */
     protected $_configs;
 
-    /**
-     * Data store handler
-     *
-     * @access  protected
-     * @var     string    $oauth
-     */
-    protected $oauth  = NULL;
 
     /**
      * Verify the request to protected resource.
@@ -67,21 +74,21 @@ abstract class Oauth_Controller extends Kohana_Controller {
         $this->oauth = new Model_Oauth;
 
         try {
-
             if(empty($this->_configs['request_methods'][Request::$method]))
             {
                 throw new Oauth_Exception('invalid_request_method');
             }
 
-            $parameter = new Oauth_Parameter_Token;
-
-            foreach($this->_configs['request_params'] as $key => $val)
+            $params = $this->_configs['request_params'];
+            foreach($params as $key => $val)
             {
-                if($val === TRUE)
+                if($val !== TRUE)
                 {
-                    $parameter->$key = $val;
+                    unset($params[$key]);
                 }
             }
+
+            $parameter = new Oauth_Parameter_Token($params);
 
             if( ! $client = $this->oauth->lookup_token($parameter->oauth_token))
             {
@@ -89,6 +96,13 @@ abstract class Oauth_Controller extends Kohana_Controller {
             }
 
             $token = $parameter->access_token($client);
+
+            if(property_exists($token, 'error'))
+            {
+                throw new Oauth_Exception($token->error);
+            }
+
+            $this->token = $token;
         }
         catch (Oauth_Exception $e)
         {

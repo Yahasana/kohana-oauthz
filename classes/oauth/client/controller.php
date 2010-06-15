@@ -20,31 +20,15 @@ class Oauth_Client_Controller extends Kohana_Controller {
      * @access  protected
      * @var     string  $provider
      */
-    protected $provider = 'default';
+    protected $_type = 'default';
 
     /**
-     * provider's request token uri
+     * Client's access token
      *
      * @access  protected
-     * @var     string    $request_uri
+     * @var     string    $token
      */
-    protected $_req_uri;
-
-    /**
-     * provider's authorize token uri
-     *
-     * @access  protected
-     * @var     string    $authorize_uri
-     */
-    protected $_aut_uri;
-
-    /**
-     * provider's access token uri
-     *
-     * @access  protected
-     * @var     string    $access_uri
-     */
-    protected $_acc_uri;
+    protected $token;
 
     /**
      * Request settings for OAuth
@@ -56,11 +40,7 @@ class Oauth_Client_Controller extends Kohana_Controller {
 
     public function before()
     {
-        $config = Kohana::config('oauth_provider')->{$this->provider};
-        $this->_params  = $config['req_code_params'];
-        $this->_req_uri = $config['request_uri'];
-        $this->_aut_uri = $config['authorize_uri'];
-        $this->_acc_uri = $config['access_uri'];
+        $this->_params  = Kohana::config('oauth_client')->{$this->_type};
         // We have a WWW-Authenticate-header with OAuth data. Parse the header
         // and add those overriding any duplicates from GET or POST
         // if (isset($headers['www-authenticate']) && substr($headers['www-authenticate'], 0, 12) === 'Token realm=')
@@ -69,58 +49,87 @@ class Oauth_Client_Controller extends Kohana_Controller {
         // }
     }
 
-    protected function request_token($uri = NULL, $type = 'user_agent')
+    protected function request_code($uri = NULL, $type = NULL)
     {
-        if($uri === NULL) $uri = $this->_req_uri;
+        if($uri === NULL) $uri = $this->_params['oauth_uri'];
 
-        $this->_params['type'] = $type;
+        if($type === NULL) $type = $this->_params['type'];
 
         //~ build base string
-        $base_string = Oauth::normalize('POST', $uri, $this->_params);
+        // $base_string = Oauth::normalize('POST', $uri, $this->_params);
 
         //~ build signature string
-        $this->_params['client_secret']    =
-            Oauth_Signature::factory($this->_params['secret_type'], $base_string)
-            ->build(new Oauth_Client($this->_params['client_id'], NULL), NULL);
+        // $this->_params['client_secret']    =
+            // Oauth::signature($this->_params['secret_type'], $base_string)
+            // ->build(new Oauth_Client($this->_params['client_id'], NULL), NULL);
 
-        //~ send request to get request_token with POST
-        $response = Remote::get($uri.'?'.Oauth::build_query($this->_params), array(
-            // CURLOPT_POST        => TRUE,
-            // CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=UTF-8'),
-            // CURLOPT_POSTFIELDS  => Oauth::build_query($this->_params)
-        ));
-        $this->request->redirect($response);
+        $params = array(
+            'type'          => $type,
+            'client_id'     => $this->_params['client_id'],
+            'redirect_uri'  => $this->_params['redirect_uri']
+        );
+
+        $this->request->redirect($uri.'?'.Oauth::build_query($params));
     }
 
-    /**
-     * oauth_token:
-     *     OPTIONAL. The Request Token obtained in the previous step. The Service Provider MAY declare this parameter as REQUIRED, or accept requests to the User Authorization URL without it, in which case it will prompt the User to enter it manually.
-     * oauth_callback:
-     *     OPTIONAL. The Consumer MAY specify a URL the Service Provider will use to redirect the User back to the Consumer when Obtaining User Authorization (Obtaining User Authorization) is complete.
-     * Additional parameters:
-     *     Any additional parameters, as defined by the Service Provider.
-     *
-     * @access    protected
-     * @param     string        $uri
-     * @param     Oauth_Token   $token
-     * @return    void
-     */
-    protected function goto_authorize($uri = NULL)
+    /**/
+    public function action_do()
     {
-        if($uri === NULL) $uri = $this->_aut_uri;
+        $params = Oauth::parse_query();
 
-        $this->_params['code'] = $response->code;
-        // $this->_params['token_secret'] = $token->access_token;
-        $this->_params['redirect_uri'] = Kohana::config('oauth_provider')->get('oauth_callback');
+        try {
+            if(empty($params['code']) OR isset($params['error']))
+            {
+                throw new Oauth_Exception($params['error']);
+            }
 
-        //~ build base string
-        $base_string = Oauth::normalize('GET', $uri, $this->_params);
+            $token = Remote::get($this->_params['token_uri'],array(
+                CURLOPT_POST        => TRUE,
+                CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=utf-8'),
+                CURLOPT_POSTFIELDS  => Oauth::build_query(array(
+                    'type'      => 'web_server',
+                    'code'      => $params['code'],
+                    'client_id' => $this->_params['client_id'],
+                ))
+            ));
 
-        //~ build signature string
-        $this->_params['token_secret'] = Oauth::signature($this->_params['secret_type'], $base_string)->build($token);
+            $token = json_decode($token);
+            if(property_exists($token, 'error'))
+            {
+                throw new Oauth_Exception($token->error);
+            }
 
-        $uri = $uri.'?'.Oauth::build_query($this->_params);
-        $this->request->redirect($uri);
+            // Resource in json format
+            $resource = Remote::get($this->_params['access_uri'],array(
+                CURLOPT_POST        => TRUE,
+                CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=utf-8'),
+                CURLOPT_POSTFIELDS  => Oauth::build_query(array(
+                    'oauth_token'       => $token->access_token,
+                    'refresh_token'     => $token->refresh_token,
+                    'expires_in'        => $token->expires_in,
+                    'client_id'         => $this->_params['client_id']
+                ))
+            ));
+
+            $this->request->response = $resource;
+        }
+        catch(Exception $e)
+        {
+            $error = $e->getMessage();
+        }
+
+        if(isset($error))
+        {
+            switch($error)
+            {
+                case 'user_denied':
+                    $this->request->response = 'You have denied this request.';
+                    break;
+                default:
+                    $this->request->response = 'There must be some errors happen in this connection, please contact our web master.'."[$error]";
+                    break;
+            }
+        }
     }
 
 } //END Oauth Consumer Controller

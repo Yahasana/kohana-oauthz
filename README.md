@@ -24,3 +24,7 @@
 ### Develop resources request handler ###
 
     class Controller_Client extends Oauth_Client_Controller {}
+
+## Want to donate ? ##
+
+If you want to donate, go to [http://kohanaframework.org/donate](http://kohanaframework.org/donate). Thanks!

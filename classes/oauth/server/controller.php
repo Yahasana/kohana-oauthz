@@ -43,8 +43,8 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
     /**
      * the end-user authenticates directly with the authorization server, and grants client access to its protected resources
      *
-     * @access    public
-     * @return    void
+     * @access  public
+     * @return  void
      */
     public function action_access()
     {
@@ -117,7 +117,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
                     $response = $this->username();
                     break;
                 default:
-                    throw new Oauth_Exception('incorrect_request_type');
+                    throw new Oauth_Exception('invalid_request_type');
                     break;
             }
 
@@ -152,7 +152,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
 
         if( ! property_exists($response, 'error'))
         {
-            $response = $this->oauth->access_token($parameter->client_id);
+            $response = $parameter->access_token($parameter->client_id);
         }
 
         return $parameter->redirect_uri.'?'.$response->query();

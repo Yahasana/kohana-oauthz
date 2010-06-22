@@ -16,11 +16,11 @@ class Model_Oauth extends Kohana_Model {
 
     protected $_db = 'default';
 
-    public function reg_server($server)
+    public function reg_server($server, $prefix = 'OAL_')
     {
         $server['user_id'] = 3;
 
-        if(isset($server['client_id']) and DB::select('server_id')
+        if(isset($server['client_id']) AND DB::select('server_id')
             ->from('t_oauth_servers')
             ->where('client_id','=', $server['client_id'])
             ->where('user_id','=', $server['user_id'])
@@ -35,22 +35,25 @@ class Model_Oauth extends Kohana_Model {
         }
         else
         {
-            $server['client_id'] = 'OA_'.uniqid();
+            $server['client_id'] = $prefix.uniqid();
             $server['client_secret'] = $server['pass'];
             $server['secret_type'] = 'plaintext';
-            DB::insert('t_oauth_servers')
-                ->columns(array(
+            DB::insert('t_oauth_servers', array(
                     'user_id',
                     'client_id',
                     'client_secret',
                     'redirect_uri',
-                    'secret_type'
+                    'secret_type',
+                    'scope',
+                    'public_cert'
                 ))->values(array(
                     $server['user_id'],
                     $server['client_id'],
-                    $server['client_secret'],
+                    sha1($server['client_secret']),
                     $server['redirect_uri'],
-                    $server['secret_type']
+                    $server['secret_type'],
+                    $server['scope'],
+                    $server['public_cert']
                 ))->execute($this->_db);
         }
         return $server['client_id'];
@@ -66,13 +69,13 @@ class Model_Oauth extends Kohana_Model {
         //
     }
 
-    public function unique_server($redirect_uri)
+    public function unique_server($redirect_uri, $user_id = NULL)
     {
         // Check if the username already exists in the database
         return ! DB::select(array(DB::expr('COUNT(1)'), 'total'))
             ->from('t_oauth_servers')
             ->where('redirect_uri', '=', $redirect_uri)
-            ->where('user_id', '=', $user_id)
+            //->where('user_id', '=', $user_id)
             ->execute($this->_db)
             ->get('total');
     }

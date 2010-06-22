@@ -40,7 +40,7 @@ class Oauth_Client_Controller extends Kohana_Controller {
 
     public function before()
     {
-        $this->_params  = Kohana::config('oauth_client')->{$this->_type};
+        $this->_params  = Kohana::config('oauth_client.'.$this->_type);
         // We have a WWW-Authenticate-header with OAuth data. Parse the header
         // and add those overriding any duplicates from GET or POST
         // if (isset($headers['www-authenticate']) && substr($headers['www-authenticate'], 0, 12) === 'Token realm=')

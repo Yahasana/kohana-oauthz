@@ -1,20 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
  *
- * 5.  Accessing a Protected Resource . . . . . . . . . . . . . . . . 38
-     5.1.  The Authorization Request Header . . . . . . . . . . . . . 38
-     5.2.  Bearer Token Requests  . . . . . . . . . . . . . . . . . . 40
-       5.2.1.  URI Query Parameter  . . . . . . . . . . . . . . . . . 40
-       5.2.2.  Form-Encoded Body Parameter  . . . . . . . . . . . . . 41
-     5.3.  Cryptographic Tokens Requests  . . . . . . . . . . . . . . 42
-       5.3.1.  The 'hmac-sha256' Algorithm  . . . . . . . . . . . . . 42
-   6.  Identifying a Protected Resource . . . . . . . . . . . . . . . 45
-     6.1.  The WWW-Authenticate Response Header . . . . . . . . . . . 45
-       6.1.1.  The 'realm' Attribute  . . . . . . . . . . . . . . . . 46
-       6.1.2.  The 'authorization-uri' Attribute  . . . . . . . . . . 46
-       6.1.3.  The 'algorithms' Attribute . . . . . . . . . . . . . . 46
-       6.1.4.  The 'error' Attribute  . . . . . . . . . . . . . . . . 46
- *
  * @author      sumh <oalite@gmail.com>
  * @package     Oauth
  * @copyright   (c) 2009 OALite team
@@ -69,7 +55,7 @@ abstract class Oauth_Controller extends Kohana_Controller {
      */
     public function before()
     {
-        $this->_configs = Kohana::config('oauth_server')->{$this->_type};
+        $this->_configs = Kohana::config('oauth_server.'.$this->_type);
 
         $this->oauth = new Model_Oauth;
 

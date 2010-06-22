@@ -1,85 +1,54 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<title>OAuth Test Server</title>
+<meta charset="utf-8" />
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>OAuth Test</title>
+<meta name="robots" content="noindex" />
+<link rel="stylesheet" href="/media/css/style-min.css" />
+<link rel="shortcut icon" href="/favicon.ico">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+<!--[if lte IE 7]><script src="js/IE8.js" type="text/javascript"></script><![endif]-->
+<!--[if lt IE 7]><link rel="stylesheet" type="text/css" media="all" href="css/ie6.css"/><![endif]-->
+<style type="text/css">
+nav ul li { display:inline}
+header {border-bottom:2px solid #555;padding-top:1em}
+footer {border-top:2px solid #555;padding-top:1em}
+section {background:#eee}
+</style>
 </head>
-<body>
-<div><a href="index.php">server</a> | <a href="client.php">client</a></div>
-<h1>OAuth Test Server</h1>
-<h2>Instructions for Use</h2>
-<p>This is a test server with a predefined static set of keys and tokens, you can make your requests using them to test your code (and mine ;)).</p>
-<h3>Your Consumer Key / Secret</h3>
-<ul>
-<li>consumer key: <code><strong>key</strong></code></li>
-<li>consumer secret: <code><strong>secret</strong></code></li>
-</ul>
-<p>Use this key and secret for all your requests.</p>
-<h3>Getting a Request Token</h3>
-
-<ul>
-<li>request token endpoint: <code><strong><?php echo ""; ?>/request_token.php</strong></code></li>
-</ul>
-
-<p>A successful request will return the following:</p>
-<p><code>oauth_token=requestkey&amp;oauth_token_secret=requestsecret</code></p>
-
-<p>An unsuccessful request will attempt to describe what went wrong.</p>
-
-<h4>Example</h4>
-<a href="<?php echo $req_req; ?>"><?php echo $req_req; ?></a>
-
-<h3>Getting an Access Token</h3>
-<p>The Request Token provided above is already authorized, you may use it to request an Access Token right away.</p>
-
-<ul>
-<li>access token endpoint: <code><strong><?php echo ""; ?>/access_token.php</strong></code></li>
-</ul>
-
-<p>A successful request will return the following:</p>
-<p><code>oauth_token=accesskey&amp;oauth_token_secret=accesssecret</code></p>
-
-<p>An unsuccessful request will attempt to describe what went wrong.</p>
-
-<h4>Example</h4>
-<a href="<?php echo $acc_req; ?>"><?php echo $acc_req; ?></a>
-
-<h3>Making Authenticated Calls</h3>
-<p>Using your Access Token you can make authenticated calls.</p>
-
-<ul>
-<li>api endpoint: <code><strong><?php echo  ""; ?>/api</strong></code></li>
-</ul>
-<p>
-A successful request will echo the non-OAuth parameters sent to it, for example:</p>
-<p><code>method=foo&amp;bar=baz</code></p>
-<p>An unsuccessful request will attempt to describe what went wrong.</p>
-
-<h4>Example</h4>
-<a href="<?php echo $echo_req; ?>"><?php echo $echo_req; ?></a>
-
-<h3>Currently Supported Signature Methods</h3>
-<p>Current signing method is: <?php echo $user_sig_method ?></p>
-<ul>
-<?php
-//~ $sig_methods = $test_server->get_signature_methods();
-//~ foreach ($sig_methods as $key => $method) {
-  //~ print "<li>$key";
-  //~ if ($key != $sig_method->get_name()) {
-    //~ print "(<a href='?sig_method=$key'>switch</a>)";
-  //~ }
-  //~ print "</li>\n";
-//~ }
-?>
-</ul>
-
-<?php
-if ("RSA-SHA1" == $sig_method->get_name()) {
-  print "<pre>" . $sig_method->fetch_private_cert($req_req) . "</pre>\n";
-  print "<pre>" . $sig_method->fetch_public_cert($req_req) . "</pre>\n";
-}
-?>
-
-<h3>Further Resources</h3>
-<p>There is also a <a href="client.php">test client</a> implementation in here.</p>
-<p>The code running this example can be downloaded from the PHP section of the OAuth google code project: <a href="http://code.google.com/p/oauth/">http://code.google.com/p/oauth/</a>
+<body><div class="page">
+<header>
+    <div style="width:90%;float:right">
+    <h1>OAuth 2.0 Test</h1>
+    <nav>
+      <ul>
+        <li><a href="/client/index">Client</a></li>
+        <li><a href="/server/index">Server</a></li>
+        <li><a href="/api/index">API Resources</a></li>
+      </ul>
+    </nav></div>
+    <div class="date">
+    <span class="day"><?php echo date('d'); ?></span>
+    <span class="month"><?php echo date('F'); ?></span>
+    <span class="year"><?php echo date('Y'); ?></span>
+    </div>
+</header><section id="main"><?php echo $content;?></section>
+<footer>
+  <section id="extras" class="body">
+  </section><!-- /#extras -->
+  <nav>
+  </nav>
+  <address id="about" class="vcard body">
+    <span class="primary">
+        <strong><a href="#" class="fn url">OALite Inc.</a></strong>
+        <span class="role">Open Application Lite</span>
+    </span><!-- /.primary -->
+    <img src="images/avatar.gif" alt="Open Application Lite Logo" class="photo" />
+    <span class="bio">Open Application Lite is a website that offers online software serivce to personal and medium and small-sized enterprises. Its foundation is OALite Inc.</span>
+  </address><!-- /#about -->
+</footer></div>
 </body>
 </html>

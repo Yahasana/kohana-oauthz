@@ -21,20 +21,6 @@ class Oauth_Response {
         {
             $this->$key = $val;
         }
-
-        /*
-        if(empty($this->format))
-        {
-            if($format = key(Request::accept_type()))
-            {
-                $this->format = $format;
-            }
-            else
-            {
-                $this->format = 'json';
-            }
-        }
-        */
     }
 
     public function json()

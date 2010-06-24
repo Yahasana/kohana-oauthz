@@ -146,7 +146,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            $response = new Oauth_Response(array('format' => 'form'));
+            $response = new Oauth_Token(array('format' => 'form'));
             $response->error = 'invalid_client_credentials';
         }
 
@@ -175,7 +175,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            $response = new Oauth_Response(array('format' => 'form'));
+            $response = new Oauth_Token(array('format' => 'form'));
             $response->error = 'invalid_client_credentials';
         }
 
@@ -192,7 +192,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            $response = new Oauth_Response;
+            $response = new Oauth_Token;
             $response->error = 'invalid_client_credentials';
         }
 
@@ -211,7 +211,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            $response = new Oauth_Response;
+            $response = new Oauth_Token;
             $response->error = 'invalid_client_credentials';
         }
 
@@ -228,7 +228,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            $response = new Oauth_Response;
+            $response = new Oauth_Token;
             $response->error = 'invalid_client_credentials';
         }
 
@@ -245,7 +245,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            $response = new Oauth_Response;
+            $response = new Oauth_Token;
             $response->error = 'invalid_client_credentials';
         }
 
@@ -262,7 +262,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            $response = new Oauth_Response;
+            $response = new Oauth_Token;
             $response->error = 'invalid_client_credentials';
         }
 
@@ -279,7 +279,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            $response = new Oauth_Response;
+            $response = new Oauth_Token;
             $response->error = 'invalid_client_credentials';
         }
 
@@ -296,7 +296,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            $response = new Oauth_Response;
+            $response = new Oauth_Token;
             $response->error = 'invalid_client_credentials';
         }
 

@@ -56,11 +56,11 @@ class Oauth_Client_Controller extends Kohana_Controller {
         if($type === NULL) $type = $this->_params['type'];
 
         //~ build base string
-        // $base_string = Oauth::normalize('POST', $uri, $this->_params);
+        // $identifier = Oauth::normalize('POST', $uri, $this->_params);
 
         //~ build signature string
         // $this->_params['client_secret']    =
-            // Oauth::signature($this->_params['secret_type'], $base_string)
+            // Oauth::signature($this->_params['secret_type'], $identifier)
             // ->build(new Oauth_Client($this->_params['client_id'], NULL), NULL);
 
         $params = array(
@@ -135,4 +135,4 @@ class Oauth_Client_Controller extends Kohana_Controller {
         }
     }
 
-} //END Oauth Consumer Controller
+} // END Oauth Consumer Controller

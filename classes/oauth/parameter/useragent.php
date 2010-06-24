@@ -56,7 +56,7 @@ class Oauth_Parameter_Useragent extends Oauth_Parameter {
 
     public function oauth_token($client)
     {
-        $response = new Oauth_Response;
+        $response = new Oauth_Token;
 
         if(property_exists($this, 'state'))
         {
@@ -83,8 +83,4 @@ class Oauth_Parameter_Useragent extends Oauth_Parameter {
         return $response;
     }
 
-    public function access_token($client)
-    {
-        return new Oauth_Response;
-    }
-}
+} // END Oauth_Parameter_Useragent

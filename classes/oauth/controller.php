@@ -154,4 +154,4 @@ abstract class Oauth_Controller extends Kohana_Controller {
         $this->request->response = NULL;
     }
 
-} //END Oauth Controller
+} // END Oauth Controller

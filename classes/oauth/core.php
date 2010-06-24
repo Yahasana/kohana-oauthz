@@ -31,19 +31,19 @@ abstract class Oauth_Core {
 
         return $method.'&'.Oauth::urlencode($uri).'&'.Oauth::build_query($params);
     }
-    
+
     /**
      * Oauth_Signature::factory alias
      *
      * @see     Oauth_Signature::factory
      * @access  public
      * @param   string	$method
-     * @param   string	$base_string
+     * @param   string	$identifier
      * @return  object
      */
-    public static function signature($method, $base_string)
+    public static function signature($method, $identifier)
     {
-        return Oauth_Signature::factory($method, $base_string);
+        return Oauth_Signature::factory($method, $identifier);
     }
 
     /**
@@ -72,7 +72,7 @@ abstract class Oauth_Core {
 
         return $args === NULL ? $params : (isset($params[$args]) ? $params[$args] : NULL);
     }
-    
+
     /**
      * Build HTTP Query
      *
@@ -92,7 +92,7 @@ abstract class Oauth_Core {
 
         return rtrim($query, '&');
     }
-    
+
     /**
      * Explode the oauth parameter from $_POST and returns the parsed
      *
@@ -196,7 +196,7 @@ abstract class Oauth_Core {
         }
         return $header;
     }
-    
+
     /**
      * URL Decode
      *
@@ -236,10 +236,5 @@ abstract class Oauth_Core {
 
         return str_replace($search, $replace, rawurlencode($item));
     }
-    
-    private function __construct()
-    {
-        // This is a static class
-    }
 
-} //END Oauth
+} // END Oauth Core

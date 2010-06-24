@@ -26,4 +26,5 @@ abstract class Oauth extends Oauth_Core{
         }
         return $default;
     }
-}
+
+} // END Oauth

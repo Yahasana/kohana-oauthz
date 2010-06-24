@@ -25,35 +25,35 @@ abstract class Oauth_Signature {
      * Base string to build the signature for some method
      *
      * @access  protected
-     * @var     string    $base_string
+     * @var     string    $identifier
      */
-    protected static $base_string  = NULL;
+    protected static $identifier  = NULL;
 
     /**
      * Initialize the signature method's driver
      *
      * @access  public
      * @param   string    $method
-     * @param   string    $base_string
+     * @param   string    $identifier
      * @throw   Oauth_Exception
      * @return  object    instance of the method's driver
      */
-    public static function factory($method, $base_string)
+    public static function factory($method, $identifier)
     {
         static $instance;
         if (! isset($instance[$method]))
         {
-            $class = 'Oauth_Signature_'.str_replace('-', '_', $method);
+            $class = __CLASS__.'_'.str_replace('-', '_', $method);
             if(class_exists($class))
             {
                 $instance[$method] = new $class;
             }
             else
             {
-                throw new Oauth_Exception('');
+                throw new Oauth_Exception('invalid_algorithm');
             }
         }
-        self::$base_string = $base_string;
+        self::$identifier = $identifier;
 
         return $instance[$method];
     }
@@ -62,8 +62,8 @@ abstract class Oauth_Signature {
      * Build a signature from oauth token
      *
      * @access	public
-     * @param	Oauth_Token	$token	default [ NULL) ]
-     * @return	void
+     * @param	Oauth_Token	$token	default [ NULL ]
+     * @return	string
      */
     abstract public function build(Oauth_Token $token);
 
@@ -78,11 +78,6 @@ abstract class Oauth_Signature {
     public function check(Oauth_Token $token, $signature)
     {
         return $signature === $this->build($token);
-    }
-
-    private function __construct()
-    {
-        // This is a static class
     }
 
 } //END Oauth Signature

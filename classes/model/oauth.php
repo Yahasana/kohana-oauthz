@@ -231,4 +231,4 @@ class Model_Oauth extends Kohana_Model {
         return NULL;
     }
 
-} //END Model Oauth
+} // END Model Oauth

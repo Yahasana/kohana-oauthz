@@ -11,7 +11,7 @@
  * @since      Available since Release 1.0
  * *
  */
-class Oauth_Response {
+class Oauth_Token {
 
     public $format = 'json';
 
@@ -164,4 +164,5 @@ class Oauth_Response {
     {
         if( ! empty($val)) $this->$key = $val;
     }
-}
+
+} // END Oauth_Token

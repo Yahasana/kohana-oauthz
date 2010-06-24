@@ -13,6 +13,7 @@ class Oauth_Signature_Hmac_Sha1 extends Oauth_Signature {
             $key .= '&'.Oauth::urlencode($token->token_secret);
         }
 
-        return base64_encode(hash_hmac('sha1', parent::$base_string, $key, TRUE));
+        return base64_encode(hash_hmac('sha1', parent::$identifier, $key, TRUE));
     }
-}
+    
+} // END Oauth_Signature_Hmac_Sha1

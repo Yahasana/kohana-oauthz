@@ -6,11 +6,12 @@ class Oauth_Signature_Md5 extends Oauth_Signature {
 
     public function build(Oauth_Token $token)
     {
-        //
+        // TODO
     }
 
     public function check(Oauth_Token $token, $signature)
     {
-        //
+        // TODO
     }
-}
+    
+} // END Oauth_Signature_Md5

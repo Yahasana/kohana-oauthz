@@ -15,4 +15,5 @@ class Oauth_Signature_Plaintext extends Oauth_Signature {
 
         return $signature;
     }
-}
+    
+} // END Oauth_Signature_Plaintext

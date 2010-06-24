@@ -74,4 +74,5 @@ class Oauth_Server extends Kohana_Controller {
         $this->request->headers['Content-Type'] = 'application/x-www-form-urlencoded';
         $this->request->headers['Location'] = 'http://example.com/rd#error=user_denied';
     }
-}
+    
+} // END Oauth_Server

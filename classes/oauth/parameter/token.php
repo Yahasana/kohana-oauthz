@@ -56,7 +56,7 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
      */
     public function oauth_token($client)
     {
-        return new Oauth_Response;
+        return new Oauth_Token;
     }
 
     /**
@@ -69,7 +69,7 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
      */
     public function access_token($client)
     {
-        $response = new Oauth_Response;
+        $response = new Oauth_Token;
 
         if(property_exists($this, 'format'))
         {
@@ -129,4 +129,5 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
 
         return $response;
     }
-}
+
+} // END Oauth_Parameter_Token

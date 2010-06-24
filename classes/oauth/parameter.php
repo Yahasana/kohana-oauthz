@@ -11,7 +11,7 @@ abstract class Oauth_Parameter {
      */
     public static function factory($type, $args = NULL)
     {
-        $class = 'Oauth_Parameter_'.$type;
+        $class = __CLASS__.'_'.$type;
         return class_exists($class) ? new $class($args) : new stdClass;
     }
 
@@ -31,6 +31,8 @@ abstract class Oauth_Parameter {
      * @param	string	$client
      * @return	Oauth_Token
      */
-    abstract public function access_token($client);
-
+    public function access_token($client)
+    {
+        return new Oauth_Token;
+    }
 }

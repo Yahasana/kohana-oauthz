@@ -12,7 +12,7 @@
 ?></tbody></table><?php
     if( ! empty($client_id))
     {
-?><form action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
+?><form action="" method="post" name="form1" id="form1">
 <input type='hidden' name='resubmit' value='<?php echo md5(microtime()); ?>'/>
 <label for="password">Password for secret request:</label><input type="text" name="password" id="password" value="<?php echo ''; ?>" /><br />
 <label for="confirm">Password confirm:</label><input type="text" name="confirm" id="confirm" value="<?php echo ''; ?>" /><br />

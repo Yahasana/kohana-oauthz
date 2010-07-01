@@ -37,7 +37,7 @@ class Oauth_Server extends Kohana_Controller {
                 {
                     $post->error('redirect_uri', 'not unique');
                 }
-                else if(empty($_POST['client_id']))
+                elseif(empty($_POST['client_id']))
                 {
                     $this->oauth->reg_server($_POST);
                 }
@@ -74,5 +74,5 @@ class Oauth_Server extends Kohana_Controller {
         $this->request->headers['Content-Type'] = 'application/x-www-form-urlencoded';
         $this->request->headers['Location'] = 'http://example.com/rd#error=user_denied';
     }
-    
+
 } // END Oauth_Server

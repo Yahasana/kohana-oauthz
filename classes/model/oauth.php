@@ -96,7 +96,7 @@ class Model_Oauth extends Kohana_Model {
     {
     }
 
-    public function lookup_client($client_id)
+    public function lookup_client($client_id, $expired_in = 3600)
     {
         if($client_id  AND $client = DB::select('client_secret','server_id','redirect_uri','user_id')
             ->from('t_oauth_servers')
@@ -106,10 +106,9 @@ class Model_Oauth extends Kohana_Model {
         {
             $client['code'] = uniqid();
             $access_token = sha1(md5(time()));
-            $token_secret = md5(sha1(time()));
             $refresh_token = sha1(sha1(mt_rand()));
-            DB::insert('t_oauth_tokens', array('client_id','code','user_id','access_token','token_secret','timestamp','expire_in','refresh_token'))
-                ->values(array($client_id, $client['code'], $client['user_id'], $access_token, $token_secret, date('Y-m-d H:i:s'), 3600, $refresh_token))
+            DB::insert('t_oauth_tokens', array('client_id','code','user_id','access_token','timestamp','expire_in','refresh_token'))
+                ->values(array($client_id, $client['code'], $client['user_id'], $access_token, time(), $expired_in, $refresh_token))
                 ->execute($this->_db);
 
             return $client;
@@ -126,20 +125,27 @@ class Model_Oauth extends Kohana_Model {
 
     public function lookup_code($code)
     {
-        if($code  AND $token = DB::select('token_id', 'client_id', 'code', 'nonce',
-            'access_token','token_secret','timestamp','refresh_token','expire_in')
+        if($code  AND $token = DB::select('token_id','client_id','code','nonce','access_token','timestamp','refresh_token','expire_in')
             ->from('t_oauth_tokens')
             ->where('code' , '=', $code)
             ->execute($this->_db)
             ->current())
         {
-            if(strtotime($token['timestamp']) > time() - 60)
+            $client = DB::select('client_id','redirect_uri','client_secret','secret_type')
+                ->from('t_oauth_servers')
+                ->where('client_id' , '=', $token['client_id'])
+                ->where('enabled' , '=', TRUE)
+                ->execute($this->_db)
+                ->current();
+                
+            if($token['timestamp'] > time() - 60)
             {
                 DB::update('t_oauth_tokens')
                     ->set(array('code' => uniqid()))
                     ->where('token_id' , '=', $token['token_id'])
                     ->execute($this->_db);
-                return $token;
+                    
+                return $token + $client;
             }
         }
         return NULL;
@@ -168,7 +174,7 @@ class Model_Oauth extends Kohana_Model {
         return NULL;
     }
 
-    public function reflesh_token(Oauth_Token $token)
+    public function refresh_token(Oauth_Token $token)
     {
         DB::delete('t_oauth_tokens')
             ->where('token', '=', $token->key)
@@ -190,45 +196,6 @@ class Model_Oauth extends Kohana_Model {
             return TRUE;
         }
         return FALSE;
-    }
-
-    public function new_request_token(Oauth_Client $client)
-    {
-        if($server_id = DB::select('server_id')
-            ->from('t_oauth_servers')
-            ->where('client_id' , '=', $client->client_id)
-            ->execute($this->_db)
-            ->get('server_id'))
-        {
-            // return a new token attached to this client
-            $key = md5(time());
-            $secret = time() + time();
-            $token = new OAuth_Token($key, md5(md5($secret)));
-
-            DB::insert('t_oauth_tokens')
-                ->columns(array('token','token_type','token_secret','server_id'))
-                ->values(array($key, 'request', $secret, $server_id))
-                ->execute($this->_db);
-
-            return $token;
-        }
-        return NULL;
-    }
-
-    public function new_access_token(Oauth_Token $token)
-    {
-        $key = md5(time());
-        $secret = time() + time();
-        $new_token = new OAuth_Token($key, md5(md5($secret)));
-
-        if(DB::update('t_oauth_tokens')
-            ->set(array('token' => $key, 'token_type' => 'access', 'token_secret' => $secret))
-            ->where('token', '=', $token->key)
-            ->where('token_type', '=', 'request')
-            ->execute($this->_db))
-            return $new_token;
-
-        return NULL;
     }
 
 } // END Model Oauth

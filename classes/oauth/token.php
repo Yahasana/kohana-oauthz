@@ -98,6 +98,12 @@ class Oauth_Token {
         {
             $form = array('error' => $this->error);
 
+            if(property_exists($this, 'error_description') AND $this->error_description)
+                $form['error_description']  = $this->error_description;
+
+            if(property_exists($this, 'error_uri') AND $this->error_uri)
+                $form['error_uri']  = $this->error_uri;
+
             if(property_exists($this, 'state') AND $this->state)
                 $form['state']  = $this->state;
         }

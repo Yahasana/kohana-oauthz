@@ -11,40 +11,53 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
     public $oauth_token;
 
     /**
+     * Parameters parsed from Form-Encoded Body
+     *
+     * @access	protected
+     * @var		string	$_params
+     */
+    protected $_params;
+
+    /**
      * Load request parameters from Authorization header, URI-Query parameters, Form-Encoded Body
      *
      * @access	public
      * @param	string	$args	default [ NULL ]
      * @return	void
      */
-    public function __construct($args = NULL)
+    public function __construct(array $args)
     {
-        switch(Request::$method)
+        $params = array();
+        /**
+         * Load oauth_token from form-encoded body
+         */
+        isset($_SERVER['CONTENT_TYPE']) OR $_SERVER['CONTENT_TYPE'] = getenv('CONTENT_TYPE');
+
+        // oauth_token already send in authorization header or the encrypt Content-Type is not single-part
+        if(stripos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') === FALSE)
         {
-            case 'HEAD':
-                $params = Oauth::parse_header();
-                $params['oauth_token'] = isset($params['token']) ? $params['token'] : NULL;
-                unset($params['token']);
-                break;
-            case 'PUT':
-            case 'POST':
-            case 'DELETE':
-                $params = $_POST;
-                break;
-            case 'GET':
-                $params = Oauth::parse_query();
-                break;
-            default:
-                $params = array();
-                break;
+            throw new Oauth_Exception('invalid-request');
+        }
+        else
+        {
+            // Check all required parameters should NOT be empty
+            foreach($args as $key => $val)
+            {
+                if($val === TRUE)
+                {
+                    if(isset($_POST[$key]) AND $value = Oauth::urldecode($_POST[$key]))
+                    {
+                        $params[$key] = $value;
+                    }
+                    else
+                    {
+                        throw new Oauth_Exception('invalid-request');
+                    }
+                }
+            }
         }
 
-        if(is_array($args)) $params += $args;
-
-        foreach($params as $key => $val)
-        {
-            $this->$key = $val;
-        }
+        $this->_params = $params;
     }
 
     /**
@@ -56,7 +69,27 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
      */
     public function oauth_token($client)
     {
-        return new Oauth_Token;
+        $response = new Oauth_Token;
+
+        if(isset($this->_params['state']))
+        {
+            $response->state = $this->state = $this->_params['state'];
+        }
+
+        if(isset($this->_params['scope']) AND ! isset($client['scope'][$this->_params['scope']]))
+        {
+            throw new Oauth_Exception('invalid-request');
+        }
+
+        if($client['redirect_uri'] !== $this->_params['redirect_uri'])
+        {
+            throw new Oauth_Exception('redirect-uri-mismatch');
+        }
+
+        // Grants Authorization
+        $response->code = $client['code'];
+
+        return $response;
     }
 
     /**
@@ -71,59 +104,37 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
     {
         $response = new Oauth_Token;
 
-        if(property_exists($this, 'format'))
+        if(isset($this->_params['token_secret']) AND $client['token_secret'] !== sha1($this->_params['token_secret']))
         {
-            $response->format = $this->format;
+            throw new Oauth_Exception('invalid-request');
         }
 
-        if(property_exists($this, 'error'))
+        if(isset($this->_params['nonce']) AND $client['nonce'] !== $this->nonce)
         {
-            $response->error = $this->error;
-            return $response;
+            throw new Oauth_Exception('invalid-request');
         }
 
-        if($client['access_token'] !== $this->oauth_token)
+        if(isset($this->_params['timestamp']) AND $client['timestamp'] < $this->_params['timestamp'])
         {
-            $response->error = 'invalid_oauth_token';
-            return $response;
-        }
-
-        if(property_exists($this, 'token_secret') AND $client['token_secret'] !== sha1($this->token_secret))
-        {
-            $response->error = 'invalid_oauth_token';
-            return $response;
-        }
-
-        if(property_exists($this, 'nonce') AND $client['nonce'] !== $this->nonce)
-        {
-            $response->error = 'invalid_nonce';
-            return $response;
-        }
-
-        if(property_exists($this,'timestamp') AND
-            $client['timestamp'] + Kohana::config('oauth_server')->get('duration') < $this->timestamp)
-        {
-            $response->error = 'invalid_timestamp';
-            return $response;
+            throw new Oauth_Exception('expired-token');
         }
 
         // verify the signature
-        if(property_exists($this, 'signature') AND property_exists($this, 'algorithm'))
+        if(isset($this->_params['signature']) AND isset($this->_params['algorithm']))
         {
-            $base_url = URL::base(FALSE, TRUE).Request::$current->uri;
+            $uri = URL::base(FALSE, TRUE).Request::$current->uri;
 
-            $string = Oauth::normalize(Request::$method, $base_url, $params);
+            $string = Oauth::normalize(Request::$method, $uri, $this->_params);
 
-            if($this->algorithm == 'rsa-sha1' OR $this->algorithm == 'hmac-sha1')
+            if($this->_params['algorithm'] == 'rsa-sha1' OR $this->_params['algorithm'] == 'hmac-sha1')
             {
                 $response->public_cert = '';
                 $response->private_cert = '';
             }
 
-            if (! Oauth::signature($this->algorithm, $string)->check($token, $this->signature))
+            if (! Oauth::signature($this->_params['algorithm'], $string)->check($response, $this->_params['signature']))
             {
-                $response->error = 'invalid_signature';
-                return $response;
+                throw new Oauth_Exception('invalid-signature');
             }
         }
 

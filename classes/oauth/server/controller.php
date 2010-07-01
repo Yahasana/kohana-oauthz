@@ -18,12 +18,12 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
     protected $_type = 'default';
 
     /**
-     * Request  settings for OAuth
+     * Configuration  settings for OAuth
      *
      * @access  protected
-     * @var     mix    $_params
+     * @var     mix    $_configs
      */
-    protected $_params = array();
+    protected $_configs = array();
 
     /**
      * Data store handler
@@ -35,6 +35,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
 
     public function before()
     {
+        $this->_configs = Kohana::config('oauth_server.'.$this->_type);
         $this->oauth = new Model_Oauth;
     }
 
@@ -46,36 +47,38 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
      * @access  public
      * @return  void
      */
-    public function action_access()
+    public function action_authorize()
     {
         try {
-            switch(Oauth::get('type'))
+            switch(Oauth::get('response_type'))
             {
-                case 'user_agent':
-                    $response = $this->user_agent();
+                case 'code':
+                    $response = $this->code();
                     break;
-                case 'web_server':
-                    $response = $this->user_server();
+                case 'token':
+                    $response = $this->token();
                     break;
-                case 'device_code':
-                    $response = $this->user_device();
-                    $this->request->status = 200; #HTTP/1.1 200 OK
-                    $this->request->response = $response;
-                    $this->request->headers['Cache-Control'] = 'no-store';
-                    $this->request->headers['Content-Type'] = $response->format;
+                case 'code-and-token':
+                    // TODO
                     return;
                 default:
-                    throw new Oauth_Exception('incorrect_request_type');
+                    $response = new Oauth_Token(array(
+                        'error'             => 'unsupported-response-type',
+                        'error_description' => '',
+                        'error_uri'         => '',
+                    ));
+                    throw new Oauth_Exception($response->query());
                     break;
             }
+            $this->request->status = 302; #HTTP/1.1 302 Found
             $this->request->headers['Content-Type'] = 'application/x-www-form-urlencoded';
             $this->request->redirect($response);
         }
         catch (Oauth_Exception $e)
         {
-            $this->request->status = 400; #HTTP/1.1 400 Bad Request
-            $this->request->headers['Content-Type'] = 'application/json';
-            $this->request->response = json_encode(array('error' => $e->getMessage()));
+            $this->request->status = 302; #HTTP/1.1 302 Found
+            $this->request->headers['Content-Type'] = 'application/x-www-form-urlencoded';
+            $this->request->redirect($e->getMessage());
         }
     }
 
@@ -95,29 +98,32 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
      */
     public function action_token()
     {
-        try {
+        try
+        {
             switch(Oauth::get('grant_type'))
             {
-                case 'authorization_code':
-                    $response = $this->web_server();
+                case 'authorization-code':
+                    $response = $this->authorization_code();
                     break;
-                case 'refresh_token':
-                    $response = $this->refresh_token();
-                    break;
-                case 'device_token':
-                    $response = $this->device_token();
-                    break;
-                case 'user_basic_credentials':
-                    $response = $this->client_credentials();
+                case 'basic-credentials':
+                    $response = $this->basic_credentials();
                     break;
                 case 'assertion':
                     $response = $this->assertion();
+                    break;
+                case 'refresh-token':
+                    $response = $this->refresh_token();
                     break;
                 case 'none':
                     $response = $this->username();
                     break;
                 default:
-                    throw new Oauth_Exception('invalid_request_type');
+                    $response = new Oauth_Token(array(
+                        'error'             => 'unsupported-grant-type',
+                        'error_description' => '',
+                        'error_uri'         => '',
+                    ));
+                    throw new Oauth_Exception($response);
                     break;
             }
 
@@ -127,36 +133,20 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         catch (Oauth_Exception $e)
         {
-            $this->request->status = 400; #HTTP/1.1 400 Bad Request
+            /**
+             * HTTP/1.1 401 (Unauthorized) for "Authorization" request header field
+             * HTTP/1.1 400 Bad Request for other authentication scheme
+             */
+            $this->request->status = 400;
             $this->request->headers['Content-Type'] = 'application/json';
-            $this->request->response = json_encode(array('error' => $e->getMessage()));
+            $this->request->response = $e->getMessage();
         }
-        $this->request->headers['Cache-Control'] = 'no-store';
+        $this->request->headers['Expires'] = 'Sat, 26 Jul 1997 05:00:00 GMT';
+        $this->request->headers['Cache-Control'] = 'no-store, must-revalidate';
     }
 
     /**********************************END actions*****************************************/
 
-    protected function user_agent()
-    {
-        $parameter = new Oauth_Parameter_Useragent;
-
-        if($client = $this->oauth->lookup_client($parameter->client_id))
-        {
-            $response = $parameter->oauth_token($client);
-        }
-        else
-        {
-            $response = new Oauth_Token(array('format' => 'form'));
-            $response->error = 'invalid_client_credentials';
-        }
-
-        if( ! property_exists($response, 'error'))
-        {
-            $response = $parameter->access_token($parameter->client_id);
-        }
-
-        return $parameter->redirect_uri.'?'.$response->query();
-    }
 
     /**
      * Client Requests Authorization by web_server
@@ -165,43 +155,58 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
      * @access    protected
      * @return    string    redirect_uri#[code,state|error=MUST be set to "redirect_uri_mismatch", "bad_authorization_code", "invalid_client_credentials"]
      */
-    protected function user_server()
+    protected function code()
     {
-        $parameter = new Oauth_Parameter_Webserver;
+        $parameter = new Oauth_Parameter_Code($this->_configs['code_params']);
 
         if($client = $this->oauth->lookup_client($parameter->client_id))
         {
+            $client['expires_in'] = $this->_configs['durations']['code'];
             $response = $parameter->oauth_token($client);
         }
         else
         {
-            $response = new Oauth_Token(array('format' => 'form'));
-            $response->error = 'invalid_client_credentials';
+            $response = new Oauth_Token(array(
+                'error'             => 'invalid-client-id',
+                'error_description' => '',
+                'error_uri'         => '',
+            ));
+            throw new Oauth_Exception($response->query());
         }
 
         return $parameter->redirect_uri.'?'.$response->query();
     }
 
-    protected function user_device()
+    protected function token()
     {
-        $parameter = new Oauth_Parameter_Device;
+        $params = $this->_configs['grant_params']['authorization-code'] + $this->_configs['code_params'];
 
-        if($client = $this->oauth->lookup_server($parameter->client_id))
+        $parameter = new Oauth_Parameter_Token($params);
+
+        if($client = $this->oauth->lookup_client($parameter->client_id))
         {
-            $response = $parameter->access_token($client);
+            $client['expires_in'] = $this->_configs['durations']['oauth_token'];
+
+            $parameter->oauth_token($client);
         }
         else
         {
-            $response = new Oauth_Token;
-            $response->error = 'invalid_client_credentials';
+            $response = new Oauth_Token(array(
+                'error'             => 'invalid-client-id',
+                'error_description' => '',
+                'error_uri'         => '',
+            ));
+            throw new Oauth_Exception($response->query());
         }
 
-        return $response;
+        $response = $parameter->access_token($parameter->client_id);
+
+        return $parameter->redirect_uri.'#'.$response->query();
     }
 
-    protected function web_server()
+    protected function authorization_code()
     {
-        $parameter = new Oauth_Parameter_Webserver(TRUE);
+        $parameter = new Oauth_Parameter_Webserver($this->_configs['grant_params']['authorization-code']);
 
         if($client = $this->oauth->lookup_code($parameter->code))
         {
@@ -211,25 +216,13 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            $response = new Oauth_Token;
-            $response->error = 'invalid_client_credentials';
-        }
+            $response = new Oauth_Token(array(
+                'error'             => 'invalid-client-credentials',
+                'error_description' => '',
+                'error_uri'         => '',
+            ));
 
-        return $response;
-    }
-
-    protected function device_token()
-    {
-        $parameter = new Oauth_Parameter_Device;
-
-        if($client = $this->oauth->lookup_server($parameter->client_id))
-        {
-            $response = $parameter->access_token($client);
-        }
-        else
-        {
-            $response = new Oauth_Token;
-            $response->error = 'invalid_client_credentials';
+            throw new Oauth_Exception($response->query());
         }
 
         return $response;
@@ -245,14 +238,18 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            $response = new Oauth_Token;
-            $response->error = 'invalid_client_credentials';
+            $response = new Oauth_Token(array(
+                'error'             => 'invalid-client-credentials',
+                'error_description' => '',
+                'error_uri'         => '',
+            ));
+            throw new Oauth_Exception($response->query());
         }
 
         return $response;
     }
 
-    protected function client_credentials()
+    protected function basic_credentials()
     {
         $parameter = new Oauth_Parameter_Credentials;
 
@@ -262,8 +259,12 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            $response = new Oauth_Token;
-            $response->error = 'invalid_client_credentials';
+            $response = new Oauth_Token(array(
+                'error'             => 'invalid-client-credentials',
+                'error_description' => '',
+                'error_uri'         => '',
+            ));
+            throw new Oauth_Exception($response->query());
         }
 
         return $response;
@@ -279,8 +280,12 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            $response = new Oauth_Token;
-            $response->error = 'invalid_client_credentials';
+            $response = new Oauth_Token(array(
+                'error'             => 'invalid-client-credentials',
+                'error_description' => '',
+                'error_uri'         => '',
+            ));
+            throw new Oauth_Exception($response->query());
         }
 
         return $response;
@@ -296,11 +301,15 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            $response = new Oauth_Token;
-            $response->error = 'invalid_client_credentials';
+            $response = new Oauth_Token(array(
+                'error'             => 'invalid-client-credentials',
+                'error_description' => '',
+                'error_uri'         => '',
+            ));
+            throw new Oauth_Exception($response->query());
         }
 
         return $response;
     }
 
-} //END Oauth Server Controller
+} // END Oauth Server Controller

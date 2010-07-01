@@ -59,36 +59,23 @@ abstract class Oauth_Controller extends Kohana_Controller {
 
         $this->oauth = new Model_Oauth;
 
-        try {
+        try
+        {
             if(empty($this->_configs['request_methods'][Request::$method]))
             {
-                throw new Oauth_Exception('unauthorized_client');
+                throw new Oauth_Exception('invalid-request');
             }
 
-            $params = $this->_configs['request_params'];
-            foreach($params as $key => $val)
-            {
-                if($val !== TRUE)
-                {
-                    unset($params[$key]);
-                }
-            }
-
-            $parameter = new Oauth_Parameter_Token($params);
+            $parameter = new Oauth_Parameter_Access($this->_configs['access_params']);
 
             if( ! $client = $this->oauth->lookup_token($parameter->oauth_token))
             {
-                throw new Oauth_Exception('unauthorized_client');
+                throw new Oauth_Exception('invalid-token');
             }
 
-            $token = $parameter->access_token($client);
+            $client['timestamp'] += $this->_configs['durations']['oauth_token'];
 
-            if(property_exists($token, 'error'))
-            {
-                throw new Oauth_Exception($token->error);
-            }
-
-            $this->token = $token;
+            $parameter->access_token($client);
         }
         catch (Oauth_Exception $e)
         {
@@ -149,9 +136,25 @@ abstract class Oauth_Controller extends Kohana_Controller {
             $error .= ',scope=\''.rtrim($challenge).'\'';
         }
 
-        $this->request->status = 401;   #HTTP/1.1 401 Unauthorized
+        switch($this->errors)
+        {
+            case 'invalid-request':
+                $this->request->status = 400;   #HTTP/1.1 400 Bad Request
+                break;
+            case 'invalid-token':
+            case 'expired-token':
+                $this->request->status = 401;   #HTTP/1.1 401 Unauthorized
+                break;
+            case 'insufficient-scope':
+                $this->request->status = 403;   #HTTP/1.1 403 Forbidden
+                break;
+            default:
+                $this->request->status = 400;   #HTTP/1.1 400 Bad Request
+                break;
+        }
+
         $this->request->headers['WWW-Authenticate'] = 'Token realm=\'Service\','.$error;
-        $this->request->response = NULL;
+        $this->request->response = $error;
     }
 
 } // END Oauth Controller

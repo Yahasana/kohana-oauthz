@@ -16,38 +16,22 @@ class Controller_Api extends Oauth_Controller {
 
     /**
      * Accessing Protected Resources
-     * The request MUST be signed per Signing Requests (Signing Requests),
-     * and contains the following parameters:
-     * oauth_consumer_key:
-     *     The Consumer Key.
-     * oauth_token:
-     *     The Access Token.
-     * oauth_signature_method:
-     *     The signature method the Consumer used to sign the request.
-     * oauth_signature:
-     *     The signature as defined in Signing Requests (Signing Requests).
-     * oauth_timestamp:
-     *     As defined in Nonce and Timestamp (Nonce and Timestamp).
-     * oauth_nonce:
-     *     As defined in Nonce and Timestamp (Nonce and Timestamp).
-     * oauth_version:
-     *     OPTIONAL. If present, value MUST be 1.0. Service Providers MUST assume the protocol version to be 1.0 if this parameter is not present. Service Providers’ response to non-1.0 value is left undefined.
-     * Additional parameters:
-     *     Any additional parameters, as defined by the Service Provider.
      *
      * @access    public
      * @return    void
      */
     public function action_index()
     {
-        try
+        $methods = array();
+        foreach(get_class_methods($this) as $method)
         {
-            print_r(Oauth::request_headers());
+            if(substr($method, 0, 7) === 'action_')
+            {
+                $method = ltrim($method, 'action_');
+                $methods[$method] = '/api/'.$method;
+            }
         }
-        catch (Oauth_Exception $e)
-        {
-            print($e->getMessage() . "\n<hr />\n");
-        }
+        $this->request->response = json_encode($methods);
     }
 
     public function action_get()
@@ -70,4 +54,4 @@ class Controller_Api extends Oauth_Controller {
         //
     }
 
-} //END Controller Oauth
+} // END Controller Oauth

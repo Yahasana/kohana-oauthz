@@ -100,51 +100,18 @@ abstract class Oauth_Core {
      * @param   string  $query
      * @return  array
      */
-    public static function parse_post($post)
+    public static function parse_post($post = NULL)
     {
         $params = array();
-
-        if (! empty($post))
+        
+        if($post === NULL) $post = $_POST;
+        
+        if ( ! empty($post))
         {
-            if(isset(self::$headers['Content-Type'])
-                AND stripos(self::$headers['Content-Type'], 'application/x-www-form-urlencoded') !== FALSE)
-            {
-                //
-            }
+            //
         }
 
         return $params;
-    }
-
-    /**
-     * helper to try to sort out headers for people who aren't running apache
-     *
-     * @access  public
-     * @return  void
-     */
-    public static function request_headers()
-    {
-        if(self::$headers !== NULL) return self::$headers;
-
-        $headers = array();
-        if (function_exists('apache_request_headers'))
-        {
-            foreach(apache_request_headers() as $key => $value)
-            {
-                $headers[ucwords(strtolower($key))] = $value;
-            }
-        }
-
-        foreach ($_SERVER as $key => $value)
-        {
-            if (substr($key, 0, 5) === 'HTTP_')
-            {
-                $key = str_replace('_', '-', strtolower(substr($key, 5)));
-                $headers[ucwords($key)] = $value;
-            }
-        }
-
-        return self::$headers = $headers;
     }
 
     /**
@@ -157,24 +124,24 @@ abstract class Oauth_Core {
      * @param   string    $oauth_only    default [ TRUE ]
      * @return  array
      */
-    public static function parse_header($headers)
+    public static function parse_header()
     {
-        $pattern = '/(([-_a-z]*)=("([^"]*)"|([^,]*)),?)/';
         $offset = 0;
         $params = array();
-        if (isset($headers['Authorization']) && substr($headers['Authorization'], 0, 12) === 'Token token=')
+        $pattern = '/(([-_a-z]*)=("([^"]*)"|([^,]*)),?)/';
+        
+        if (isset($_SERVER['HTTP_AUTHORIZATION']) && substr($_SERVER['HTTP_AUTHORIZATION'], 0, 12) === 'Token token=')
         {
-            $this->_params = Oauth::parse_header($headers['Authorization']) + $this->_params;
+            while(preg_match($pattern, $_SERVER['HTTP_AUTHORIZATION'], $matches, PREG_OFFSET_CAPTURE, $offset) > 0)
+            {
+                $match = $matches[0];
+                $header_name = $matches[2][0];
+                $header_content = (isset($matches[5])) ? $matches[5][0] : $matches[4][0];
+                $params[$header_name] = Oauth::urldecode($header_content);
+                $offset = $match[1] + strlen($match[0]);
+            }
         }
-        while (preg_match($pattern, $headers, $matches, PREG_OFFSET_CAPTURE, $offset) > 0)
-        {
-            $match = $matches[0];
-            $header_name = $matches[2][0];
-            $header_content = (isset($matches[5])) ? $matches[5][0] : $matches[4][0];
-            $params[$header_name] = Oauth::urldecode($header_content);
-            $offset = $match[1] + strlen($match[0]);
-        }
-
+        
         if (isset($params['realm']))
         {
             unset($params['realm']);

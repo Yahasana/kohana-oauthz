@@ -14,9 +14,19 @@
  */
 class Controller_Server extends Oauth_Server {
 
+    public function __construct(Request $request)
+    {
+        if( ! Session::instance()->get('user'))
+        {
+            $request->redirect('oauth/signin');
+        }
+
+        parent::__construct($request);
+    }
+
     public function action_index()
     {
         //
     }
 
-} //END Controller Consumer
+} // END Controller Consumer

@@ -36,4 +36,4 @@ class Controller_Authorize extends Oauth_Server_Controller {
         $this->request->response = $this->_hel;
     }
 
-} //END Controller Consumer
+} // END Controller Consumer

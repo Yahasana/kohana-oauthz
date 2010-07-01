@@ -34,44 +34,44 @@ class Oauth_Client_Controller extends Kohana_Controller {
      * Request settings for OAuth
      *
      * @access  protected
-     * @var     string $_params
+     * @var     string $_configs
      */
-    protected $_params = null;
+    protected $_configs = null;
 
     public function before()
     {
-        $this->_params  = Kohana::config('oauth_client.'.$this->_type);
+        $this->_configs  = Kohana::config('oauth_client.'.$this->_type);
         // We have a WWW-Authenticate-header with OAuth data. Parse the header
         // and add those overriding any duplicates from GET or POST
         // if (isset($headers['www-authenticate']) && substr($headers['www-authenticate'], 0, 12) === 'Token realm=')
         // {
-            // $this->_params = Oauth::parse_header($headers['www-authenticate']) + $this->_params;
+            // $this->_configs = Oauth::parse_header($headers['www-authenticate']) + $this->_configs;
         // }
     }
 
     protected function request_code($uri = NULL, $type = NULL)
     {
-        if($uri === NULL) $uri = $this->_params['oauth_uri'];
+        if($uri === NULL) $uri = $this->_configs['oauth_uri'];
 
-        if($type === NULL) $type = $this->_params['type'];
+        if($type === NULL) $type = $this->_configs['response_type'];
 
         //~ build base string
-        // $identifier = Oauth::normalize('POST', $uri, $this->_params);
+        // $identifier = Oauth::normalize('POST', $uri, $this->_configs);
 
         //~ build signature string
-        // $this->_params['client_secret']    =
-            // Oauth::signature($this->_params['secret_type'], $identifier)
-            // ->build(new Oauth_Client($this->_params['client_id'], NULL), NULL);
+        // $this->_configs['client_secret']    =
+            // Oauth::signature($this->_configs['secret_type'], $identifier)
+            // ->build(new Oauth_Client($this->_configs['client_id'], NULL), NULL);
 
         $params = array(
-            'type'          => $type,
-            'client_id'     => $this->_params['client_id'],
-            'redirect_uri'  => $this->_params['redirect_uri']
+            'response_type' => $type,
+            'client_id'     => $this->_configs['client_id'],
+            'redirect_uri'  => $this->_configs['redirect_uri']
         );
 
-        if( ! empty($this->_params['state']))
-            $params['state'] = $this->_params['state'];
-
+        if( ! empty($this->_configs['state']))
+            $params['state'] = $this->_configs['state'];
+            
         $this->request->redirect($uri.'?'.Oauth::build_query($params));
     }
 
@@ -80,19 +80,22 @@ class Oauth_Client_Controller extends Kohana_Controller {
     {
         $params = Oauth::parse_query();
 
-        try {
+        try
+        {
             if(empty($params['code']) OR isset($params['error']))
             {
                 throw new Oauth_Exception($params['error']);
             }
 
-            $token = Remote::get($this->_params['token_uri'],array(
+            $token = Remote::get($this->_configs['token_uri'],array(
                 CURLOPT_POST        => TRUE,
                 CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=utf-8'),
                 CURLOPT_POSTFIELDS  => Oauth::build_query(array(
-                    'grant_type'    => $this->_params['grant_type'],
+                    'grant_type'    => $this->_configs['grant_type'],
                     'code'          => $params['code'],
-                    'client_id'     => $this->_params['client_id'],
+                    'client_id'     => $this->_configs['client_id'],
+                    'redirect_uri'  => $this->_configs['redirect_uri'],
+                    'client_secret' => $this->_configs['client_secret'],
                 ))
             ));
 
@@ -103,14 +106,15 @@ class Oauth_Client_Controller extends Kohana_Controller {
             }
 
             // Resource in json format
-            $resource = Remote::get($this->_params['access_uri'],array(
+            $resource = Remote::get($this->_configs['access_uri'],array(
                 CURLOPT_POST        => TRUE,
                 CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=utf-8'),
                 CURLOPT_POSTFIELDS  => Oauth::build_query(array(
-                    'oauth_token'       => $token->access_token,
-                    'refresh_token'     => $token->refresh_token,
-                    'expires_in'        => $token->expires_in,
-                    'client_id'         => $this->_params['client_id']
+                    'oauth_token'   => $token->access_token,
+                    'timestamp'     => time(),
+                    'refresh_token' => $token->refresh_token,
+                    'expires_in'    => $token->expires_in,
+                    'client_id'     => $this->_configs['client_id']
                 ))
             ));
 

@@ -25,107 +25,60 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
      * @param	string	$flag	default [ FALSE ]
      * @return	void
      */
-    public function __construct($args = NULL)
+    public function __construct(array $args)
     {
-        // Client Requests Authorization
-        if($args === NULL)
+        $params = array();
+        /**
+         * Load oauth_token from form-encoded body
+         */
+        isset($_SERVER['CONTENT_TYPE']) OR $_SERVER['CONTENT_TYPE'] = getenv('CONTENT_TYPE');
+
+        // oauth_token already send in authorization header or the encrypt Content-Type is not single-part
+        if(stripos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') === FALSE)
         {
-            $params = Oauth::parse_query();
-
-            $this->client_id = Arr::get($params, 'client_id');
-            $this->redirect_uri = Arr::get($params, 'redirect_uri');
-
-            // OPTIONAL.  An opaque value used by the client to maintain state between the request and callback.
-            if(NULL !== $state = Arr::get($params, 'state'))
-                $this->state = $state;
+            throw new Oauth_Exception('invalid-request');
         }
-        // Client Requests Access Token
         else
         {
-            $params = $_POST;
-
-            $this->client_id = Arr::get($params, 'client_id');
-
-            // REQUIRED if the client identifier has a matching secret.
-            $this->client_secret = Arr::get($params, 'client_secret');
-
-            // REQUIRED.  The verification code received from the authorization server.
-            $this->code = Arr::get($params, 'code');
-
-            // OPTIONAL.  The scope of the access request expressed as a list of space-delimited strings.
-            if(NULL !== $scope = Arr::get($params, 'scope'))
-                $this->scope = $scope;
-
-            /**
-             * format
-             *     OPTIONAL.  The response format requested by the client.  Valu
-             *     MUST be one of "json", "xml", or "form".  Alternatively, the
-             *     client MAY use the HTTP "Accept" header field with the desire
-             *     media type.  Defaults to "json" if omitted and no "Accept"
-             *     header field is present.
-             */
-            if(NULL !== $format = Arr::get($params, 'format'))
-                $this->format = $format;
+            // Check all required parameters should NOT be empty
+            foreach($args as $key => $val)
+            {
+                if($val === TRUE)
+                {
+                    if(isset($_POST[$key]) AND $value = Oauth::urldecode($_POST[$key]))
+                    {
+                        $params[$key] = $value;
+                    }
+                    else
+                    {
+                        throw new Oauth_Exception('invalid-request');
+                    }
+                }
+            }
         }
+
+        $this->code = $params['code'];
+
+        $this->_params = $params;
     }
 
     public function oauth_token($client)
     {
-        $response = new Oauth_Token;
-
-        if(property_exists($this, 'state'))
-        {
-            $response->state = $this->state;
-        }
-
-        if(property_exists($this, 'format'))
-        {
-            $response->format = $this->format;
-        }
-
-        if(property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
-        {
-            $response->error = 'invalid_client_credentials';
-            return $response;
-        }
-
-        if($client['redirect_uri'] !== $this->redirect_uri)
-        {
-            $response->error = 'redirect_uri_mismatch';
-            return $response;
-        }
-
-        // Grants Authorization
-        $response->code = $client['code'];
-
-        return $response;
+        throw new Oauth_Exception('invalid-request');
     }
 
     public function access_token($client)
     {
         $response = new Oauth_Token;
 
-        if(property_exists($this, 'format'))
+        if($client['redirect_uri'] !== $this->_params['redirect_uri'])
         {
-            $response->format = $this->format;
+            throw new Oauth_Exception('redirect-uri-mismatch');
         }
 
-        // if($client['redirect_uri'] !== $this->redirect_uri)
-        // {
-            // $response->error = 'redirect_uri_mismatch';
-            // return $response;
-        // }
-
-        // if($client['client_secret'] !== sha1($this->client_secret))
-        // {
-            // $response->error = 'invalid_client_credentials';
-            // return $response;
-        // }
-
-        if($client['code'] !== $this->code)
+        if($client['client_secret'] !== sha1($this->_params['client_secret']))
         {
-            $response->error = 'bad_authorization_code';
-            return $response;
+            throw new Oauth_Exception('invalid-client-credentials');
         }
 
         $response->expires_in = 3000;

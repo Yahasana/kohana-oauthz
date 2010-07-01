@@ -54,20 +54,20 @@ class Oauth_Parameter_Credentials extends Oauth_Parameter {
 
         if($client['client_secret'] !== sha1($this->client_secret))
         {
-            $response->error = 'invalid_client_credentials';
+            $response->error = 'unauthorized-client';
             return $response;
         }
 
         if(property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
         {
-            $response->error = 'invalid_client_credentials';
+            $response->error = 'invalid-scope';
             return $response;
         }
 
         // Grants Authorization
         $response->expires_in = 3000;
         $response->access_token = $client['access_token'];
-        $response->reflash_token = $client['reflash_token'];
+        $response->refresh_token = $client['refresh_token'];
 
         return $response;
     }

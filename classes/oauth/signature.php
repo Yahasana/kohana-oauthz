@@ -80,4 +80,4 @@ abstract class Oauth_Signature {
         return $signature === $this->build($token);
     }
 
-} //END Oauth Signature
+} // END Oauth Signature

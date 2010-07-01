@@ -1,33 +1,13 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 return array(
-    'default'    => array(
-        'client_request' => array(
-            'type'    => TRUE,
-            'client_id'    => TRUE,
-            /**
-             The redirection URI MUST NOT include a query component
-            */
-            'redirect_uri'    => TRUE,
-            /**
-             OPTIONAL.  An opaque value used by the client to maintain state
-             between the request and callback.  The authorization server
-             includes this value when redirecting the user-agent back to the client.
-            */
-            'state'    => FALSE,
-            /**
-             The parameter value must be set to "true" or
-             "false".  If set to "true", the authorization server MUST NOT
-             prompt the end-user to authenticate or approve access.
-            */
-            'immediate'    => FALSE,
-            'secret_type'    => FALSE
-        ),
+
+    'default' => array(
 
         'formats' => array(
-            'json'    => TRUE,
-            'xml'    => TRUE,
-            'form'    => FALSE
+            'json'      => TRUE,
+            'xml'       => TRUE,
+            'form'      => FALSE
         ),
 
         'types'    => array(
@@ -41,7 +21,6 @@ return array(
             'access_token'  => '',
             'expires_in'    => '',
             'refresh_token' => '',
-            'token_secret'  => '',
             'scope'         => '',
         ),
 
@@ -53,11 +32,61 @@ return array(
             'DELETE'    => TRUE
         ),
 
-        // cryptographic token or bear token
-        'request_params'    => array(
+        /**
+         * Parameters should be required when request authorization code
+         * cryptographic token or bear token
+         */
+        'code_params'     => array(
+            'client_id'     => TRUE,
+            'redirect_uri'  => TRUE,
+            'scope'         => FALSE,
+            'state'         => FALSE
+        ),
+
+        /**
+         * Parameters should be required when request access token
+         */
+        'grant_params'     => array(
+            'authorization-code'    => array(
+                'code'              => TRUE,
+                'redirect_uri'      => TRUE,
+                'client_id'         => TRUE,
+                'client_secret'     => TRUE,
+            ),
+            'basic-credentials'     => array(
+                'username'          => TRUE,
+                'password'          => TRUE,
+                'client_id'         => TRUE,
+                'client_secret'     => TRUE,
+            ),
+            'assertion'             => array(
+                'assertion_type'    => TRUE,
+                'assertion'         => TRUE,
+                'client_id'         => TRUE,
+                'client_secret'     => TRUE,
+
+            ),
+            'refresh-token'         => array(
+                'refresh_token'     => TRUE,
+                'client_id'         => TRUE,
+                'client_secret'     => TRUE,
+            ),
+            'none'                  => array(
+                'client_id'         => TRUE,
+                'client_secret'     => TRUE,
+            ),
+            'signature'             => FALSE
+        ),
+
+        /**
+         * Parameters should be required when access protected resource
+         * cryptographic token or bear token
+         */
+        'access_params'     => array(
             'oauth_token'   => TRUE,
+            'timestamp'     => TRUE,
+            'scope'         => FALSE,
             'nonce'         => FALSE,
-            'timestamp'     => FALSE,
             'algorithm'     => FALSE,
             'signature'     => FALSE
         ),
@@ -79,6 +108,88 @@ return array(
             1500,       // vip client
         ),
 
-        'duration'      => 300 // token expires time, default is five minutes
+        'durations'     => array(
+            'code'          => 120,     // authorization code expires time, default is 2 minutes
+            'oauth_token'   => 3600,    // token expires time, default is 1 hour
+            'refresh_token' => 86400    // refresh token expires time, default is 1 day
+        ),
+
+        #section-3.2.1 Error Codes
+        'req_code_errors'   => array(
+            'invalid-request'       => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            ),
+            'invalid-client-id'     => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            ),
+            'unauthorized-client'   => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            ),
+            'redirect-uri-mismatch' => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            ),
+            'access-denied'         => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            ),
+            'unsupported-response-type' => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            ),
+            'invalid-scope'         => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            )
+        ),
+        #section-4.3.1 Error Codes
+        'req_token_errors'  => array(
+            'invalid-request'       => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            ),
+            'invalid-client-credentials' => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            ),
+            'unauthorized-client'   => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            ),
+            'invalid-grant'         => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            ),
+            'unsupported-grant-type'=> array(
+                'error_description' => '',
+                'error_uri'         => '',
+            ),
+            'invalid-scope'         => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            )
+        ),
+        #section-5.2.1 Error Codes
+        'access_res_errors' => array(
+            'invalid-request'       => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            ),
+            'invalid-token'         => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            ),
+            'expired-token'         => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            ),
+            'insufficient-scope'    => array(
+                'error_description' => '',
+                'error_uri'         => '',
+            )
+        )
     )
 );

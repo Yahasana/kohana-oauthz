@@ -61,9 +61,9 @@ class Oauth_Parameter_Assertion extends Oauth_Parameter {
     {
         $response = new Oauth_Token;
 
-        if($client['format'] !== $this->assertion_type)
+        if($client['assertion_type'] !== $this->assertion_type)
         {
-            $response->error = 'unknown_format';
+            $response->error = 'unknown-format';
             return $response;
         }
         else
@@ -76,7 +76,7 @@ class Oauth_Parameter_Assertion extends Oauth_Parameter {
             OR (property_exists($this, 'client_secret') AND $client['client_secret'] !== sha1($this->client_secret))
             OR (property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
         {
-            $response->error = 'invalid_assertion';
+            $response->error = 'invalid-request';
             return $response;
         }
 

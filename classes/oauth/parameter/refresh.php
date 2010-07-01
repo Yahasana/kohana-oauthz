@@ -23,10 +23,7 @@ class Oauth_Parameter_Refresh extends Oauth_Parameter {
     /**
      * format
      *      OPTIONAL.  The response format requested by the client.  Value
-     *      MUST be one of "json", "xml", or "form".  Alternatively, the
-     *      client MAY use the HTTP "Accept" header field with the desired
-     *      media type.  Defaults to "json" if omitted and no "Accept"
-     *      header field is present.
+     *      MUST be one of "json", "xml", or "form".
      */
 
     public function __construct($args = NULL)
@@ -42,6 +39,11 @@ class Oauth_Parameter_Refresh extends Oauth_Parameter {
 
         if(NULL !== $format = Arr::get($params, 'format'))
             $this->format = $format;
+
+        if(empty($this->client_id) OR empty($this->client_secret) OR empty($this->refresh_token))
+        {
+            throw new Oauth_Exception('invalid-request');
+        }
     }
 
     public function oauth_token($client)
@@ -58,16 +60,21 @@ class Oauth_Parameter_Refresh extends Oauth_Parameter {
             $response->format = $this->format;
         }
 
-        if($client['client_secret'] !== sha1($this->client_secret)
-            OR $client['refresh_token'] !== $this->refresh_token)
+        if($client['client_secret'] !== sha1($this->client_secret))
         {
-            $response->error = 'invalid_client_credentials';
+            $response->error = 'unauthorized-client';
+            return $response;
+        }
+
+        if($client['refresh_token'] !== $this->refresh_token)
+        {
+            $response->error = 'invalid-token';
             return $response;
         }
 
         if($client['timestamp'] + 300 < time())
         {
-            $response->error = 'authorization_expired';
+            $response->error = 'expired-token';
             return $response;
         }
 

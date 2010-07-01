@@ -62,6 +62,12 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
         // OPTIONAL.  The scope of the access request expressed as a list of space-delimited strings.
         if(NULL !== $format = Arr::get($params, 'format'))
             $this->format = $format;
+
+        if(empty($this->client_id) OR empty($this->client_secret)
+            OR empty($this->username) OR empty($this->password))
+        {
+            throw new Oauth_Exception('invalid-request');
+        }
     }
 
     public function oauth_token($client)
@@ -82,20 +88,20 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
             OR $client['password'] !== sha1($this->password)
             OR $client['username'] !== $this->username)
         {
-            $response->error = 'invalid_client_credentials';
+            $response->error = 'unauthorized-client';
             return $response;
         }
 
         if(property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
         {
-            $response->error = 'unauthorized_client';
+            $response->error = 'invalid-scope';
             return $response;
         }
 
         // Grants Authorization
         $response->expires_in = 3000;
         $response->access_token = $client['access_token'];
-        $response->reflash_token = $client['reflash_token'];
+        $response->refresh_token = $client['refresh_token'];
 
         return $response;
     }

@@ -21,7 +21,8 @@ class Controller_Client extends Oauth_Client_Controller {
 
     public function action_test()
     {
-        try {
+        try
+        {
             $resource = Remote::get('http://docs/api',array(
                 CURLOPT_POST        => TRUE,
                 CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=UTF-8'),
@@ -33,11 +34,11 @@ class Controller_Client extends Oauth_Client_Controller {
                 ))
             ));
         }
-        catch(Exception $e)
+        catch (Exception $e)
         {
             $resource = $e->getMessage();
         }
         echo '<pre>'.print_r($resource,TRUE).'</pre>';
     }
 
-} //END Controller Consumer
+} // END Controller Consumer

@@ -1,4 +1,8 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');        
+    if(Request::$current->param('id'))
+        $uri = Request::$current->controller.'/'.Request::$current->action.'/';
+    else
+        $uri = Request::$current->uri.'/';
 ?><style type="text/css" media="screen">/*<![CDATA[*/
 table{
     border:1px solid #ccc;margin:10px
@@ -23,9 +27,9 @@ tbody th{
                     echo '<th rowspan="'.$count.'">'.__('Authorization Response').'</th>';
                     $count = FALSE;
                 }
-            ?><td><a href="/<?php echo Request::$current->uri(array('controller'=>'server','action'=>'error','id'=>$error_code));
+            ?><td><a href="/<?php echo $uri.$error_code;
             ?>"><?php echo $error_code; ?></a></td><td><?php echo $error_info['error_description']; ?></td><td>/<?php
-                echo Request::$current->uri(array('controller'=>'server','action'=>'error','id'=>$error_code)); ?></td></tr><?php
+                echo $uri.$error_code; ?></td></tr><?php
         }
         echo '</tbody>';
     }
@@ -41,9 +45,9 @@ tbody th{
                     echo '<th rowspan="'.$count.'">'.__('Access Token Response').'</th>';
                     $count = FALSE;
                 }
-            ?><td><a href="/<?php echo Request::$current->uri(array('controller'=>'server','action'=>'error','id'=>$error_code));
+            ?><td><a href="/<?php echo $uri.$error_code;
             ?>"><?php echo $error_code; ?></a></td><td><?php echo $error_info['error_description']; ?></td><td>/<?php
-                echo Request::$current->uri(array('controller'=>'server','action'=>'error','id'=>$error_code)); ?></td></tr><?php
+                echo $uri.$error_code; ?></td></tr><?php
         }
         echo '</tbody>';
     }
@@ -51,7 +55,7 @@ tbody th{
     if(isset($access_res_errors))
     {
         echo '<tbody>';
-        $count = count($access_res_errors);
+        $count = count($access_res_errors);            
         foreach($access_res_errors as $error_code => $error_info)
         {
             ?><tr><?php
@@ -59,9 +63,9 @@ tbody th{
                     echo '<th rowspan="'.$count.'">'.__('Access Protected Resource').'</th>';
                     $count = FALSE;
                 }
-            ?><td><a href="/<?php echo Request::$current->uri(array('controller'=>'server','action'=>'error','id'=>$error_code));
+            ?><td><a href="/<?php echo $uri.$error_code;
             ?>"><?php echo $error_code; ?></a></td><td><?php echo $error_info['error_description']; ?></td><td>/<?php
-                echo Request::$current->uri(array('controller'=>'server','action'=>'error','id'=>$error_code)); ?></td></tr><?php
+                echo $uri.$error_code; ?></td></tr><?php
         }
         echo '</tbody>';
     }

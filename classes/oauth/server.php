@@ -22,24 +22,47 @@ class Oauth_Server extends Kohana_Controller {
         $this->template = new View($this->template);
     }
 
-    public function action_register()
+    public function action_register($client_id = NULL)
     {
-        if(isset($_POST['password']))
+        $data = array();
+        if($client_id)
+        {
+            $data = $this->oauth->lookup_server($client_id, $_SESSION['user']['uid']);
+        }
+        elseif(isset($_POST['password']))
         {
             $post = new Validate($_POST);
             $post->filter(TRUE, 'trim')
-                ->rule('password', 'not_empty')
-                ->rule('password', 'min_length', array(6))
-                ->rule('confirm',  'matches', array('password'));
+                ->rule('redirect_uri', 'not_empty');
+            
+            if(empty($_POST['client_id']))
+            {
+                $post->rule('password', 'not_empty')
+                    ->rule('password', 'min_length', array(6))
+                    ->rule('confirm',  'matches', array('password'));
+            }
+            elseif( ! empty($_POST['password']) OR ! empty($_POST['confirm']))
+            {
+                $post->rule('password', 'not_empty')
+                    ->rule('password', 'min_length', array(6))
+                    ->rule('confirm',  'matches', array('password'));
+            }
+                
             if($post->check())
             {
-                if($this->oauth->unique_server($_POST['redirect_uri']))
+                $_POST['user_id'] = $_SESSION['user']['uid'];
+                
+                if(empty($_POST['client_id']))
                 {
-                    $post->error('redirect_uri', 'not unique');
-                }
-                elseif(empty($_POST['client_id']))
-                {
-                    $this->oauth->reg_server($_POST);
+                    if($this->oauth->unique_server($_POST['redirect_uri']))
+                    {
+                        $post->error('redirect_uri', 'not unique');
+                        $data['errors'] = $post->errors('validate');
+                    }
+                    else
+                    {
+                        $this->oauth->reg_server($_POST);
+                    }
                 }
                 else
                 {
@@ -52,9 +75,7 @@ class Oauth_Server extends Kohana_Controller {
             }
         }
 
-        $data['servers'] = $this->oauth->list_server('0');
-
-        $this->template->content = new View('v_oauth_server', $data);
+        $this->template->content = new View('v_oauth_register', $data);
 
         $this->request->response = $this->template->render();
     }

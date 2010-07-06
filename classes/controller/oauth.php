@@ -74,19 +74,20 @@ class Controller_Oauth extends Oauth_Server_Controller {
                 'uid' => $_SERVER['REQUEST_TIME'],
                 'mail' => $_POST['usermail']
             );
-            Cookie::set('user', $user);
+            Cookie::set('user', json_encode($user));
             Session::instance()->set('user', $user);
             $this->request->redirect('server/index');
         }
         elseif($user = Cookie::get('user'))
         {
-            Session::instance()->set('user', $user);
+            Session::instance()->set('user', json_decode($user, TRUE));
             $this->request->redirect('server/index');
         }
 
+        $template = new View('v_oauth');
         $view = new View('v_oauth_signin');
-        $this->template->content = $view->render();
-        $this->request->response = $this->template;
+        $template->content = $view->render();
+        $this->request->response = $template;
     }
 
     public function action_logout()

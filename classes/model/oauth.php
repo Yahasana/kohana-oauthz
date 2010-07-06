@@ -18,8 +18,6 @@ class Model_Oauth extends Kohana_Model {
 
     public function reg_server($server, $prefix = 'OAL_')
     {
-        $server['user_id'] = 3;
-
         if(isset($server['client_id']) AND DB::select('server_id')
             ->from('t_oauth_servers')
             ->where('client_id','=', $server['client_id'])
@@ -35,44 +33,65 @@ class Model_Oauth extends Kohana_Model {
         }
         else
         {
-            $server['client_id'] = $prefix.uniqid();
-            $server['client_secret'] = $server['pass'];
+            $server['client_id'] = $prefix.strtoupper(uniqid());
+            $server['client_secret'] = $server['password'];
             $server['secret_type'] = 'plaintext';
             DB::insert('t_oauth_servers', array(
-                    'user_id',
-                    'client_id',
-                    'client_secret',
-                    'redirect_uri',
-                    'secret_type',
-                    'scope',
-                    'public_cert'
-                ))->values(array(
-                    $server['user_id'],
-                    $server['client_id'],
-                    sha1($server['client_secret']),
-                    $server['redirect_uri'],
-                    $server['secret_type'],
-                    $server['scope'],
-                    $server['public_cert']
-                ))->execute($this->_db);
+                'user_id',
+                'client_id',
+                'client_secret',
+                'redirect_uri',
+                'secret_type',
+                'scope',
+                'public_cert'
+            ))->values(array(
+                $server['user_id'],
+                $server['client_id'],
+                sha1($server['client_secret']),
+                $server['redirect_uri'],
+                $server['secret_type'],
+                $server['scope'],
+                $server['public_cert']
+            ))->execute($this->_db);
         }
         return $server['client_id'];
     }
 
-    public function update_server()
+    public function update_server($server)
     {
-        //
+        $data = array(
+            //'user_id'       => $server['user_id'],
+            //'client_id'     => $server['client_id'],
+            //'redirect_uri'  => $server['redirect_uri'],
+            'scope'         => $server['scope'],
+            'public_cert'   => $server['public_cert']
+        );
+        if( ! empty($server['client_secret'])) 
+        {
+            $data['client_secret'] = sha1($server['client_secret']);
+        }
+        
+        return DB::update('t_oauth_servers')
+            ->set($data)
+            ->where('client_id','=', $server['client_id'])
+            ->where('user_id','=', $server['user_id'])
+            ->execute($this->_db);
     }
 
-    public function lookup_server($client_id)
+    public function lookup_server($client_id, $user_id)
     {
-        //
+        return DB::select('*')
+            ->from('t_oauth_servers')
+            ->where('client_id', '=', $client_id)
+            ->where('user_id','=', $user_id)
+            ->execute($this->_db)
+            ->current();
     }
 
     public function unique_server($redirect_uri, $user_id = NULL)
     {
         // Check if the username already exists in the database
-        return ! DB::select(array(DB::expr('COUNT(1)'), 'total'))
+        return DB::select(array(DB::expr('COUNT(1)'), 'total'))
             ->from('t_oauth_servers')
             ->where('redirect_uri', '=', $redirect_uri)
             //->where('user_id', '=', $user_id)
@@ -82,7 +101,8 @@ class Model_Oauth extends Kohana_Model {
 
     public function list_server($user_id)
     {
-        return DB::select('*')->from('t_oauth_servers')
+        return DB::select('*')
+            ->from('t_oauth_servers')
             ->where('user_id', '=', $user_id)
             ->execute($this->_db);
     }
@@ -98,7 +118,7 @@ class Model_Oauth extends Kohana_Model {
 
     public function lookup_client($client_id, $expired_in = 3600)
     {
-        if($client_id  AND $client = DB::select('client_secret','server_id','redirect_uri','user_id')
+        if($client_id AND $client = DB::select('client_secret','server_id','redirect_uri','user_id')
             ->from('t_oauth_servers')
             ->where('client_id' , '=', $client_id)
             ->execute($this->_db)
@@ -125,7 +145,7 @@ class Model_Oauth extends Kohana_Model {
 
     public function lookup_code($code)
     {
-        if($code  AND $token = DB::select('token_id','client_id','code','nonce','access_token','timestamp','refresh_token','expire_in')
+        if($code AND $token = DB::select('token_id','client_id','code','nonce','access_token','timestamp','refresh_token','expire_in')
             ->from('t_oauth_tokens')
             ->where('code' , '=', $code)
             ->execute($this->_db)

@@ -26,7 +26,11 @@ class Controller_Server extends Oauth_Server {
 
     public function action_index()
     {
-        //
+        $data['servers'] = $this->oauth->list_server($_SESSION['user']['uid']);
+        
+        $this->template->content = new View('v_oauth_server', $data);
+
+        $this->request->response = $this->template->render();
     }
 
 } // END Controller Consumer

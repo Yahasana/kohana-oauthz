@@ -65,13 +65,13 @@ class Oauth_Parameter_Useragent extends Oauth_Parameter {
 
         if($client['redirect_uri'] !== $this->redirect_uri)
         {
-            $response->error = 'redirect-uri-mismatch';
+            $response->error = 'redirect_uri_mismatch';
             return $response;
         }
 
         if(property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
         {
-            $response->error = 'invalid-scope';
+            $response->error = 'invalid_scope';
             return $response;
         }
 

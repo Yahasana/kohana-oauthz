@@ -40,7 +40,7 @@ class Oauth_Parameter_Code extends Oauth_Parameter {
                 }
                 else
                 {
-                    throw new Oauth_Exception('invalid-request');
+                    throw new Oauth_Exception('invalid_request');
                 }
             }
         }
@@ -61,12 +61,12 @@ class Oauth_Parameter_Code extends Oauth_Parameter {
 
         if($client['redirect_uri'] !== $this->redirect_uri)
         {
-            throw new Oauth_Exception('redirect-uri-mismatch');
+            throw new Oauth_Exception('redirect_uri_mismatch');
         }
 
         if(isset($this->_params['scope']) AND ! isset($client['scope'][$this->_params['scope']]))
         {
-            throw new Oauth_Exception('invalid-scope');
+            throw new Oauth_Exception('invalid_scope');
         }
 
         $response->expires_in = $client['expires_in'];

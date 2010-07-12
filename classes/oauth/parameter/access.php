@@ -33,7 +33,7 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
          */
         isset($_SERVER['HTTP_AUTHORIZATION']) OR $_SERVER['HTTP_AUTHORIZATION'] = getenv('HTTP_AUTHORIZATION');
 
-        if (substr($_SERVER['HTTP_AUTHORIZATION'], 0, 12) === 'Token token=')
+        if (substr($_SERVER['HTTP_AUTHORIZATION'], 0, 12) === 'OAuth token=')
         {
             $offset = 0;
             $pattern = '/(([-_a-z]*)=("([^"]*)"|([^,]*)),?)/';
@@ -62,7 +62,7 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
                 {
                     if( ! isset($params[$key]))
                     {
-                        throw new Oauth_Exception('invalid-request');
+                        throw new Oauth_Exception('invalid_request');
                     }
                 }
             }
@@ -78,7 +78,7 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
             // oauth_token already send in authorization header or the encrypt Content-Type is not single-part
             if(isset($params['oauth_token']) OR stripos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') === FALSE)
             {
-                throw new Oauth_Exception('invalid-request');
+                throw new Oauth_Exception('invalid_request');
             }
             else
             {
@@ -93,7 +93,7 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
                         }
                         else
                         {
-                            throw new Oauth_Exception('invalid-request');
+                            throw new Oauth_Exception('invalid_request');
                         }
                     }
                 }
@@ -108,7 +108,7 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
             // oauth_token already send in authorization header or form-encoded body
             if(isset($params['oauth_token']))
             {
-                throw new Oauth_Exception('invalid-request');
+                throw new Oauth_Exception('invalid_request');
             }
             else
             {
@@ -123,7 +123,7 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
                         }
                         else
                         {
-                            throw new Oauth_Exception('invalid-request');
+                            throw new Oauth_Exception('invalid_request');
                         }
                     }
                 }
@@ -132,7 +132,7 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
 
         if(empty($params))
         {
-            throw new Oauth_Exception('invalid-request');
+            throw new Oauth_Exception('invalid_request');
         }
 
         $this->oauth_token = $params['oauth_token'];
@@ -171,22 +171,22 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
 
         if(isset($this->_params['nonce']) AND $client['nonce'] !== $this->_params['nonce'])
         {
-            throw new Oauth_Exception('invalid-request');
+            throw new Oauth_Exception('invalid_request');
         }
 
         if($client['access_token'] !== $this->_params['oauth_token'])
         {
-            throw new Oauth_Exception('invalid-token');
+            throw new Oauth_Exception('invalid_token');
         }
 
         if(isset($this->_params['scope']) AND $client['scope'] !== $this->_params['scope'])
         {
-            throw new Oauth_Exception('insufficient-scope');
+            throw new Oauth_Exception('insufficient_scope');
         }
 
         if(isset($this->_params['timestamp']) AND $client['timestamp'] < $this->_params['timestamp'])
         {
-            throw new Oauth_Exception('expired-token');
+            throw new Oauth_Exception('expired_token');
         }
 
         // verify the signature
@@ -206,7 +206,7 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
 
             if( ! Oauth::signature($this->_params['algorithm'], $string)->check($response, $this->_params['signature']))
             {
-                throw new Oauth_Exception('invalid-request');
+                throw new Oauth_Exception('invalid_request');
             }
         }
 

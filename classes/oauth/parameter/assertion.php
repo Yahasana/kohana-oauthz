@@ -76,7 +76,7 @@ class Oauth_Parameter_Assertion extends Oauth_Parameter {
             OR (property_exists($this, 'client_secret') AND $client['client_secret'] !== sha1($this->client_secret))
             OR (property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
         {
-            $response->error = 'invalid-request';
+            $response->error = 'invalid_request';
             return $response;
         }
 

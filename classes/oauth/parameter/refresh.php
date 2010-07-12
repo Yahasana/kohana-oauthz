@@ -42,7 +42,7 @@ class Oauth_Parameter_Refresh extends Oauth_Parameter {
 
         if(empty($this->client_id) OR empty($this->client_secret) OR empty($this->refresh_token))
         {
-            throw new Oauth_Exception('invalid-request');
+            throw new Oauth_Exception('invalid_request');
         }
     }
 
@@ -62,19 +62,19 @@ class Oauth_Parameter_Refresh extends Oauth_Parameter {
 
         if($client['client_secret'] !== sha1($this->client_secret))
         {
-            $response->error = 'unauthorized-client';
+            $response->error = 'unauthorized_client';
             return $response;
         }
 
         if($client['refresh_token'] !== $this->refresh_token)
         {
-            $response->error = 'invalid-token';
+            $response->error = 'invalid_token';
             return $response;
         }
 
         if($client['timestamp'] + 300 < time())
         {
-            $response->error = 'expired-token';
+            $response->error = 'expired_token';
             return $response;
         }
 

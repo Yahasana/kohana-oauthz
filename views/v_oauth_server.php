@@ -7,8 +7,7 @@
     {
     ?><tr><td><a href="/server/register/<?php echo $row['client_id']; ?>"><?php echo $row['client_id']; ?></a></td>
     <td><?php echo $row['client_secret']; ?></td><td><?php echo $row['redirect_uri']; ?></td>
-    <td><?php echo $row['scope']; ?></td><td><?php echo $row['public_cert']; ?></td><th>DEL</th></tr>
-<?php
+    <td><?php echo $row['scope']; ?></td><td><?php echo $row['public_cert']; ?></td><th>DEL</th></tr><?php
     }
 ?></tbody></table><hr />
 

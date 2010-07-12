@@ -58,12 +58,12 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
                 case 'token':
                     $response = $this->token();
                     break;
-                case 'code-and-token':
+                case 'code_and_token':
                     // TODO
                     return;
                 default:
                     $response = new Oauth_Token(array(
-                        'error'             => 'unsupported-response-type',
+                        'error'             => 'unsupported_response_type',
                         'error_description' => '',
                         'error_uri'         => '',
                     ));
@@ -102,24 +102,24 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         {
             switch(Oauth::get('grant_type'))
             {
-                case 'authorization-code':
+                case 'authorization_code':
                     $response = $this->authorization_code();
                     break;
-                case 'basic-credentials':
-                    $response = $this->basic_credentials();
+                case 'password':
+                    $response = $this->password_credentials();
                     break;
                 case 'assertion':
                     $response = $this->assertion();
                     break;
-                case 'refresh-token':
+                case 'refresh_token':
                     $response = $this->refresh_token();
                     break;
                 case 'none':
-                    $response = $this->username();
+                    $response = $this->none();
                     break;
                 default:
                     $response = new Oauth_Token(array(
-                        'error'             => 'unsupported-grant-type',
+                        'error'             => 'unsupported_grant_type',
                         'error_description' => '',
                         'error_uri'         => '',
                     ));
@@ -153,7 +153,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
      *
      * @author    sumh <oalite@gmail.com>
      * @access    protected
-     * @return    string    redirect_uri#[code,state|error=MUST be set to "redirect_uri_mismatch", "bad_authorization_code", "invalid_client_credentials"]
+     * @return    string    redirect_uri#[code,state|error=MUST be set to "redirect_uri_mismatch", "bad_authorization_code", "invalid_client"]
      */
     protected function code()
     {
@@ -167,7 +167,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Token(array(
-                'error'             => 'invalid-client-id',
+                'error'             => 'invalid_client',
                 'error_description' => '',
                 'error_uri'         => '',
             ));
@@ -179,7 +179,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
 
     protected function token()
     {
-        $params = $this->_configs['grant_params']['authorization-code'] + $this->_configs['code_params'];
+        $params = $this->_configs['grant_params']['authorization_code'] + $this->_configs['code_params'];
 
         $parameter = new Oauth_Parameter_Token($params);
 
@@ -192,7 +192,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Token(array(
-                'error'             => 'invalid-client-id',
+                'error'             => 'invalid_client',
                 'error_description' => '',
                 'error_uri'         => '',
             ));
@@ -206,7 +206,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
 
     protected function authorization_code()
     {
-        $parameter = new Oauth_Parameter_Webserver($this->_configs['grant_params']['authorization-code']);
+        $parameter = new Oauth_Parameter_Webserver($this->_configs['grant_params']['authorization_code']);
 
         if($client = $this->oauth->lookup_code($parameter->code))
         {
@@ -217,7 +217,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Token(array(
-                'error'             => 'invalid-client-credentials',
+                'error'             => 'invalid_client',
                 'error_description' => '',
                 'error_uri'         => '',
             ));
@@ -228,9 +228,9 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         return $response;
     }
 
-    protected function username()
+    protected function none()
     {
-        $parameter = new Oauth_Parameter_Username;
+        $parameter = new Oauth_Parameter_None;
 
         if($client = $this->oauth->lookup_server($parameter->client_id))
         {
@@ -239,7 +239,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Token(array(
-                'error'             => 'invalid-client-credentials',
+                'error'             => 'invalid_client',
                 'error_description' => '',
                 'error_uri'         => '',
             ));
@@ -249,9 +249,9 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         return $response;
     }
 
-    protected function basic_credentials()
+    protected function password_credentials()
     {
-        $parameter = new Oauth_Parameter_Credentials;
+        $parameter = new Oauth_Parameter_Password;
 
         if($client = $this->oauth->lookup_server($parameter->client_id))
         {
@@ -260,7 +260,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Token(array(
-                'error'             => 'invalid-client-credentials',
+                'error'             => 'invalid_client',
                 'error_description' => '',
                 'error_uri'         => '',
             ));
@@ -281,7 +281,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Token(array(
-                'error'             => 'invalid-client-credentials',
+                'error'             => 'invalid_client',
                 'error_description' => '',
                 'error_uri'         => '',
             ));
@@ -302,7 +302,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             $response = new Oauth_Token(array(
-                'error'             => 'invalid-client-credentials',
+                'error'             => 'invalid_client',
                 'error_description' => '',
                 'error_uri'         => '',
             ));

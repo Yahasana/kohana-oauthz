@@ -36,7 +36,7 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
         // oauth_token already send in authorization header or the encrypt Content-Type is not single-part
         if(stripos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') === FALSE)
         {
-            throw new Oauth_Exception('invalid-request');
+            throw new Oauth_Exception('invalid_request');
         }
         else
         {
@@ -51,7 +51,7 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
                     }
                     else
                     {
-                        throw new Oauth_Exception('invalid-request');
+                        throw new Oauth_Exception('invalid_request');
                     }
                 }
             }
@@ -78,12 +78,12 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
 
         if(isset($this->_params['scope']) AND ! isset($client['scope'][$this->_params['scope']]))
         {
-            throw new Oauth_Exception('invalid-request');
+            throw new Oauth_Exception('invalid_request');
         }
 
         if($client['redirect_uri'] !== $this->_params['redirect_uri'])
         {
-            throw new Oauth_Exception('redirect-uri-mismatch');
+            throw new Oauth_Exception('redirect_uri_mismatch');
         }
 
         // Grants Authorization
@@ -106,17 +106,17 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
 
         if(isset($this->_params['token_secret']) AND $client['token_secret'] !== sha1($this->_params['token_secret']))
         {
-            throw new Oauth_Exception('invalid-request');
+            throw new Oauth_Exception('invalid_request');
         }
 
         if(isset($this->_params['nonce']) AND $client['nonce'] !== $this->nonce)
         {
-            throw new Oauth_Exception('invalid-request');
+            throw new Oauth_Exception('invalid_request');
         }
 
         if(isset($this->_params['timestamp']) AND $client['timestamp'] < $this->_params['timestamp'])
         {
-            throw new Oauth_Exception('expired-token');
+            throw new Oauth_Exception('expired_token');
         }
 
         // verify the signature

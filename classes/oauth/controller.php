@@ -63,14 +63,14 @@ abstract class Oauth_Controller extends Kohana_Controller {
         {
             if(empty($this->_configs['request_methods'][Request::$method]))
             {
-                throw new Oauth_Exception('invalid-request');
+                throw new Oauth_Exception('invalid_request');
             }
 
             $parameter = new Oauth_Parameter_Access($this->_configs['access_params']);
 
             if( ! $client = $this->oauth->lookup_token($parameter->oauth_token))
             {
-                throw new Oauth_Exception('invalid-token');
+                throw new Oauth_Exception('invalid_token');
             }
 
             $client['timestamp'] += $this->_configs['durations']['oauth_token'];
@@ -79,8 +79,8 @@ abstract class Oauth_Controller extends Kohana_Controller {
         }
         catch (Oauth_Exception $e)
         {
-            $this->errors = $e->getMessage();
-            $this->request->action = 'invalid_credentials';
+            $this->error_code = $e->getMessage();
+            $this->request->action = 'unauthenticated';
         }
     }
 
@@ -98,54 +98,25 @@ abstract class Oauth_Controller extends Kohana_Controller {
      * Unauthorized response
      *
      * @access	public
-     * @param	string	$error	default [ error='invalid_client_credentials' ]
+     * @param	string	$error	default [ error='invalid_client' ]
      * @return	void
      * @todo    Add list of error codes
      */
-    public function action_invalid_credentials()
+    public function action_unauthenticated()
     {
-        $error = 'error=\''.$this->errors.'\'';
+        $error['error'] = $this->error_code;
+        $error += $this->_configs['access_res_errors'][$this->error_code];
 
-        //space-delimited list of the cryptographic algorithms supported by the resource server
-        $challenge = '';
-        foreach($this->_configs['secret_types'] as $key => $val)
+        switch($this->error_code)
         {
-            if($val === TRUE)
-            {
-                $challenge .= $key.' ';
-            }
-        }
-
-        if($challenge !== '')
-        {
-            $error .= ',algorithms=\''.rtrim($challenge).'\'';
-        }
-
-        //space-delimited list of URIs (relative or absolute)
-        $challenge = '';
-        foreach($this->_configs['scopes'] as $key => $val)
-        {
-            if($val === TRUE)
-            {
-                $challenge .= $key.' ';
-            }
-        }
-
-        if($challenge !== '')
-        {
-            $error .= ',scope=\''.rtrim($challenge).'\'';
-        }
-
-        switch($this->errors)
-        {
-            case 'invalid-request':
+            case 'invalid_request':
                 $this->request->status = 400;   #HTTP/1.1 400 Bad Request
                 break;
-            case 'invalid-token':
-            case 'expired-token':
+            case 'invalid_token':
+            case 'expired_token':
                 $this->request->status = 401;   #HTTP/1.1 401 Unauthorized
                 break;
-            case 'insufficient-scope':
+            case 'insufficient_scope':
                 $this->request->status = 403;   #HTTP/1.1 403 Forbidden
                 break;
             default:
@@ -153,8 +124,8 @@ abstract class Oauth_Controller extends Kohana_Controller {
                 break;
         }
 
-        $this->request->headers['WWW-Authenticate'] = 'Token realm=\'Service\','.$error;
-        $this->request->response = $error;
+        $this->request->headers['WWW-Authenticate'] = 'OAuth realm=\'Service\','.http_build_query($error, '', ',');
+        $this->request->response = json_encode($error);
     }
 
 } // END Oauth Controller

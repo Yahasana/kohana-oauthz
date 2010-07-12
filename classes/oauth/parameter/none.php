@@ -1,6 +1,6 @@
 <?php
 
-class Oauth_Parameter_Username extends Oauth_Parameter {
+class Oauth_Parameter_None extends Oauth_Parameter {
 
     /**
      * client_id
@@ -66,7 +66,7 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
         if(empty($this->client_id) OR empty($this->client_secret)
             OR empty($this->username) OR empty($this->password))
         {
-            throw new Oauth_Exception('invalid-request');
+            throw new Oauth_Exception('invalid_request');
         }
     }
 
@@ -88,13 +88,13 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
             OR $client['password'] !== sha1($this->password)
             OR $client['username'] !== $this->username)
         {
-            $response->error = 'unauthorized-client';
+            $response->error = 'unauthorized_client';
             return $response;
         }
 
         if(property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
         {
-            $response->error = 'invalid-scope';
+            $response->error = 'invalid_scope';
             return $response;
         }
 
@@ -106,4 +106,4 @@ class Oauth_Parameter_Username extends Oauth_Parameter {
         return $response;
     }
 
-} // END Oauth_Parameter_Username
+} // END Oauth_Parameter_None

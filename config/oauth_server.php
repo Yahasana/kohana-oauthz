@@ -47,13 +47,13 @@ return array(
          * Parameters should be required when request access token
          */
         'grant_params'     => array(
-            'authorization-code'    => array(
+            'authorization_code'    => array(
                 'code'              => TRUE,
                 'redirect_uri'      => TRUE,
                 'client_id'         => TRUE,
                 'client_secret'     => TRUE,
             ),
-            'basic-credentials'     => array(
+            'password'     => array(
                 'username'          => TRUE,
                 'password'          => TRUE,
                 'client_id'         => TRUE,
@@ -66,7 +66,7 @@ return array(
                 'client_secret'     => TRUE,
 
             ),
-            'refresh-token'         => array(
+            'refresh_token'         => array(
                 'refresh_token'     => TRUE,
                 'client_id'         => TRUE,
                 'client_secret'     => TRUE,
@@ -116,77 +116,77 @@ return array(
 
         #section-3.2.1 Error Codes
         'req_code_errors'   => array(
-            'invalid-request'       => array(
+            'invalid_request'       => array(
                 'error_description' => '',
                 'error_uri'         => '',
             ),
-            'invalid-client-id'     => array(
+            'invalid_client'     => array(
                 'error_description' => '',
                 'error_uri'         => '',
             ),
-            'unauthorized-client'   => array(
+            'unauthorized_client'   => array(
                 'error_description' => '',
                 'error_uri'         => '',
             ),
-            'redirect-uri-mismatch' => array(
+            'redirect_uri_mismatch' => array(
                 'error_description' => '',
                 'error_uri'         => '',
             ),
-            'access-denied'         => array(
+            'access_denied'         => array(
                 'error_description' => '',
                 'error_uri'         => '',
             ),
-            'unsupported-response-type' => array(
+            'unsupported_response_type' => array(
                 'error_description' => '',
                 'error_uri'         => '',
             ),
-            'invalid-scope'         => array(
+            'invalid_scope'         => array(
                 'error_description' => '',
                 'error_uri'         => '',
             )
         ),
         #section-4.3.1 Error Codes
         'req_token_errors'  => array(
-            'invalid-request'       => array(
+            'invalid_request'       => array(
                 'error_description' => '',
                 'error_uri'         => '',
             ),
-            'invalid-client-credentials' => array(
+            'invalid_client' => array(
                 'error_description' => '',
                 'error_uri'         => '',
             ),
-            'unauthorized-client'   => array(
+            'unauthorized_client'   => array(
                 'error_description' => '',
                 'error_uri'         => '',
             ),
-            'invalid-grant'         => array(
+            'invalid_grant'         => array(
                 'error_description' => '',
                 'error_uri'         => '',
             ),
-            'unsupported-grant-type'=> array(
+            'unsupported_grant_type'=> array(
                 'error_description' => '',
                 'error_uri'         => '',
             ),
-            'invalid-scope'         => array(
+            'invalid_scope'         => array(
                 'error_description' => '',
                 'error_uri'         => '',
             )
         ),
         #section-5.2.1 Error Codes
         'access_res_errors' => array(
-            'invalid-request'       => array(
+            'invalid_request'       => array(
                 'error_description' => '',
                 'error_uri'         => '',
             ),
-            'invalid-token'         => array(
+            'invalid_token'         => array(
                 'error_description' => '',
                 'error_uri'         => '',
             ),
-            'expired-token'         => array(
+            'expired_token'         => array(
                 'error_description' => '',
                 'error_uri'         => '',
             ),
-            'insufficient-scope'    => array(
+            'insufficient_scope'    => array(
                 'error_description' => '',
                 'error_uri'         => '',
             )

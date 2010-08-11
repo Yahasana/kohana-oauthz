@@ -1,5 +1,15 @@
 <?php
-
+/**
+ * Oauth parameter handler for request with none or without oauth param
+ *
+ * @author      sumh <oalite@gmail.com>
+ * @package     Oauth
+ * @copyright   (c) 2010 OALite
+ * @license     ISC License (ISCL)
+ * @link        http://www.oalite.cn
+ * @see         Oauth_Parameter
+ * *
+ */
 class Oauth_Parameter_None extends Oauth_Parameter {
 
     /**

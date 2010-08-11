@@ -1,5 +1,14 @@
 <?php
-
+/**
+ * OAuth Client class
+ *
+ * @author      sumh <oalite@gmail.com>
+ * @package     Oauth
+ * @copyright   (c) 2010 OALite
+ * @license     ISC License (ISCL)
+ * @link        http://www.oalite.cn
+ * *
+ */
 class Oauth_Client {
 
     public $type = 'webserver';
@@ -23,4 +32,5 @@ class Oauth_Client {
         $this->client_id = $client_id;
         $this->client_secret = $client_secret;
     }
-}
+    
+} // END Oauth_Client

@@ -1,3 +1,13 @@
+/**
+ * OAuth database table schema
+ *
+ * @author      sumh <oalite@gmail.com>
+ * @package     Oauth
+ * @copyright   (c) 2010 OALite
+ * @license     ISC License (ISCL)
+ * @link        http://www.oalite.cn
+ * *
+ */
 
 /******************** Add Table: t_oauth_clients ************************/
 

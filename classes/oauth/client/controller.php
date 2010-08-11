@@ -2,14 +2,12 @@
 /**
  * Oauth client controller
  *
- * @author     sumh <oalite@gmail.com>
- * @package    Oauth
- * @copyright  (c) 2009 OALite team
- * @license    http://www.oalite.com/license.txt
- * @version    $id$
- * @link       http://www.oalite.com
- * @see        Kohana_Controller
- * @since      Available since Release 1.0
+ * @author      sumh <oalite@gmail.com>
+ * @package     Oauth
+ * @copyright   (c) 2010 OALite
+ * @license     ISC License (ISCL)
+ * @link        http://www.oalite.cn
+ * @see         Kohana_Controller
  * *
  */
 class Oauth_Client_Controller extends Kohana_Controller {
@@ -71,7 +69,7 @@ class Oauth_Client_Controller extends Kohana_Controller {
 
         if( ! empty($this->_configs['state']))
             $params['state'] = $this->_configs['state'];
-            
+
         $this->request->redirect($uri.'?'.Oauth::build_query($params));
     }
 
@@ -139,4 +137,4 @@ class Oauth_Client_Controller extends Kohana_Controller {
         }
     }
 
-} // END Oauth Consumer Controller
+} // END Oauth Client Controller

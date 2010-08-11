@@ -2,14 +2,12 @@
 /**
  * OAuth servers register management
  *
- * @author		sumh <oalite@gmail.com>
- * @package		Oauth_Server
- * @copyright	(c) 2009 OALite team
- * @license		http://www.oalite.com/license.txt
- * @version		$id$
- * @link		http://www.oalite.com
+ * @author      sumh <oalite@gmail.com>
+ * @package     Oauth
+ * @copyright   (c) 2010 OALite
+ * @license     ISC License (ISCL)
+ * @link		http://www.oalite.cn
  * @see			Kohana_Controller
- * @since		Available since Release 1.0
  * *
  */
 class Oauth_Server extends Kohana_Controller {
@@ -34,7 +32,7 @@ class Oauth_Server extends Kohana_Controller {
             $post = new Validate($_POST);
             $post->filter(TRUE, 'trim')
                 ->rule('redirect_uri', 'not_empty');
-            
+
             if(empty($_POST['client_id']))
             {
                 $post->rule('password', 'not_empty')
@@ -47,11 +45,11 @@ class Oauth_Server extends Kohana_Controller {
                     ->rule('password', 'min_length', array(6))
                     ->rule('confirm',  'matches', array('password'));
             }
-                
+
             if($post->check())
             {
                 $_POST['user_id'] = $_SESSION['user']['uid'];
-                
+
                 if(empty($_POST['client_id']))
                 {
                     if($this->oauth->unique_server($_POST['redirect_uri']))

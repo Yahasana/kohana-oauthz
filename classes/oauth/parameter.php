@@ -1,5 +1,14 @@
 <?php
-
+/**
+ * OAuth request parameter handler
+ *
+ * @author      sumh <oalite@gmail.com>
+ * @package     Oauth
+ * @copyright   (c) 2010 OALite
+ * @license     ISC License (ISCL)
+ * @link        http://www.oalite.cn
+ * *
+ */
 abstract class Oauth_Parameter {
 
     /**
@@ -77,4 +86,5 @@ abstract class Oauth_Parameter {
     {
         return new Oauth_Token;
     }
-}
+
+} // END Oauth_Parameter

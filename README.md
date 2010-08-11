@@ -25,6 +25,10 @@
 
     class Controller_Client extends Oauth_Client_Controller {}
 
+## ISC License (ISCL) ##
+
+http://www.opensource.org/licenses/isc-license.txt
+
 ## Want to donate ? ##
 
 If you want to donate, go to [http://kohanaframework.org/donate](http://kohanaframework.org/donate). Thanks!

@@ -4,11 +4,9 @@
  *
  * @author      sumh <oalite@gmail.com>
  * @package     Oauth
- * @copyright   (c) 2009 OALite team
- * @license     http://www.oalite.com/license.txt
- * @version     $id$
- * @link        http://www.oalite.com
- * @since       Available since Release 1.0
+ * @copyright   (c) 2010 OALite
+ * @license     ISC License (ISCL)
+ * @link        http://www.oalite.cn
  * *
  */
 abstract class Oauth_Core {

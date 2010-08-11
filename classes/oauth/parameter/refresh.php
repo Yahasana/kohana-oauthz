@@ -1,5 +1,15 @@
 <?php
-
+/**
+ * Oauth parameter handler for refresh token flow
+ *
+ * @author      sumh <oalite@gmail.com>
+ * @package     Oauth
+ * @copyright   (c) 2010 OALite
+ * @license     ISC License (ISCL)
+ * @link        http://www.oalite.cn
+ * @see         Oauth_Parameter
+ * *
+ */
 class Oauth_Parameter_Refresh extends Oauth_Parameter {
 
     /**

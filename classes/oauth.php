@@ -2,13 +2,11 @@
 /**
  * OAuth helper class
  *
- * @author     sumh <oalite@gmail.com>
- * @package    Oauth
- * @copyright  (c) 2009 OALite team
- * @license    http://www.opensource.org/licenses/bsd-license.php
- * @version    $id$
- * @link       http://www.oalite.cn
- * @since      Available since Release 1.0
+ * @author      sumh <oalite@gmail.com>
+ * @package     Oauth
+ * @copyright   (c) 2010 OALite
+ * @license     ISC License (ISCL)
+ * @link        http://www.oalite.cn
  * *
  */
 abstract class Oauth extends Oauth_Core{

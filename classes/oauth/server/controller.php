@@ -5,12 +5,10 @@
  *
  * @author      sumh <oalite@gmail.com>
  * @package     Oauth
- * @copyright   (c) 2009 OALite team
- * @license     http://www.oalite.com/license.txt
- * @version     $id$
- * @link        http://www.oalite.com
+ * @copyright   (c) 2010 OALite
+ * @license     ISC License (ISCL)
+ * @link        http://www.oalite.cn
  * @see         Kohana_Controller
- * @since       Available since Release 1.0
  * *
  */
 abstract class Oauth_Server_Controller extends Kohana_Controller {

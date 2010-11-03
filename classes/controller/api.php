@@ -4,12 +4,10 @@
  *
  * @author      sumh <oalite@gmail.com>
  * @package     Oauth
- * @copyright   (c) 2009 OALite team
- * @license     http://www.oalite.com/license.txt
- * @version     $id$
- * @link        http://www.oalite.com
- * @see         Oauth_Server_Controller
- * @since       Available since Release 1.0
+ * @copyright   (c) 2010 OALite
+ * @license     ISC License (ISCL)
+ * @link		http://www.oalite.cn
+ * @see         Oauth_Controller
  * *
  */
 class Controller_Api extends Oauth_Controller {
@@ -39,12 +37,12 @@ class Controller_Api extends Oauth_Controller {
         //
     }
 
-    public function action_post()
+    public function action_create()
     {
         //
     }
 
-    public function action_put()
+    public function action_update()
     {
         //
     }

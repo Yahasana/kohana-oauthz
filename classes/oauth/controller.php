@@ -1,5 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
+ * OAuth protected layout for all API controller
  *
  * @author      sumh <oalite@gmail.com>
  * @package     Oauth
@@ -43,6 +44,13 @@ abstract class Oauth_Controller extends Kohana_Controller {
      */
     protected $_configs;
 
+    /**
+     * methods exclude from OAuth protection
+     *
+     * @access  protected
+     * @var     array    $_exclude
+     */
+    protected $_exclude = array();
 
     /**
      * Verify the request to protected resource.
@@ -53,54 +61,60 @@ abstract class Oauth_Controller extends Kohana_Controller {
      */
     public function before()
     {
-        $this->_configs = Kohana::config('oauth_server.'.$this->_type);
-
-        $this->oauth = new Model_Oauth;
-
-        try
+        if( ! in_array($this->request->action, $this->_exclude))
         {
-            if(empty($this->_configs['request_methods'][Request::$method]))
+            $this->_configs = Kohana::config('oauth-server.'.$this->_type);
+
+            $this->oauth = new Model_Oauth;
+
+            try
             {
-                throw new Oauth_Exception('invalid_request');
+                if(empty($this->_configs['request_methods'][Request::$method]))
+                {
+                    throw new Oauth_Exception('invalid_request');
+                }
+
+                $parameter = new Oauth_Parameter_Access($this->_configs['access_params']);
+
+                if( ! $client = $this->oauth->lookup_token($parameter->oauth_token))
+                {
+                    throw new Oauth_Exception('invalid_token');
+                }
+
+                $client['timestamp'] += $this->_configs['durations']['oauth_token'];
+
+                $parameter->access_token($client);
             }
-
-            $parameter = new Oauth_Parameter_Access($this->_configs['access_params']);
-
-            if( ! $client = $this->oauth->lookup_token($parameter->oauth_token))
+            catch (Oauth_Exception $e)
             {
-                throw new Oauth_Exception('invalid_token');
+                $this->error_code = $e->getMessage();
+                $this->request->action = 'un_authenticated';
             }
-
-            $client['timestamp'] += $this->_configs['durations']['oauth_token'];
-
-            $parameter->access_token($client);
-        }
-        catch (Oauth_Exception $e)
-        {
-            $this->error_code = $e->getMessage();
-            $this->request->action = 'unauthenticated';
         }
     }
 
-    /**********************************Server OAuth Discovery for user*******************/
-
+    /**
+     * OAuth server auto-discovery for user
+     *
+     * @access	public
+     * @return	void
+     * @todo    Add list of error codes
+     */
     public function action_xrds()
     {
         $this->request->headers['Content-Type'] = 'application/xrds+xml';
-        $this->request->response = View::factory('v_oauth_xrds')->render();
+        $this->request->response = View::factory('oauth-xrds')->render();
     }
 
-    /**********************************END actions*****************************************/
-
     /**
-     * Unauthorized response
+     * Unauthorized response, only be called from internal
      *
      * @access	public
      * @param	string	$error	default [ error='invalid_client' ]
      * @return	void
      * @todo    Add list of error codes
      */
-    public function action_unauthenticated()
+    public function action_un_authenticated()
     {
         $error['error'] = $this->error_code;
         $error += $this->_configs['access_res_errors'][$this->error_code];
@@ -125,5 +139,13 @@ abstract class Oauth_Controller extends Kohana_Controller {
         $this->request->headers['WWW-Authenticate'] = 'OAuth realm=\'Service\','.http_build_query($error, '', ',');
         $this->request->response = json_encode($error);
     }
+
+    abstract public function action_get();
+
+    abstract public function action_create();
+
+    abstract public function action_update();
+
+    abstract public function action_delete();
 
 } // END Oauth Controller

@@ -1,13 +1,30 @@
 <?php defined('SYSPATH') or die('No direct script access.');
-
+/**
+ * TRUE - mandatory/enable, FALSE - option/disable
+ */
 return array(
 
     'default' => array(
 
-        'formats' => array(
-            'json'      => TRUE,
-            'xml'       => TRUE,
-            'form'      => FALSE
+        'realm'     => 'REST API',
+
+        // '' - no login required, 'basic' - unsecure login, 'digest' - more secure login, 'OAuth' - cool
+        'auth'      => 'OAuth',
+
+        /**
+         * Set to FALSE to ignore the HTTP Accept and speed up each request a little.
+         * Only do this if you are using the follow formats or /format/xml in URLs
+         */
+        'http_accept'=> FALSE,
+
+        'formats'   => array(
+            'json'      => TRUE,    # 'application/json'
+            'xml'       => TRUE,    # 'application/xml'
+            'form'      => FALSE,   # 'text/plain'
+            'html'      => FALSE,   # 'text/html'
+            'csv'       => FALSE,   # 'application/csv'
+            'php'       => FALSE,   # 'text/plain'
+            'serialize' => FALSE    # 'application/vnd.php.serialized'
         ),
 
         'types'    => array(
@@ -99,7 +116,10 @@ return array(
         ),
 
         'scopes'    => array(
-            //
+            'get'       => TRUE,
+            'create'    => TRUE,
+            'update'    => TRUE,
+            'delete'    => TRUE
         ),
 
         'max_requests'  => array(
@@ -114,7 +134,7 @@ return array(
             'refresh_token' => 86400    // refresh token expires time, default is 1 day
         ),
 
-        #section-3.2.1 Error Codes
+        // section-3.2.1 Error Codes
         'req_code_errors'   => array(
             'invalid_request'       => array(
                 'error_description' => '',
@@ -145,7 +165,7 @@ return array(
                 'error_uri'         => '',
             )
         ),
-        #section-4.3.1 Error Codes
+        // section-4.3.1 Error Codes
         'req_token_errors'  => array(
             'invalid_request'       => array(
                 'error_description' => '',
@@ -172,7 +192,7 @@ return array(
                 'error_uri'         => '',
             )
         ),
-        #section-5.2.1 Error Codes
+        // section-5.2.1 Error Codes
         'access_res_errors' => array(
             'invalid_request'       => array(
                 'error_description' => '',
@@ -192,4 +212,5 @@ return array(
             )
         )
     )
-);
+
+); // END OAuth server config

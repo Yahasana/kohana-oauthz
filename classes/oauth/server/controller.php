@@ -33,11 +33,9 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
 
     public function before()
     {
-        $this->_configs = Kohana::config('oauth_server.'.$this->_type);
+        $this->_configs = Kohana::config('oauth-server.'.$this->_type);
         $this->oauth = new Model_Oauth;
     }
-
-    /**********************************Server provider actions for user*******************/
 
     /**
      * the end-user authenticates directly with the authorization server, and grants client access to its protected resources
@@ -80,16 +78,8 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
     }
 
-    /********************************Server provider actions for consumer*****************/
     /**
      * Client Requests Access Token
-     *
-     * oauth_token:
-     *      The Access Token.
-     * oauth_token_secret:
-     *      The Token Secret.
-     * Additional parameters:
-     *      Any additional parameters, as defined by the Service Provider.
      *
      * @access    public
      * @return    void
@@ -125,7 +115,8 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
                     break;
             }
 
-            $this->request->status = 200; #HTTP/1.1 200 OK
+            // HTTP/1.1 200 OK
+            $this->request->status = 200;
             $this->request->response = $response;
             $this->request->headers['Content-Type'] = $response->format;
         }
@@ -142,9 +133,6 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         $this->request->headers['Expires'] = 'Sat, 26 Jul 1997 05:00:00 GMT';
         $this->request->headers['Cache-Control'] = 'no-store, must-revalidate';
     }
-
-    /**********************************END actions*****************************************/
-
 
     /**
      * Client Requests Authorization by web_server

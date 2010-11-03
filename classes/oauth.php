@@ -20,6 +20,7 @@ abstract class Oauth extends Oauth_Core{
         else
         {
             $data = Request::$method === 'POST' ? $_POST : $_GET;
+
             if(isset($data[$key])) $default = $data[$key];
         }
         return $default;

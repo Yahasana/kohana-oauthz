@@ -1,22 +1,20 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * OAuth consumer controller
+ * OAuth server controller
  *
- * @author     sumh <oalite@gmail.com>
- * @package    Oauth
- * @copyright  (c) 2009 OALite team
- * @license    http://www.oalite.com/license.txt
- * @version    $id$
- * @link       http://www.oalite.com
+ * @author      sumh <oalite@gmail.com>
+ * @package     Oauth
+ * @copyright   (c) 2010 OALite
+ * @license     ISC License (ISCL)
+ * @link		http://www.oalite.cn
  * @see        Oauth_Server_Controller
- * @since      Available since Release 1.0
  * *
  */
 class Controller_Oauth extends Oauth_Server_Controller {
 
     public function action_index()
     {
-        $template = new View('v_oauth');
+        $template = new View('oauth');
         $template->content = '<h3>Hello guest.</h3>';
         $this->request->response = $template;
     }
@@ -24,8 +22,10 @@ class Controller_Oauth extends Oauth_Server_Controller {
     public function action_code()
     {
         $query = URL::query();
-        $view = new View('v_oauth_authorize', array('authorized' => TRUE, 'query' => $query));
-        $this->request->response = $view->render();
+        $template = new View('oauth');
+        $view = new View('oauth-authorize', array('authorized' => TRUE, 'query' => $query));
+        $template->content = $view->render();
+        $this->request->response = $template;
     }
 
     public function action_error($error_code = NULL)
@@ -60,8 +60,8 @@ class Controller_Oauth extends Oauth_Server_Controller {
             $errors['access_res_errors'] = $config['req_code_errors'];
         }
 
-        $template = new View('v_oauth');
-        $view = new View('v_oauth_error', $errors);
+        $template = new View('oauth');
+        $view = new View('oauth-error', $errors);
         $template->content = $view->render();
         $this->request->response = $template;
     }
@@ -84,8 +84,8 @@ class Controller_Oauth extends Oauth_Server_Controller {
             $this->request->redirect('server/index');
         }
 
-        $template = new View('v_oauth');
-        $view = new View('v_oauth_signin');
+        $template = new View('oauth');
+        $view = new View('oauth-signin');
         $template->content = $view->render();
         $this->request->response = $template;
     }
@@ -99,12 +99,6 @@ class Controller_Oauth extends Oauth_Server_Controller {
     public function action_okay()
     {
         echo $this->request->referrer;
-    }
-
-    public function action_test()
-    {
-        extract(array('hel' => 'helo'), EXTR_PREFIX_ALL, 'this->');
-        $this->request->response = $this->_hel;
     }
 
 } // END Controller Consumer

@@ -1,7 +1,7 @@
 <?php defined('SYSPATH') or die('No direct script access.');
     $GI18N = I18n::load(I18n::$lang);
-    ?><table><caption>Service list you have register</caption><thead>
-    <tr><th>client_id</th><th>client_secret</th><th>redirect_uri</th><th>scope</th><th>Public Cert</th><th>OP</th></tr>
+    ?><table><caption>Applications list you have registered</caption><thead>
+    <tr><th>API Key</th><th>API Secret</th><th>Redirect URI</th><th>Scope</th><th>SSH Key</th><th>OP</th></tr>
     </thead><tbody><?php
     foreach($servers as $row)
     {

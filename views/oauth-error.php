@@ -3,17 +3,7 @@
         $uri = Request::$current->controller.'/'.Request::$current->action.'/';
     else
         $uri = Request::$current->uri.'/';
-?><style type="text/css" media="screen">/*<![CDATA[*/
-table{
-    border:1px solid #ccc;margin:10px
-}
-tbody{
-    border-top:1px solid #ccc;margin:5px 0
-}
-tbody th{
-    vertical-align: middle
-}
-/*]]>*/</style><table><caption><h3>Service error codes description</h3></caption><thead>
+?><table><caption><h3>Service error codes description</h3></caption><thead>
     <tr><th>Request Stage</th><th>Error Code</th><th>Description</th><th>URI</th></tr>
     </thead><?php
     if(isset($req_code_errors))

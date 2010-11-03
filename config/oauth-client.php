@@ -18,4 +18,5 @@ return array(
         'secret_type'   => 'plaintext', // PLAINTEXT, HMAC-SHA1, RSA-SHA1, MD5
         'nonce'         => uniqid()
     ),
-);
+
+); // END OAuth client config

@@ -24,7 +24,7 @@ abstract class Oauth_Parameter {
         return new $class($args);
     }
 
-    public function headers()
+    public static function headers()
     {
         // CONTENT_TYPE for application/x-www-form-encoded or multipart/form-data
         // $_SERVER['HTTP_AUTHORIZATION']
@@ -40,7 +40,7 @@ abstract class Oauth_Parameter {
         }
     }
 
-    function post()
+    public static function post()
     {
         if((isset($_SERVER['CONTENT_TYPE']) OR $_SERVER['CONTENT_TYPE'] = getenv('CONTENT_TYPE'))
             AND stripos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') !== FALSE)
@@ -50,7 +50,7 @@ abstract class Oauth_Parameter {
     }
 
     // function to parse the http auth header
-    function parse_digest($txt)
+    public static function parse_digest($txt)
     {
         // protect against missing data
         $needed_parts = array('nonce'=>1, 'nc'=>1, 'cnonce'=>1, 'qop'=>1, 'username'=>1, 'uri'=>1, 'response'=>1);

@@ -16,20 +16,30 @@ class Model_Oauth extends Kohana_Model {
 
     public function reg_server($server, $prefix = 'OAL_')
     {
-        if(isset($server['client_id']) AND DB::select('server_id')
-            ->from('t_oauth_servers')
-            ->where('client_id','=', $server['client_id'])
-            ->where('user_id','=', $server['user_id'])
-            ->execute($this->_db)
-            ->current())
+        $valid = Validate::factory($server)
+            ->rule('client_id', 'not_empty')
+            ->rule('user_id', 'not_empty');
+        if($valid->check())
         {
-            DB::update('t_oauth_servers')
-                ->set($server)
+            if(DB::select('server_id')
+                ->from('t_oauth_servers')
                 ->where('client_id','=', $server['client_id'])
                 ->where('user_id','=', $server['user_id'])
-                ->execute($this->_db);
+                ->execute($this->_db)
+                ->count())
+            {
+                DB::update('t_oauth_servers')
+                    ->set($server)
+                    ->where('client_id','=', $server['client_id'])
+                    ->where('user_id','=', $server['user_id'])
+                    ->execute($this->_db);
+            }
         }
-        else
+        elseif($valid->rule('password', 'not_empty')
+            ->rule('redirect_uri', 'not_empty')
+            ->rule('secret_type', 'not_empty')
+            ->rule('public_cert', 'not_empty')
+            ->check())
         {
             $server['client_id'] = $prefix.strtoupper(uniqid());
             $server['client_secret'] = $server['password'];

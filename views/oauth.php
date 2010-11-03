@@ -9,7 +9,7 @@
 <title>OAuth Test</title>
 <meta name="robots" content="noindex" />
 <link rel="shortcut icon" href="/favicon.ico">
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
 <!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 <!--[if lte IE 7]><script src="js/IE8.js" type="text/javascript"></script><![endif]-->
 <!--[if lt IE 7]><link rel="stylesheet" type="text/css" media="all" href="css/ie6.css"/><![endif]-->
@@ -102,6 +102,17 @@ border-bottom-radius: 10px;
 -moz-border-radius-topleft: 10px;
 -moz-border-radius-topright:10px;
 -webkit-border-bottom-radius: 10px;padding:10px 5px
+}
+
+label{display:inline-block;width:23%;vertical-align:middle}
+table{
+    border:1px solid #ccc;margin:10px
+}
+tbody{
+    border-top:1px solid #ccc;margin:5px 0
+}
+th{
+    vertical-align: middle; padding:5px 1em
 }
 </style>
 </head>

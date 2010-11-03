@@ -12,7 +12,7 @@
  */
 class Oauth_Server extends Kohana_Controller {
 
-    protected $template = 'v_oauth';
+    protected $template = 'oauth';
 
     public function before()
     {
@@ -73,7 +73,7 @@ class Oauth_Server extends Kohana_Controller {
             }
         }
 
-        $this->template->content = new View('v_oauth_register', $data);
+        $this->template->content = new View('oauth-register', $data);
 
         $this->request->response = $this->template->render();
     }
@@ -82,7 +82,7 @@ class Oauth_Server extends Kohana_Controller {
     {
         $data['clients'] = $this->oauth->list_client('0');
 
-        $this->template->content = new View('v_oauth_client', $data);
+        $this->template->content = new View('oauth-client', $data);
 
         $this->request->response = $this->template->render();
     }

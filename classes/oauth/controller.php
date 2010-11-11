@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * OAuth protected layout for all API controller
+ * OAuth protect layout for all API controller, which can be accessed through access_token
  *
  * @author      sumh <oalite@gmail.com>
  * @package     Oauth
@@ -61,6 +61,7 @@ abstract class Oauth_Controller extends Kohana_Controller {
      */
     public function before()
     {
+        // Exclude actions do NOT need to protect
         if( ! in_array($this->request->action, $this->_exclude))
         {
             $this->_configs = Kohana::config('oauth-server.'.$this->_type);
@@ -69,25 +70,31 @@ abstract class Oauth_Controller extends Kohana_Controller {
 
             try
             {
+                // Verify the request method supported in the config settings
                 if(empty($this->_configs['request_methods'][Request::$method]))
                 {
                     throw new Oauth_Exception('invalid_request');
                 }
-
+                
+                // Process the access token from the request header or body
                 $parameter = new Oauth_Parameter_Access($this->_configs['access_params']);
 
+                // Load the token information from database
                 if( ! $client = $this->oauth->lookup_token($parameter->oauth_token))
                 {
                     throw new Oauth_Exception('invalid_token');
                 }
 
                 $client['timestamp'] += $this->_configs['durations']['oauth_token'];
-
+                
+                // Verify the access token
                 $parameter->access_token($client);
             }
             catch (Oauth_Exception $e)
             {
                 $this->error_code = $e->getMessage();
+                
+                // Redirect the action to unauthenticated
                 $this->request->action = 'un_authenticated';
             }
         }
@@ -117,6 +124,8 @@ abstract class Oauth_Controller extends Kohana_Controller {
     public function action_un_authenticated()
     {
         $error['error'] = $this->error_code;
+        
+        // Get the error description from config settings
         $error += $this->_configs['access_res_errors'][$this->error_code];
 
         switch($this->error_code)

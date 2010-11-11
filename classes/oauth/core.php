@@ -33,11 +33,11 @@ abstract class Oauth_Core {
     /**
      * Oauth_Signature::factory alias
      *
-     * @see     Oauth_Signature::factory
      * @access  public
      * @param   string	$method
      * @param   string	$identifier
      * @return  object
+     * @see     Oauth_Signature::factory
      */
     public static function signature($method, $identifier)
     {
@@ -101,9 +101,9 @@ abstract class Oauth_Core {
     public static function parse_post($post = NULL)
     {
         $params = array();
-        
+
         if($post === NULL) $post = $_POST;
-        
+
         if ( ! empty($post))
         {
             //
@@ -127,23 +127,20 @@ abstract class Oauth_Core {
         $offset = 0;
         $params = array();
         $pattern = '/(([-_a-z]*)=("([^"]*)"|([^,]*)),?)/';
-        
+
         if (isset($_SERVER['HTTP_AUTHORIZATION']) && substr($_SERVER['HTTP_AUTHORIZATION'], 0, 12) === 'Token token=')
         {
             while(preg_match($pattern, $_SERVER['HTTP_AUTHORIZATION'], $matches, PREG_OFFSET_CAPTURE, $offset) > 0)
             {
                 $match = $matches[0];
-                $header_name = $matches[2][0];
-                $header_content = (isset($matches[5])) ? $matches[5][0] : $matches[4][0];
-                $params[$header_name] = Oauth::urldecode($header_content);
+                $name = $matches[2][0];
+                $content = (isset($matches[5])) ? $matches[5][0] : $matches[4][0];
+                $params[$name] = Oauth::urldecode($content);
                 $offset = $match[1] + strlen($match[0]);
             }
         }
-        
-        if (isset($params['realm']))
-        {
-            unset($params['realm']);
-        }
+
+        unset($params['realm']);
 
         return $params;
     }

@@ -26,9 +26,6 @@ abstract class Oauth_Parameter {
 
     public static function headers()
     {
-        // CONTENT_TYPE for application/x-www-form-encoded or multipart/form-data
-        // $_SERVER['HTTP_AUTHORIZATION']
-        // $auth_params = explode(":" , base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
         if(isset($_SERVER['HTTP_AUTHORIZATION']) OR $_SERVER['HTTP_AUTHORIZATION'] = getenv('HTTP_AUTHORIZATION'))
         {
             $params = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
@@ -42,6 +39,7 @@ abstract class Oauth_Parameter {
 
     public static function post()
     {
+        // CONTENT_TYPE for application/x-www-form-encoded or multipart/form-data
         if((isset($_SERVER['CONTENT_TYPE']) OR $_SERVER['CONTENT_TYPE'] = getenv('CONTENT_TYPE'))
             AND stripos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') !== FALSE)
         {
@@ -53,7 +51,7 @@ abstract class Oauth_Parameter {
     public static function parse_digest($txt)
     {
         // protect against missing data
-        $needed_parts = array('nonce'=>1, 'nc'=>1, 'cnonce'=>1, 'qop'=>1, 'username'=>1, 'uri'=>1, 'response'=>1);
+        $needed_parts = array('nonce' => TRUE, 'nc' => TRUE, 'cnonce' => TRUE, 'qop'=> TRUE, 'username' => TRUE, 'uri' => TRUE, 'response' => TRUE);
         $data = array();
 
         preg_match_all('@(\w+)=(?:(?:\'([^\']+)\'|"([^"]+)")|([^\s,]+))@', $txt, $matches, PREG_SET_ORDER);
@@ -63,7 +61,7 @@ abstract class Oauth_Parameter {
             unset($needed_parts[$m[1]]);
         }
 
-        return $needed_parts ? false : $data;
+        return $needed_parts ? FALSE : $data;
     }
 
     /**

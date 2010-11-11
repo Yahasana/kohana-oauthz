@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * OAuth servers register management
+ * OAuth server for clients register management
  *
  * @author      sumh <oalite@gmail.com>
  * @package     Oauth

@@ -55,9 +55,13 @@ class Oauth_Parameter_Code extends Oauth_Parameter {
             }
         }
 
-        $this->_params      = $params;
         $this->client_id    = $params['client_id'];
         $this->redirect_uri = $params['redirect_uri'];
+
+        // Remove all required parameters
+        unset($params['client_id'], $params['redirect_uri']);
+
+        $this->_params = $params;
     }
 
     public function oauth_token($client)
@@ -66,7 +70,7 @@ class Oauth_Parameter_Code extends Oauth_Parameter {
 
         if(isset($this->_params['state']))
         {
-            $response->state = $this->state = $this->_params['state'];
+            $response->state = $this->_params['state'];
         }
 
         if($client['redirect_uri'] !== $this->redirect_uri)
@@ -74,9 +78,10 @@ class Oauth_Parameter_Code extends Oauth_Parameter {
             throw new Oauth_Exception('redirect_uri_mismatch');
         }
 
-        if(isset($this->_params['scope']) AND ! isset($client['scope'][$this->_params['scope']]))
+        if(isset($this->_params['scope']) AND ! empty($client['scope']))
         {
-            throw new Oauth_Exception('invalid_scope');
+            if( ! in_array($this->_params['scope'], explode(' ', $client['scope'])))
+                throw new Oauth_Exception('invalid_scope');
         }
 
         $response->expires_in = $client['expires_in'];

@@ -38,9 +38,8 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
     public function __construct(array $args)
     {
         $params = array();
-        /**
-         * Load oauth_token from form-encoded body
-         */
+
+        // Load oauth_token from form-encoded body
         isset($_SERVER['CONTENT_TYPE']) OR $_SERVER['CONTENT_TYPE'] = getenv('CONTENT_TYPE');
 
         // oauth_token already send in authorization header or the encrypt Content-Type is not single-part
@@ -68,6 +67,8 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
         }
 
         $this->code = $params['code'];
+
+        unset($params['code']);
 
         $this->_params = $params;
     }

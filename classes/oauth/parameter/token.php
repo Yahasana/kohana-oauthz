@@ -38,9 +38,8 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
     public function __construct(array $args)
     {
         $params = array();
-        /**
-         * Load oauth_token from form-encoded body
-         */
+
+        // Load oauth_token from form-encoded body
         isset($_SERVER['CONTENT_TYPE']) OR $_SERVER['CONTENT_TYPE'] = getenv('CONTENT_TYPE');
 
         // oauth_token already send in authorization header or the encrypt Content-Type is not single-part
@@ -83,12 +82,13 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
 
         if(isset($this->_params['state']))
         {
-            $response->state = $this->state = $this->_params['state'];
+            $response->state = $this->_params['state'];
         }
 
-        if(isset($this->_params['scope']) AND ! isset($client['scope'][$this->_params['scope']]))
+        if(isset($this->_params['scope']) AND ! empty($client['scope']))
         {
-            throw new Oauth_Exception('invalid_request');
+            if( ! in_array($this->_params['scope'], explode(' ', $client['scope'])))
+                throw new Oauth_Exception('invalid_scope');
         }
 
         if($client['redirect_uri'] !== $this->_params['redirect_uri'])
@@ -119,10 +119,10 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
             throw new Oauth_Exception('invalid_request');
         }
 
-        if(isset($this->_params['nonce']) AND $client['nonce'] !== $this->nonce)
-        {
-            throw new Oauth_Exception('invalid_request');
-        }
+        //if(isset($this->_params['nonce']) AND $client['nonce'] !== $this->nonce)
+        //{
+        //    throw new Oauth_Exception('invalid_request');
+        //}
 
         if(isset($this->_params['timestamp']) AND $client['timestamp'] < $this->_params['timestamp'])
         {
@@ -132,19 +132,19 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
         // verify the signature
         if(isset($this->_params['signature']) AND isset($this->_params['algorithm']))
         {
-            $uri = URL::base(FALSE, TRUE).Request::$current->uri;
+            $uri = URL::base(FALSE, TRUE).Request::$instance->uri;
 
             $string = Oauth::normalize(Request::$method, $uri, $this->_params);
 
             if($this->_params['algorithm'] == 'rsa-sha1' OR $this->_params['algorithm'] == 'hmac-sha1')
             {
-                $response->public_cert = '';
-                $response->private_cert = '';
+                $response->public_cert = $client['ssh_key'];
+                $response->private_cert = $this->_params['signature'];
             }
 
             if (! Oauth::signature($this->_params['algorithm'], $string)->check($response, $this->_params['signature']))
             {
-                throw new Oauth_Exception('invalid-signature');
+                throw new Oauth_Exception('invalid_signature');
             }
         }
 

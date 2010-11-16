@@ -126,9 +126,9 @@ abstract class Oauth_Controller extends Kohana_Controller {
         $error['error'] = $this->error_code;
         
         // Get the error description from config settings
-        $error += $this->_configs['access_res_errors'][$this->error_code];
+        $error += $this->_configs['access_res_errors'][$error['error']];
 
-        switch($this->error_code)
+        switch($error['error'])
         {
             case 'invalid_request':
                 $this->request->status = 400;   #HTTP/1.1 400 Bad Request

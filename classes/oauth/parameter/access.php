@@ -147,6 +147,8 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
 
         $this->oauth_token = $params['oauth_token'];
 
+        unset($params['oauth_token']);
+
         $this->_params = $params;
     }
 
@@ -179,19 +181,20 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
             $response->format = $this->_params['format'];
         }
 
-        if(isset($this->_params['nonce']) AND $client['nonce'] !== $this->_params['nonce'])
-        {
-            throw new Oauth_Exception('invalid_request');
-        }
+        //if(isset($this->_params['nonce']) AND $client['nonce'] !== $this->_params['nonce'])
+        //{
+        //    throw new Oauth_Exception('invalid_request');
+        //}
 
-        if($client['access_token'] !== $this->_params['oauth_token'])
+        if($client['access_token'] !== $this->oauth_token)
         {
             throw new Oauth_Exception('invalid_token');
         }
 
-        if(isset($this->_params['scope']) AND $client['scope'] !== $this->_params['scope'])
+        if(isset($this->_params['scope']) AND ! empty($client['scope']))
         {
-            throw new Oauth_Exception('insufficient_scope');
+            if( ! in_array($this->_params['scope'], explode(' ', $client['scope'])))
+                throw new Oauth_Exception('insufficient_scope');
         }
 
         if(isset($this->_params['timestamp']) AND $client['timestamp'] < $this->_params['timestamp'])
@@ -210,13 +213,13 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
 
             if($this->_params['algorithm'] === 'rsa-sha1' OR $this->_params['algorithm'] === 'hmac-sha1')
             {
-                $response->public_cert = '';
-                $response->private_cert = '';
+                $response->public_cert = $client['ssh_key'];
+                $response->private_cert = $this->_params['signature'];
             }
 
             if( ! Oauth::signature($this->_params['algorithm'], $string)->check($response, $this->_params['signature']))
             {
-                throw new Oauth_Exception('invalid_request');
+                throw new Oauth_Exception('invalid_signature');
             }
         }
 

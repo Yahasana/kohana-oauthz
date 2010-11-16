@@ -8,8 +8,7 @@
  * @license    http://www.oalite.com/license.txt
  * @version    $id$
  * @link       http://www.oalite.com
- * @see        Oauth_Consumer_Controller
- * @since      Available since Release 1.0
+ * @see        Oauth_Server_Controller
  * *
  */
 class Controller_Authorize extends Oauth_Server_Controller {

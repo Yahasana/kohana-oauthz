@@ -34,19 +34,19 @@ class Controller_Oauth extends Oauth_Server_Controller {
 
         $config = $this->_configs;
 
-        if(isset($config['req_code_errors'][$error_code]))
+        if(isset($config['code_errors'][$error_code]))
         {
-            $errors['req_code_errors'][$error_code] = $config['req_code_errors'][$error_code];
+            $errors['code_errors'][$error_code] = $config['code_errors'][$error_code];
         }
 
-        if(isset($config['req_token_errors'][$error_code]))
+        if(isset($config['token_errors'][$error_code]))
         {
-            $errors['req_token_errors'][$error_code] = $config['req_code_errors'][$error_code];
+            $errors['token_errors'][$error_code] = $config['code_errors'][$error_code];
         }
 
-        if(isset($config['access_res_errors'][$error_code]))
+        if(isset($config['access_errors'][$error_code]))
         {
-            $errors['access_res_errors'][$error_code] = $config['req_code_errors'][$error_code];
+            $errors['access_errors'][$error_code] = $config['code_errors'][$error_code];
         }
 
         if($errors)
@@ -55,9 +55,9 @@ class Controller_Oauth extends Oauth_Server_Controller {
         }
         else
         {
-            $errors['req_code_errors'] = $config['req_code_errors'];
-            $errors['req_token_errors'] = $config['req_code_errors'];
-            $errors['access_res_errors'] = $config['req_code_errors'];
+            $errors['code_errors'] = $config['code_errors'];
+            $errors['token_errors'] = $config['code_errors'];
+            $errors['access_errors'] = $config['code_errors'];
         }
 
         $template = new View('oauth');

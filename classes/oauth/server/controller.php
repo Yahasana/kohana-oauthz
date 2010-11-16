@@ -35,6 +35,9 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
     {
         $this->_configs = Kohana::config('oauth-server.'.$this->_type);
         $this->oauth = new Model_Oauth;
+        Oauth_Exception::$errors[$this->_type]['code_errors'] = $this->_configs['code_errors'];
+        Oauth_Exception::$errors[$this->_type]['token_errors'] = $this->_configs['token_errors'];
+        Oauth_Exception::$errors[$this->_type]['access_errors'] = $this->_configs['access_errors'];
     }
 
     /**
@@ -45,7 +48,10 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
      */
     public function action_authorize()
     {
-        try {
+        $this->request->status = 302; #HTTP/1.1 302 Found
+        $this->request->headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        try
+        {
             switch(Oauth::get('response_type'))
             {
                 case 'code':
@@ -55,26 +61,20 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
                     $response = $this->token();
                     break;
                 case 'code_and_token':
-                    // TODO
-                    return;
+                    $response = $this->code_and_token();
+                    break;
                 default:
-                    $response = new Oauth_Token(array(
-                        'error'             => 'unsupported_response_type',
-                        'error_description' => '',
-                        'error_uri'         => '',
-                    ));
-                    throw new Oauth_Exception($response->query());
+                    throw new Oauth_Exception_Authorize('unsupported_response_type');
                     break;
             }
-            $this->request->status = 302; #HTTP/1.1 302 Found
-            $this->request->headers['Content-Type'] = 'application/x-www-form-urlencoded';
             $this->request->redirect($response);
         }
         catch (Oauth_Exception $e)
         {
-            $this->request->status = 302; #HTTP/1.1 302 Found
-            $this->request->headers['Content-Type'] = 'application/x-www-form-urlencoded';
-            $this->request->redirect($e->getMessage());
+            // $error = $e->getMessage();
+            // $description = $this->_configs['code_errors'][$error];
+            // print_r($description);
+            $this->request->redirect($e);
         }
     }
 
@@ -106,7 +106,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
                     $response = $this->none();
                     break;
                 default:
-                    throw new Oauth_Exception('unsupported_grant_type');
+                    throw new Oauth_Exception_Authorize('unsupported_grant_type');
                     break;
             }
 
@@ -151,7 +151,10 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         else
         {
             // Invalid client_id
-            throw new Oauth_Exception('invalid_client');
+            $e = new Oauth_Exception_Authorize('invalid_client');
+            $e->redirect_uri = $parameter->redirect_uri;
+            $e->state = $parameter->state;
+            throw $e;
         }
 
         return $parameter->redirect_uri.'?'.$response->query();
@@ -171,12 +174,21 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            throw new Oauth_Exception('invalid_client');
+            // Invalid client_id
+            $e = new Oauth_Exception_Authorize('invalid_client');
+            $e->redirect_uri = $parameter->redirect_uri;
+            $e->state = $parameter->state;
+            throw $e;
         }
 
         $response = $parameter->access_token($parameter->client_id);
 
         return $parameter->redirect_uri.'#'.$response->query();
+    }
+
+    protected function code_and_token()
+    {
+        // TODO
     }
 
     protected function authorization_code()
@@ -191,23 +203,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            throw new Oauth_Exception('invalid_client');
-        }
-
-        return $response;
-    }
-
-    protected function none()
-    {
-        $parameter = new Oauth_Parameter_None;
-
-        if($client = $this->oauth->lookup_server($parameter->client_id))
-        {
-            $response = $parameter->access_token($client);
-        }
-        else
-        {
-            throw new Oauth_Exception('invalid_client');
+            throw new Oauth_Exception_Token('invalid_client');
         }
 
         return $response;
@@ -223,7 +219,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            throw new Oauth_Exception('invalid_client');
+            throw new Oauth_Exception_Token('invalid_client');
         }
 
         return $response;
@@ -239,7 +235,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            throw new Oauth_Exception('invalid_client');
+            throw new Oauth_Exception_Token('invalid_client');
         }
 
         return $response;
@@ -255,7 +251,23 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         }
         else
         {
-            throw new Oauth_Exception('invalid_client');
+            throw new Oauth_Exception_Token('invalid_client');
+        }
+
+        return $response;
+    }
+
+    protected function none()
+    {
+        $parameter = new Oauth_Parameter_None;
+
+        if($client = $this->oauth->lookup_server($parameter->client_id))
+        {
+            $response = $parameter->access_token($client);
+        }
+        else
+        {
+            throw new Oauth_Exception_Token('invalid_client');
         }
 
         return $response;

@@ -1,6 +1,6 @@
 <?php
 /**
- * Oauth parameter handler for request with autonomous or without oauth param
+ * Oauth parameter handler for request with none
  *
  * @author      sumh <oalite@gmail.com>
  * @package     Oauth
@@ -10,7 +10,7 @@
  * @see         Oauth_Parameter
  * *
  */
-class Oauth_Parameter_Autonomous extends Oauth_Parameter {
+class Oauth_Parameter_None extends Oauth_Parameter {
 
     /**
      * client_id
@@ -116,4 +116,4 @@ class Oauth_Parameter_Autonomous extends Oauth_Parameter {
         return $response;
     }
 
-} // END Oauth_Parameter_Autonomous
+} // END Oauth_Parameter_None

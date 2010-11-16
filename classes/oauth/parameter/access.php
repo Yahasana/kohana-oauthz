@@ -70,9 +70,9 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
             {
                 if($val === TRUE)
                 {
-                    if( ! isset($params[$key]))
+                    if( ! empty($params[$key]))
                     {
-                        throw new Oauth_Exception('invalid_request');
+                        throw new Oauth_Exception_Access('invalid_request');
                     }
                 }
             }
@@ -88,7 +88,7 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
             // oauth_token already send in authorization header or the encrypt Content-Type is not single-part
             if(isset($params['oauth_token']) OR stripos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') === FALSE)
             {
-                throw new Oauth_Exception('invalid_request');
+                throw new Oauth_Exception_Access('invalid_request');
             }
             else
             {
@@ -103,7 +103,7 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
                         }
                         else
                         {
-                            throw new Oauth_Exception('invalid_request');
+                            throw new Oauth_Exception_Access('invalid_request');
                         }
                     }
                 }
@@ -118,7 +118,7 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
             // oauth_token already send in authorization header or form-encoded body
             if(isset($params['oauth_token']))
             {
-                throw new Oauth_Exception('invalid_request');
+                throw new Oauth_Exception_Access('invalid_request');
             }
             else
             {
@@ -133,7 +133,7 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
                         }
                         else
                         {
-                            throw new Oauth_Exception('invalid_request');
+                            throw new Oauth_Exception_Access('invalid_request');
                         }
                     }
                 }
@@ -142,7 +142,7 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
 
         if(empty($params))
         {
-            throw new Oauth_Exception('invalid_request');
+            throw new Oauth_Exception_Access('invalid_request');
         }
 
         $this->oauth_token = $params['oauth_token'];
@@ -150,18 +150,6 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
         unset($params['oauth_token']);
 
         $this->_params = $params;
-    }
-
-    /**
-     * No need to authorization any more
-     *
-     * @access	public
-     * @param	string	$client
-     * @return	Oauth_Token
-     */
-    public function oauth_token($client)
-    {
-        return new Oauth_Token;
     }
 
     /**
@@ -183,27 +171,27 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
 
         //if(isset($this->_params['nonce']) AND $client['nonce'] !== $this->_params['nonce'])
         //{
-        //    throw new Oauth_Exception('invalid_request');
+        //    throw new Oauth_Exception_Access('invalid_request');
         //}
 
         if($client['access_token'] !== $this->oauth_token)
         {
-            throw new Oauth_Exception('invalid_token');
+            throw new Oauth_Exception_Access('invalid_token');
         }
 
         if(isset($this->_params['scope']) AND ! empty($client['scope']))
         {
             if( ! in_array($this->_params['scope'], explode(' ', $client['scope'])))
-                throw new Oauth_Exception('insufficient_scope');
+                throw new Oauth_Exception_Access('insufficient_scope');
         }
 
         if(isset($this->_params['timestamp']) AND $client['timestamp'] < $this->_params['timestamp'])
         {
-            throw new Oauth_Exception('expired_token');
+            throw new Oauth_Exception_Access('expired_token');
         }
 
-        // verify the signature
-        if(isset($this->_params['signature']) AND isset($this->_params['algorithm']))
+        // Verify the signature
+        if( ! empty($this->_params['signature']) AND ! empty($this->_params['algorithm']))
         {
             $uri = URL::base(FALSE, TRUE).Request::$instance->uri;
 
@@ -219,7 +207,7 @@ class Oauth_Parameter_Access extends Oauth_Parameter {
 
             if( ! Oauth::signature($this->_params['algorithm'], $string)->check($response, $this->_params['signature']))
             {
-                throw new Oauth_Exception('invalid_signature');
+                throw new Oauth_Exception_Access('invalid_signature');
             }
         }
 

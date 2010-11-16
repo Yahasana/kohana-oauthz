@@ -71,7 +71,10 @@ abstract class Oauth_Parameter {
      * @param	string	$client
      * @return	Oauth_Token
      */
-    abstract public function oauth_token($client);
+    public function oauth_token($client)
+    {
+        throw new Oauth_Exception_Token('invalid_request');
+    }
 
     /**
      * Verify the request parameter and populate $client into token
@@ -82,7 +85,7 @@ abstract class Oauth_Parameter {
      */
     public function access_token($client)
     {
-        return new Oauth_Token;
+        throw new Oauth_Exception_Access('invalid_request');
     }
 
 } // END Oauth_Parameter

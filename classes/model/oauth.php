@@ -38,7 +38,7 @@ class Model_Oauth extends Kohana_Model {
         elseif($valid->rule('password', 'not_empty')
             ->rule('redirect_uri', 'not_empty')
             ->rule('secret_type', 'not_empty')
-            ->rule('public_cert', 'not_empty')
+            ->rule('ssh_key', 'not_empty')
             ->check())
         {
             $server['client_id'] = $prefix.strtoupper(uniqid());
@@ -51,7 +51,7 @@ class Model_Oauth extends Kohana_Model {
                 'redirect_uri',
                 'secret_type',
                 'scope',
-                'public_cert'
+                'ssh_key'
             ))->values(array(
                 $server['user_id'],
                 $server['client_id'],
@@ -59,7 +59,7 @@ class Model_Oauth extends Kohana_Model {
                 $server['redirect_uri'],
                 $server['secret_type'],
                 $server['scope'],
-                $server['public_cert']
+                $server['ssh_key']
             ))->execute($this->_db);
         }
         return $server['client_id'];
@@ -72,13 +72,13 @@ class Model_Oauth extends Kohana_Model {
             //'client_id'     => $server['client_id'],
             //'redirect_uri'  => $server['redirect_uri'],
             'scope'         => $server['scope'],
-            'public_cert'   => $server['public_cert']
+            'ssh_key'       => $server['ssh_key']
         );
-        if( ! empty($server['client_secret'])) 
+        if( ! empty($server['client_secret']))
         {
             $data['client_secret'] = sha1($server['client_secret']);
         }
-        
+
         return DB::update('t_oauth_servers')
             ->set($data)
             ->where('client_id','=', $server['client_id'])
@@ -165,14 +165,14 @@ class Model_Oauth extends Kohana_Model {
                 ->where('enabled' , '=', TRUE)
                 ->execute($this->_db)
                 ->current();
-                
-            if($token['timestamp'] > time() - 60)
+
+            if($token['timestamp'] > $_SERVER['REQUEST_TIME'] - 60)
             {
                 DB::update('t_oauth_tokens')
                     ->set(array('code' => uniqid()))
                     ->where('token_id' , '=', $token['token_id'])
                     ->execute($this->_db);
-                    
+
                 return $token + $client;
             }
         }
@@ -189,12 +189,11 @@ class Model_Oauth extends Kohana_Model {
     public function lookup_token($oauth_token)
     {
         // implement me
-        $token = DB::select('*')
+        if($token = DB::select('*')
             ->from('t_oauth_tokens')
             ->where('access_token' , '=', $oauth_token)
             ->execute($this->_db)
-            ->current();
-        if($token)
+            ->current())
         {
             return $token;
         }
@@ -212,14 +211,13 @@ class Model_Oauth extends Kohana_Model {
     public function lookup_nonce($client, $token, $nonce, $timestamp)
     {
         // implement me
-        $secret = DB::select('*')
+        if($secret = DB::select('*')
             ->from('t_oauth_server_nonces')
             ->where('token' , '=', serialize($token))
             ->where('nonce' , '=', $nonce)
             ->where('timestamp' , '=', $timestamp)
             ->execute($this->_db)
-            ->current();
-        if($secret)
+            ->current())
         {
             return TRUE;
         }

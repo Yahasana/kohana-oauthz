@@ -45,7 +45,7 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
         // oauth_token already send in authorization header or the encrypt Content-Type is not single-part
         if(stripos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') === FALSE)
         {
-            throw new Oauth_Exception('invalid_request');
+            throw new Oauth_Exception_Token('invalid_request');
         }
         else
         {
@@ -60,7 +60,7 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
                     }
                     else
                     {
-                        throw new Oauth_Exception('invalid_request');
+                        throw new Oauth_Exception_Token('invalid_request');
                     }
                 }
             }
@@ -73,23 +73,18 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
         $this->_params = $params;
     }
 
-    public function oauth_token($client)
-    {
-        throw new Oauth_Exception('invalid_request');
-    }
-
     public function access_token($client)
     {
         $response = new Oauth_Token;
 
         if($client['redirect_uri'] !== $this->_params['redirect_uri'])
         {
-            throw new Oauth_Exception('redirect_uri_mismatch');
+            throw new Oauth_Exception_Token('redirect_uri_mismatch');
         }
 
         if($client['client_secret'] !== sha1($this->_params['client_secret']))
         {
-            throw new Oauth_Exception('invalid_client');
+            throw new Oauth_Exception_Token('invalid_client');
         }
 
         $response->expires_in = 3000;

@@ -29,6 +29,14 @@ class Oauth_Parameter_Code extends Oauth_Parameter {
     public $redirect_uri;
 
     /**
+     * REQUIRED if the "state" parameter was present in the client authorization request.
+     *
+     * @access	public
+     * @var		string	$state
+     */
+    public $state;
+
+    /**
      * Load oauth parameters from GET or POST
      *
      * @access	public
@@ -38,6 +46,13 @@ class Oauth_Parameter_Code extends Oauth_Parameter {
     public function __construct(array $args)
     {
         $params = array();
+
+        // Parse the "state" paramter
+        if(isset($_GET['state']) AND $state = Oauth::urldecode($_GET['state']))
+        {
+            $this->state = $state;
+            unset($_GET['state']);
+        }
 
         // Check all required parameters should NOT be empty
         foreach($args as $key => $val)
@@ -50,7 +65,9 @@ class Oauth_Parameter_Code extends Oauth_Parameter {
                 }
                 else
                 {
-                    throw new Oauth_Exception('invalid_request');
+                    $e = new Oauth_Exception_Authorize('invalid_request');
+                    $e->state = $this->state;
+                    throw $e;
                 }
             }
         }
@@ -68,20 +85,15 @@ class Oauth_Parameter_Code extends Oauth_Parameter {
     {
         $response = new Oauth_Token;
 
-        if(isset($this->_params['state']))
-        {
-            $response->state = $this->_params['state'];
-        }
-
         if($client['redirect_uri'] !== $this->redirect_uri)
         {
-            throw new Oauth_Exception('redirect_uri_mismatch');
+            throw new Oauth_Exception_Authorize('redirect_uri_mismatch');
         }
 
-        if(isset($this->_params['scope']) AND ! empty($client['scope']))
+        if(! empty($this->_params['scope']) AND ! empty($client['scope']))
         {
             if( ! in_array($this->_params['scope'], explode(' ', $client['scope'])))
-                throw new Oauth_Exception('invalid_scope');
+                throw new Oauth_Exception_Authorize('invalid_scope');
         }
 
         $response->expires_in = $client['expires_in'];

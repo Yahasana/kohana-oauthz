@@ -135,7 +135,7 @@ return array(
         ),
 
         // section-3.2.1 Error Codes
-        'req_code_errors'   => array(
+        'code_errors'   => array(
             'invalid_request'       => array(
                 'error_description' => '',
                 'error_uri'         => '',
@@ -166,7 +166,7 @@ return array(
             )
         ),
         // section-4.3.1 Error Codes
-        'req_token_errors'  => array(
+        'token_errors'  => array(
             'invalid_request'       => array(
                 'error_description' => '',
                 'error_uri'         => '',
@@ -193,7 +193,7 @@ return array(
             )
         ),
         // section-5.2.1 Error Codes
-        'access_res_errors' => array(
+        'access_errors' => array(
             'invalid_request'       => array(
                 'error_description' => '',
                 'error_uri'         => '',

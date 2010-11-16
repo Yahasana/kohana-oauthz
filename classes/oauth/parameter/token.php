@@ -45,7 +45,7 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
         // oauth_token already send in authorization header or the encrypt Content-Type is not single-part
         if(stripos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') === FALSE)
         {
-            throw new Oauth_Exception('invalid_request');
+            throw new Oauth_Exception_Token('invalid_request');
         }
         else
         {
@@ -60,7 +60,7 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
                     }
                     else
                     {
-                        throw new Oauth_Exception('invalid_request');
+                        throw new Oauth_Exception_Token('invalid_request');
                     }
                 }
             }
@@ -80,20 +80,15 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
     {
         $response = new Oauth_Token;
 
-        if(isset($this->_params['state']))
-        {
-            $response->state = $this->_params['state'];
-        }
-
         if(isset($this->_params['scope']) AND ! empty($client['scope']))
         {
             if( ! in_array($this->_params['scope'], explode(' ', $client['scope'])))
-                throw new Oauth_Exception('invalid_scope');
+                throw new Oauth_Exception_Token('invalid_scope');
         }
 
         if($client['redirect_uri'] !== $this->_params['redirect_uri'])
         {
-            throw new Oauth_Exception('redirect_uri_mismatch');
+            throw new Oauth_Exception_Token('redirect_uri_mismatch');
         }
 
         // Grants Authorization
@@ -116,21 +111,21 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
 
         if(isset($this->_params['token_secret']) AND $client['token_secret'] !== sha1($this->_params['token_secret']))
         {
-            throw new Oauth_Exception('invalid_request');
+            throw new Oauth_Exception_Token('invalid_request');
         }
 
         //if(isset($this->_params['nonce']) AND $client['nonce'] !== $this->nonce)
         //{
-        //    throw new Oauth_Exception('invalid_request');
+        //    throw new Oauth_Exception_Token('invalid_request');
         //}
 
         if(isset($this->_params['timestamp']) AND $client['timestamp'] < $this->_params['timestamp'])
         {
-            throw new Oauth_Exception('expired_token');
+            throw new Oauth_Exception_Token('expired_token');
         }
 
-        // verify the signature
-        if(isset($this->_params['signature']) AND isset($this->_params['algorithm']))
+        // Verify the signature
+        if( ! empty($this->_params['signature']) AND ! empty($this->_params['algorithm']))
         {
             $uri = URL::base(FALSE, TRUE).Request::$instance->uri;
 
@@ -144,7 +139,7 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
 
             if (! Oauth::signature($this->_params['algorithm'], $string)->check($response, $this->_params['signature']))
             {
-                throw new Oauth_Exception('invalid_signature');
+                throw new Oauth_Exception_Token('invalid_signature');
             }
         }
 

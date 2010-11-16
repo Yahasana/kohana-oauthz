@@ -127,7 +127,7 @@ class Oauth_Client_Controller extends Kohana_Controller {
         {
             switch($error)
             {
-                case 'user_denied':
+                case 'access_denied':
                     $this->request->response = 'You have denied this request.';
                     break;
                 default:

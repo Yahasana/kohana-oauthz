@@ -52,7 +52,7 @@ class Oauth_Parameter_Refresh extends Oauth_Parameter {
 
         if(empty($this->client_id) OR empty($this->client_secret) OR empty($this->refresh_token))
         {
-            throw new Oauth_Exception('invalid_request');
+            throw new Oauth_Exception_Token('invalid_request');
         }
     }
 

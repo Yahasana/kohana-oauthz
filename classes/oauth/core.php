@@ -199,4 +199,17 @@ abstract class Oauth_Core {
         return str_replace($search, $replace, rawurlencode($item));
     }
 
+    public static function grant_access_uri($redirect)
+    {
+        return $redirect.URL::query();
+    }
+
+    public static function access_denied_uri($redirect = NULL)
+    {
+        $params = Oauth::parse_query();
+        if( ! $redirect) $redirect = Arr::get($params, 'redirect_uri');
+        if( $state = Arr::get($params, 'state')) $state = '&state='.$state;
+        return $redirect.'?error=access_denied'.$state;
+    }
+
 } // END Oauth Core

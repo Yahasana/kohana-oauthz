@@ -2,14 +2,12 @@
 /**
  * OAuth consumer controller
  *
- * @author     sumh <oalite@gmail.com>
- * @package    Oauth
- * @copyright  (c) 2009 OALite team
- * @license    http://www.oalite.com/license.txt
- * @version    $id$
- * @link       http://www.oalite.com
- * @see        Oauth_Consumer_Controller
- * @since      Available since Release 1.0
+ * @author      sumh <oalite@gmail.com>
+ * @package     Oauth
+ * @copyright   (c) 2010 OALite
+ * @license     ISC License (ISCL)
+ * @link		http://www.oalite.cn
+ * @see         Oauth_Consumer_Controller
  * *
  */
 class Controller_Client extends Oauth_Client_Controller {

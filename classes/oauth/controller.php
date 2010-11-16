@@ -73,7 +73,7 @@ abstract class Oauth_Controller extends Kohana_Controller {
                 // Verify the request method supported in the config settings
                 if(empty($this->_configs['request_methods'][Request::$method]))
                 {
-                    throw new Oauth_Exception('invalid_request');
+                    throw new Oauth_Exception_Access('invalid_request');
                 }
                 
                 // Process the access token from the request header or body
@@ -82,7 +82,7 @@ abstract class Oauth_Controller extends Kohana_Controller {
                 // Load the token information from database
                 if( ! $client = $this->oauth->lookup_token($parameter->oauth_token))
                 {
-                    throw new Oauth_Exception('invalid_token');
+                    throw new Oauth_Exception_Access('invalid_token');
                 }
 
                 $client['timestamp'] += $this->_configs['durations']['oauth_token'];
@@ -126,7 +126,7 @@ abstract class Oauth_Controller extends Kohana_Controller {
         $error['error'] = $this->error_code;
         
         // Get the error description from config settings
-        $error += $this->_configs['access_res_errors'][$error['error']];
+        $error += $this->_configs['access_errors'][$error['error']];
 
         switch($error['error'])
         {

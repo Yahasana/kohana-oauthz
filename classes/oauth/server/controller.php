@@ -64,16 +64,17 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
                     $response = $this->code_and_token();
                     break;
                 default:
-                    throw new Oauth_Exception_Authorize('unsupported_response_type');
+                    $e = new Oauth_Exception_Authorize('unsupported_response_type');
+                    $params = Oauth::parse_query();
+                    $e->state = Arr::get($params, 'state');
+                    $e->redirect_uri = Arr::get($params, 'redirect_uri');
+                    throw $e;
                     break;
             }
             $this->request->redirect($response);
         }
         catch (Oauth_Exception $e)
         {
-            // $error = $e->getMessage();
-            // $description = $this->_configs['code_errors'][$error];
-            // print_r($description);
             $this->request->redirect($e);
         }
     }
@@ -106,7 +107,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
                     $response = $this->none();
                     break;
                 default:
-                    throw new Oauth_Exception_Authorize('unsupported_grant_type');
+                    throw new Oauth_Exception_Token('unsupported_grant_type');
                     break;
             }
 

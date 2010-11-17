@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * OAuth Exception
+ * OAuth exception for oauth_token verify flow
  *
  * @author      sumh <oalite@gmail.com>
  * @package     Oauth
@@ -10,5 +10,27 @@
  * *
  */
 class OAuth_Exception_Access extends Oauth_Exception {
+
+	/**
+	 * Magic object-to-string method.
+	 *
+	 *     echo $exception;
+	 *
+	 * @return  string
+	 */
+	public function __toString()
+	{
+        $code = $this->getMessage();
+
+        $desc = parent::$errors[parent::$type]['access_errors'][$code];
+
+        $params['error'] = $code;
+
+        if( ! empty($desc['error_description'])) $params['error_description'] = $desc['error_description'];
+
+        if( ! empty($desc['error_uri'])) $params['error_uri'] = $desc['error_uri'];
+
+		return json_encode($params);
+	}
 
 } // END OAuth_Exception_Access

@@ -1,4 +1,5 @@
 <?php
+defined('REQUEST_TIME') OR define('REQUEST_TIME', $_SERVER['REQUEST_TIME']);
 /**
  * OAuth request parameter handler
  *

@@ -50,7 +50,7 @@ abstract class Oauth_Controller extends Kohana_Controller {
      * @access  protected
      * @var     array    $_exclude
      */
-    protected $_exclude = array();
+    protected $_exclude = array('xrds');
 
     /**
      * Verify the request to protected resource.
@@ -66,8 +66,6 @@ abstract class Oauth_Controller extends Kohana_Controller {
         {
             $this->_configs = Kohana::config('oauth-server.'.$this->_type);
 
-            $this->oauth = new Model_Oauth;
-
             try
             {
                 // Verify the request method supported in the config settings
@@ -75,27 +73,29 @@ abstract class Oauth_Controller extends Kohana_Controller {
                 {
                     throw new Oauth_Exception_Access('invalid_request');
                 }
-                
+
                 // Process the access token from the request header or body
                 $parameter = new Oauth_Parameter_Access($this->_configs['access_params']);
 
+                $token = new Model_Oauth_Access;
+
                 // Load the token information from database
-                if( ! $client = $this->oauth->lookup_token($parameter->oauth_token))
+                if( ! $access_token = $token->access_token($parameter->oauth_token))
                 {
                     throw new Oauth_Exception_Access('invalid_token');
                 }
 
-                $client['timestamp'] += $this->_configs['durations']['oauth_token'];
-                
+                $access_token['timestamp'] += $this->_configs['durations']['oauth_token'];
+
                 // Verify the access token
-                $parameter->access_token($client);
+                $parameter->access_token($access_token);
             }
             catch (Oauth_Exception $e)
             {
                 $this->error_code = $e->getMessage();
-                
+
                 // Redirect the action to unauthenticated
-                $this->request->action = 'un_authenticated';
+                $this->request->action = 'unauthenticated';
             }
         }
     }
@@ -121,10 +121,10 @@ abstract class Oauth_Controller extends Kohana_Controller {
      * @return	void
      * @todo    Add list of error codes
      */
-    public function action_un_authenticated()
+    public function action_unauthenticated()
     {
         $error['error'] = $this->error_code;
-        
+
         // Get the error description from config settings
         $error += $this->_configs['access_errors'][$error['error']];
 
@@ -134,7 +134,6 @@ abstract class Oauth_Controller extends Kohana_Controller {
                 $this->request->status = 400;   #HTTP/1.1 400 Bad Request
                 break;
             case 'invalid_token':
-            case 'expired_token':
                 $this->request->status = 401;   #HTTP/1.1 401 Unauthorized
                 break;
             case 'insufficient_scope':
@@ -145,7 +144,7 @@ abstract class Oauth_Controller extends Kohana_Controller {
                 break;
         }
 
-        $this->request->headers['WWW-Authenticate'] = 'OAuth realm=\'Service\','.http_build_query($error, '', ',');
+        $this->request->headers['WWW-Authenticate'] = 'OAuth2 realm=\'Service\','.http_build_query($error, '', ',');
         $this->request->response = json_encode($error);
     }
 

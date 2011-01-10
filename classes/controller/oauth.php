@@ -71,8 +71,8 @@ class Controller_Oauth extends Oauth_Server_Controller {
         if( ! empty($_POST['usermail']) AND Validate::email($_POST['usermail']))
         {
             $user = array(
-                'uid' => $_SERVER['REQUEST_TIME'],
-                'mail' => $_POST['usermail']
+                'uid'   => $_SERVER['REQUEST_TIME'],
+                'mail'  => $_POST['usermail']
             );
             Cookie::set('user', json_encode($user));
             Session::instance()->set('user', $user);
@@ -93,6 +93,7 @@ class Controller_Oauth extends Oauth_Server_Controller {
     public function action_logout()
     {
         Session::instance()->delete('user');
+        Cookie::delete('user');
         $this->request->redirect('oauth/index');
     }
 

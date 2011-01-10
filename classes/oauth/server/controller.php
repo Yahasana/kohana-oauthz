@@ -103,8 +103,8 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
                 case 'refresh_token':
                     $response = $this->refresh_token();
                     break;
-                case 'none':
-                    $response = $this->none();
+                case 'client_credentials':
+                    $response = $this->client_credentials();
                     break;
                 default:
                     throw new Oauth_Exception_Token('unsupported_grant_type');
@@ -142,12 +142,14 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
     {
         $parameter = new Oauth_Parameter_Code($this->_configs['code_params']);
 
-        if($client = $this->oauth->lookup_client($parameter->client_id))
+        $token = new Model_Oauth_Token;
+
+        if($code_token = $token->code($parameter->client_id))
         {
-            $client['expires_in'] = $this->_configs['durations']['code'];
+            $code_token['expires_in'] = $this->_configs['durations']['code'];
 
             // Populate the code
-            $response = $parameter->oauth_token($client);
+            $response = $parameter->oauth_token($code_token);
         }
         else
         {
@@ -167,11 +169,13 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
 
         $parameter = new Oauth_Parameter_Token($params);
 
-        if($client = $this->oauth->lookup_client($parameter->client_id))
-        {
-            $client['expires_in'] = $this->_configs['durations']['oauth_token'];
+        $token = new Model_Oauth_Token;
 
-            $parameter->oauth_token($client);
+        if($access_token = $token->access_token($parameter->client_id, $parameter->oauth_token))
+        {
+            $oauth_token['expires_in'] = $this->_configs['durations']['oauth_token'];
+
+            $response = $parameter->access_token($access_token);
         }
         else
         {
@@ -181,8 +185,6 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
             $e->state = $parameter->state;
             throw $e;
         }
-
-        $response = $parameter->access_token($parameter->client_id);
 
         return $parameter->redirect_uri.'#'.$response->query();
     }
@@ -196,11 +198,13 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
     {
         $parameter = new Oauth_Parameter_Webserver($this->_configs['grant_params']['authorization_code']);
 
-        if($client = $this->oauth->lookup_code($parameter->code))
+        $token = new Model_Oauth_Token;
+        
+        if($oauth_token = $token->oauth_token($parameter->client_id, $parameter->code))
         {
-            $response = $parameter->access_token($client);
+            //$this->oauth->audit_token($response);
 
-            $this->oauth->audit_token($response);
+            $response = $parameter->oauth_token($oauth_token);
         }
         else
         {
@@ -230,7 +234,9 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
     {
         $parameter = new Oauth_Parameter_Assertion;
 
-        if($client = $this->oauth->lookup_server($parameter->client_id))
+        $token = new Model_Oauth_Token;
+        
+        if($client = $token->assertion($parameter->client_id))
         {
             $response = $parameter->access_token($client);
         }
@@ -246,9 +252,11 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
     {
         $parameter = new Oauth_Parameter_Refresh;
 
-        if($client = $this->oauth->lookup_server($parameter->client_id))
+        $token = new Model_Oauth_Token;
+        
+        if($refresh_token = $token->refresh_token($parameter->client_id))
         {
-            $response = $parameter->access_token($client);
+            $response = $parameter->access_token($refresh_token);
         }
         else
         {
@@ -258,7 +266,7 @@ abstract class Oauth_Server_Controller extends Kohana_Controller {
         return $response;
     }
 
-    protected function none()
+    protected function client_credentials()
     {
         $parameter = new Oauth_Parameter_None;
 

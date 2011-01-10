@@ -76,7 +76,7 @@ class Model_Oauth extends Kohana_Model {
                 if($val === '') $valid[$key] = NULL;
             }
 
-            $valid['created'] = REQUEST_TIME;
+            $valid['created'] = $_SERVER['REQUEST_TIME'];
             $valid['client_secret'] = sha1($valid['client_secret']);
             $server = DB::insert('t_oauth_servers', array_keys($valid))
                 ->values(array_values($valid))
@@ -148,7 +148,7 @@ class Model_Oauth extends Kohana_Model {
                 if($val === '') $valid[$key] = NULL;
             }
 
-            $valid['modified'] = REQUEST_TIME;
+            $valid['modified'] = $_SERVER['REQUEST_TIME'];
             isset($valid['client_secret']) AND $valid['client_secret'] = sha1($valid['client_secret']);
             return DB::update('t_oauth_servers')
                 ->set($valid)
@@ -161,96 +161,6 @@ class Model_Oauth extends Kohana_Model {
             // Validation failed, collect the errors
             return $valid;
         }
-    }
-
-    public function lookup_server($client_id, $user_id)
-    {
-        return DB::select('*')
-            ->from('t_oauth_servers')
-            ->where('client_id', '=', $client_id)
-            ->where('user_id','=', $user_id)
-            ->execute($this->_db)
-            ->current();
-    }
-
-    public function unique_server($redirect_uri, $user_id = NULL)
-    {
-        // Check if the username already exists in the database
-        return DB::select(array(DB::expr('COUNT(1)'), 'total'))
-            ->from('t_oauth_servers')
-            ->where('redirect_uri', '=', $redirect_uri)
-            //->where('user_id', '=', $user_id)
-            ->execute($this->_db)
-            ->get('total');
-    }
-
-    /**
-     * List servers
-     *
-     * @access	public
-     * @param	array	    $params
-     * @param	Pagination	$pagination	default [ NULL ] passed by reference
-     * @param	boolean	    $calc_total	default [ TRUE ] is needed to caculate the total records for pagination
-     * @return	array       array('servers' => data, 'orderby' => $params['orderby'], 'pagination' => $pagination)
-     */
-    public function list_server(array $params, & $pagination = NULL, $calc_total = TRUE)
-    {
-        if( ! $pagination instanceOf Pagination) $pagination = new Pagination;
-
-        $params['user_id'] = $this->_db->qoute($params['user_id']);
-
-        $sql = 'FROM `t_oauth_servers` WHERE user_id=\''.$params['user_id'].'\'';
-
-        // Customize where from params
-        //$sql .= 'WHERE ... '
-
-        // caculte the total rows
-        if($calc_total === TRUE)
-        {
-            $pagination->total_items = $this->_db->query(Database::SELECT,
-                'SELECT COUNT(`server_id`) num_rows '.$sql, FALSE
-            )->get('num_rows');
-
-            $data['pagination'] = $pagination;
-
-            if($pagination->total_items == 0)
-            {
-                $data['servers'] = array();
-                isset($params['orderby']) AND $data['orderby'] = $params['orderby'];
-                return $data;
-            }
-        }
-
-        // Customize order by from params
-        if(isset($params['orderby']))
-        {
-            switch($params['orderby'])
-            {
-                case 'uri':
-                    $sql .= ' ORDER BY redirect_uri DESC';
-                    break;
-                case 'name':
-                    $sql .= ' ORDER BY app_name DESC';
-                    break;
-                case 'update':
-                    $sql .= ' ORDER BY modified DESC';
-                    break;
-                case 'level':
-                    $sql .= ' ORDER BY user_level DESC';
-                    break;
-                default:
-                    $params['orderby'] = 'redirect_uri';
-                    $sql .= ' ORDER BY redirect_uri DESC';
-                    break;
-            }
-            $data['orderby'] = $params['orderby'];
-        }
-
-        $sql .= " LIMIT {$pagination->offset}, {$pagination->items_per_page}";
-
-        $data['servers'] = $this->_db->query(Database::SELECT, 'SELECT * '.$sql);
-
-        return $data;
     }
 
     /**
@@ -300,7 +210,7 @@ class Model_Oauth extends Kohana_Model {
                 if($val === '') $valid[$key] = NULL;
             }
 
-            $valid['created'] = REQUEST_TIME;
+            $valid['created'] = $_SERVER['REQUEST_TIME'];
             return DB::insert('t_oauth_clients', array_keys($valid))
                 ->values(array_values($valid))
                 ->execute($this->_db);
@@ -358,7 +268,7 @@ class Model_Oauth extends Kohana_Model {
                 if($val === '') $valid[$key] = NULL;
             }
 
-            $valid['modified'] = REQUEST_TIME;
+            $valid['modified'] = $_SERVER['REQUEST_TIME'];
             return DB::update('t_oauth_clients')
                 ->set($valid)
                 ->where('user_id', '=', $user_id)
@@ -369,26 +279,6 @@ class Model_Oauth extends Kohana_Model {
             // Validation failed, collect the errors
             return $valid;
         }
-    }
-
-    public function lookup_client($client_id, $expired_in = 3600)
-    {
-        if($client_id AND $client = DB::select('client_secret','server_id','redirect_uri','user_id')
-            ->from('t_oauth_servers')
-            ->where('client_id' , '=', $client_id)
-            ->execute($this->_db)
-            ->current())
-        {
-            $client['code'] = uniqid();
-            $access_token   = sha1(md5(time()));
-            $refresh_token  = sha1(sha1(mt_rand()));
-            DB::insert('t_oauth_tokens', array('client_id','code','user_id','access_token','timestamp','expire_in','refresh_token'))
-                ->values(array($client_id, $client['code'], $client['user_id'], $access_token, time(), $expired_in, $refresh_token))
-                ->execute($this->_db);
-
-            return $client;
-        }
-        return NULL;
     }
 
     /**
@@ -491,21 +381,6 @@ class Model_Oauth extends Kohana_Model {
         DB::insert('t_oauth_audits', array('access_token'))
             ->values(array($token->access_token))
             ->execute($this->_db);
-    }
-
-    public function lookup_token($oauth_token)
-    {
-        // implement me
-        if($token = DB::select('*')
-            ->from('t_oauth_tokens')
-            ->where('access_token' , '=', $oauth_token)
-            ->execute($this->_db)
-            ->current())
-        {
-            return $token;
-        }
-
-        return NULL;
     }
 
     public function refresh_token(Oauth_Token $token)

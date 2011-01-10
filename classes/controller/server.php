@@ -24,7 +24,9 @@ class Controller_Server extends Oauth_Server {
 
     public function action_index()
     {
-        $data['servers'] = $this->oauth->list_server($_SESSION['user']['uid']);
+        $server = new Model_Oauth_Server;
+
+        $data = $server->lists(array('user_id' => $_SESSION['user']['uid']));
 
         $this->template->content = new View('oauth-server', $data);
 

@@ -1,5 +1,4 @@
 <?php
-defined('REQUEST_TIME') OR define('REQUEST_TIME', $_SERVER['REQUEST_TIME']);
 /**
  * OAuth request parameter handler
  *
@@ -57,7 +56,8 @@ abstract class Oauth_Parameter {
 
         preg_match_all('@(\w+)=(?:(?:\'([^\']+)\'|"([^"]+)")|([^\s,]+))@', $txt, $matches, PREG_SET_ORDER);
 
-        foreach($matches as $m) {
+        foreach($matches as $m) 
+        {
             $data[$m[1]] = $m[2] ? $m[2] : ($m[3] ? $m[3] : $m[4]);
             unset($needed_parts[$m[1]]);
         }

@@ -20,10 +20,10 @@ CREATE TABLE t_oauth_clients
 		COMMENT 'Request confirm, 0: every time; 1: only once; 2: with expired period; 3: once and banned',
 	client_level TINYINT UNSIGNED NOT NULL DEFAULT 0
 		COMMENT 'diferent client levels have different max request times',
-	modified INTEGER UNSIGNED NOT NULL,
-	created INTEGER UNSIGNED NULL,
+	modified INTEGER UNSIGNED NULL,
+	created INTEGER UNSIGNED NOT NULL,
 	scope VARCHAR(512) NULL,
-	expired_date INTEGER UNSIGNED NULL
+	expired_date INTEGER UNSIGNED NULL 
 		COMMENT 'date time',
 	remark TEXT NULL,
 	client_desc TEXT NULL
@@ -31,7 +31,7 @@ CREATE TABLE t_oauth_clients
 
 /* Table Items: t_oauth_clients */
 ALTER TABLE t_oauth_clients ADD CONSTRAINT pkt_oauth_clients
-	PRIMARY KEY (user_id, client_id);
+	PRIMARY KEY (user_id);
 
 /* Set Comments */
 ALTER TABLE t_oauth_clients COMMENT = 'Store audit information from resource owner for the resource requester';
@@ -42,7 +42,7 @@ ALTER TABLE t_oauth_clients COMMENT = 'Store audit information from resource own
 CREATE TABLE t_oauth_audits
 (
 	access_token VARCHAR(128) NOT NULL,
-	created INTEGER NOT NULL,
+	created INTEGER UNSIGNED NOT NULL,
 	nonce VARCHAR(64) NULL,
 	secret_type VARCHAR(32) NULL
 ) DEFAULT CHARSET=utf8;
@@ -83,33 +83,34 @@ CREATE INDEX idx_t_oauth_logs_client_id_log_id ON t_oauth_logs (client_id, log_i
 CREATE TABLE t_oauth_servers
 (
 	server_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	client_id VARCHAR(128) NOT NULL
+	client_id VARCHAR(128) NOT NULL 
 		COMMENT 'AKA. API key',
-	client_secret VARCHAR(128) NOT NULL
+	client_secret VARCHAR(128) NOT NULL 
 		COMMENT 'AKA. API secret',
-	redirect_uri VARCHAR(512) NOT NULL
+	redirect_uri VARCHAR(512) NOT NULL 
 		COMMENT 'AKA. Callback URI',
-	scope VARCHAR(256) NULL
+	scope VARCHAR(256) NULL 
 		COMMENT 'May be create, read, update or delete. so on so for',
 	secret_type ENUM('plaintext','md5','rsa-sha1','hmac-sha1') NOT NULL DEFAULT 'plaintext'
 		COMMENT 'Secret signature encrypt type. e.g',
-	ssh_key VARCHAR(512) NULL
+	ssh_key VARCHAR(512) NULL 
 		COMMENT 'SSH public keys',
-	app_name VARCHAR(128) NOT NULL
+	app_name VARCHAR(128) NOT NULL 
 		COMMENT 'Application Name',
-	app_desc VARCHAR(512) NULL
+	app_desc TEXT NULL 
 		COMMENT 'Application Description, When users authenticate via your app, this is what they\'ll see.',
-	app_profile ENUM('webserver','native','useragent') NOT NULL DEFAULT 'webserver'
-		COMMENT 'Application Profile: Web Server Application, Native Application, Browser Application',
-	user_id BIGINT UNSIGNED NULL
+	app_profile ENUM('webserver','native','useragent','autonomous') NOT NULL DEFAULT 'webserver'
+		COMMENT 'Application Profile: Web Server Application, Native Application, Browser Application, Autonomous clients',
+	app_purpose VARCHAR(512) NULL,
+	user_id BIGINT UNSIGNED NULL 
 		COMMENT 'Ref# from users table',
 	user_level TINYINT UNSIGNED NOT NULL DEFAULT 0
 		COMMENT 'diferent client levels have different max request times',
 	enabled TINYINT UNSIGNED NOT NULL DEFAULT 0
 		COMMENT '0: waiting for system administrator audit; 1: acceptable; 2: ban',
-	created INTEGER UNSIGNED NOT NULL
+	created INTEGER UNSIGNED NOT NULL 
 		COMMENT 'create datetime',
-	modified INTEGER NULL
+	modified INTEGER UNSIGNED NULL 
 		COMMENT 'modified datetime'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -134,7 +135,7 @@ CREATE TABLE t_oauth_tokens
 	expire_in INTEGER UNSIGNED NOT NULL DEFAULT 300,
 	`timestamp` INTEGER UNSIGNED NOT NULL,
 	nonce VARCHAR(64) NULL,
-	user_id BIGINT NOT NULL
+	user_id BIGINT NOT NULL 
 		COMMENT 'Ref# from users table'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -148,17 +149,6 @@ CREATE INDEX idx_t_oauth_tokens_server_id ON t_oauth_tokens (client_id);
 
 
 /************ Add Foreign Keys to Database ***************/
-/*-----------------------------------------------------------
-Warning: Versions of MySQL prior to 4.1.2 require indexes on all columns involved in a foreign key. The following indexes may be required:
-fk_t_oauth_clients_t_oauth_servers may require an index on table: t_oauth_servers, column: redirect_uri
-fk_t_oauth_clients_t_oauth_servers may require an index on table: t_oauth_clients, column: redirect_uri
------------------------------------------------------------
-*/
-
-/************ Foreign Key: fk_t_oauth_clients_t_oauth_servers ***************/
-ALTER TABLE t_oauth_clients ADD CONSTRAINT fk_t_oauth_clients_t_oauth_servers
-	FOREIGN KEY (redirect_uri) REFERENCES t_oauth_servers (redirect_uri)
-	ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_t_oauth_tokens_t_oauth_servers ***************/
 ALTER TABLE t_oauth_tokens ADD CONSTRAINT fk_t_oauth_tokens_t_oauth_servers

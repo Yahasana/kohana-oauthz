@@ -1,5 +1,5 @@
 <?php defined('SYSPATH') or die('No direct script access.');
-    $is_login = Session::instance()->get('user') ? TRUE : FALSE;
+    $user = Session::instance()->get('user');
 ?><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -119,14 +119,14 @@ th{
 <body><div class="page">
 <header>
     <div style="width:90%;float:right">
-    <h1>OAuth 2.0 Test</h1>
+    <h1><?php if($user) echo 'Welcome '.$user['mail'].', '; ?>OAuth 2.0 Test</h1>
     <nav>
       <ul>
         <li><a href="/client/index">Client</a></li>
         <li><a href="/server/index">Server</a></li>
         <li><a href="/api/index">API Resources</a></li>
         <li><a href="/oauth/error">Error Codes</a></li><?php
-        if($is_login)
+        if($user)
         {
             echo '<li><a href="/oauth/logout">Logout</a></li>';
         }

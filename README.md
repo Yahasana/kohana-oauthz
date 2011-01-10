@@ -19,11 +19,15 @@
 
 ### Install and configuration ###
 
- 1. configurate the client parameters in `config/oauth_provider.php`
+ 1. configurate the client parameters in `config/oauth_client.php`
 
 ### Develop resources request handler ###
 
     class Controller_Client extends Oauth_Client_Controller {}
+
+### Demo explaination ###
+
+    [Demo guide](guide/demo.md)
 
 ## ISC License (ISCL) ##
 

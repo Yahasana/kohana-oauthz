@@ -49,6 +49,16 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
         }
         else
         {
+            if(isset($_SERVER['PHP_AUTH_USER']) AND isset($_SERVER['PHP_AUTH_PW']))
+            {
+                $_POST += array('client_id' => $_SERVER['PHP_AUTH_USER'], 'client_secret' => $_SERVER['PHP_AUTH_PW']);
+            }
+            // TODO Digest HTTP authentication
+            //else if( ! empty($_SERVER['PHP_AUTH_DIGEST']) AND $digest = parent::parse_digest($_SERVER['PHP_AUTH_DIGEST']))
+            //{                
+            //    $_POST += array('client_id' => $digest['username'], 'client_secret' => $digest['']);
+            //}
+
             // Check all required parameters should NOT be empty
             foreach($args as $key => $val)
             {

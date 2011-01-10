@@ -16,60 +16,31 @@ class Oauth_Server extends Kohana_Controller {
 
     public function before()
     {
-        $this->oauth = new Model_Oauth;
         $this->template = new View($this->template);
     }
 
     public function action_register($client_id = NULL)
     {
         $data = array();
+        $server = new Model_Oauth_Server;
         if($client_id)
         {
-            $data = $this->oauth->lookup_server($client_id, $_SESSION['user']['uid']);
+            $data = (array) $server->get($client_id, $_SESSION['user']['uid']);
         }
-        elseif(isset($_POST['password']))
+        elseif(isset($_POST['__v_state__']))
         {
-            $post = new Validate($_POST);
-            $post->filter(TRUE, 'trim')
-                ->rule('redirect_uri', 'not_empty');
+            $_POST['user_id'] = $_SESSION['user']['uid'];
 
-            if(empty($_POST['client_id']))
-            {
-                $post->rule('password', 'not_empty')
-                    ->rule('password', 'min_length', array(6))
-                    ->rule('confirm',  'matches', array('password'));
-            }
-            elseif( ! empty($_POST['password']) OR ! empty($_POST['confirm']))
-            {
-                $post->rule('password', 'not_empty')
-                    ->rule('password', 'min_length', array(6))
-                    ->rule('confirm',  'matches', array('password'));
-            }
+            $valid = empty($_POST['server_id']) ? $server->append($_POST) : $server->update($_POST['server_id'], $_POST);
 
-            if($post->check())
+            if($valid instanceOf Validate)
             {
-                $_POST['user_id'] = $_SESSION['user']['uid'];
-
-                if(empty($_POST['client_id']))
-                {
-                    if($this->oauth->unique_server($_POST['redirect_uri']))
-                    {
-                        $post->error('redirect_uri', 'not unique');
-                        $data['errors'] = $post->errors('validate');
-                    }
-                    else
-                    {
-                        $this->oauth->reg_server($_POST);
-                    }
-                }
-                else
-                {
-                    $this->oauth->update_server($_POST);
-                }
+                $data += $valid->as_array();
+                $data['errors'] = $valid->errors('validate');
             }
             else
             {
-                $data['errors'] = $post->errors('validate');
+                $data += $valid;
             }
         }
 

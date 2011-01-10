@@ -53,7 +53,7 @@ CREATE TABLE "t_oauth_audits"
 COMMENT ON TABLE "t_oauth_audits" IS 'Audit the access token';
 
 /******************** Add Table: "t_oauth_logs" ************************/
- CREATE SEQUENCE Server.seq_t_oauth_logs_log_id INCREMENT 1;
+ CREATE SEQUENCE seq_t_oauth_logs_log_id INCREMENT 1;
 
 /* Build Table Structure */
 CREATE TABLE "t_oauth_logs"
@@ -81,7 +81,7 @@ COMMENT ON TABLE "t_oauth_logs" IS 'Log table to hold all OAuth request when you
 CREATE INDEX idx_t_oauth_logs_client_id_log_id ON "t_oauth_logs" (client_id, log_id);
 
 /******************** Add Table: "t_oauth_servers" ************************/
- CREATE SEQUENCE Server.seq_t_oauth_servers_server_id INCREMENT 1;
+ CREATE SEQUENCE seq_t_oauth_servers_server_id INCREMENT 1;
 
 /* Build Table Structure */
 CREATE TABLE "t_oauth_servers"
@@ -129,7 +129,7 @@ COMMENT ON TABLE "t_oauth_servers" IS 'Used for verification of incoming request
 CREATE UNIQUE INDEX idx_t_oauth_servers_client_id ON "t_oauth_servers" (client_id);
 
 /******************** Add Table: "t_oauth_tokens" ************************/
- CREATE SEQUENCE Server.seq_t_oauth_tokens_token_id INCREMENT 1;
+ CREATE SEQUENCE seq_t_oauth_tokens_token_id INCREMENT 1;
 
 /* Build Table Structure */
 CREATE TABLE "t_oauth_tokens"

@@ -31,13 +31,13 @@ ALTER TABLE t_oauth_clients ADD CONSTRAINT pkt_oauth_clients
 	PRIMARY KEY (user_id);
 
 /* Set Comments */
-EXEC sp_addextendedproperty 'MS_Description', 'Request confirm, 0: every time; 1: only once; 2: with expired period; 3: once and banned', 'schema', 'Client', 
+EXEC sp_addextendedproperty 'MS_Description', 'Request confirm, 0: every time; 1: only once; 2: with expired period; 3: once and banned',
 	'table', 't_oauth_clients', 'column', 'confirm_type';
-EXEC sp_addextendedproperty 'MS_Description', 'diferent client levels have different max request times', 'schema', 'Client', 
+EXEC sp_addextendedproperty 'MS_Description', 'diferent client levels have different max request times',
 	'table', 't_oauth_clients', 'column', 'client_level';
-EXEC sp_addextendedproperty 'MS_Description', 'date time', 'schema', 'Client', 
+EXEC sp_addextendedproperty 'MS_Description', 'date time',
 	'table', 't_oauth_clients', 'column', 'expired_date';
-EXEC sp_addextendedproperty 'MS_Description', 'Store audit information from resource owner for the resource requester', 'schema', 'Client', 
+EXEC sp_addextendedproperty 'MS_Description', 'Store audit information from resource owner for the resource requester',
 	'table', t_oauth_clients, null, null;
 
 /******************** Add Table: t_oauth_audits ************************/
@@ -54,7 +54,7 @@ CREATE TABLE t_oauth_audits
 /* Table Items: t_oauth_audits */
 
 /* Set Comments */
-EXEC sp_addextendedproperty 'MS_Description', 'Audit the access token', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'Audit the access token',
 	'table', t_oauth_audits, null, null;
 
 /******************** Add Table: t_oauth_logs ************************/
@@ -79,7 +79,7 @@ ALTER TABLE t_oauth_logs ADD CONSTRAINT pkt_oauth_logs
 	PRIMARY KEY (log_id);
 
 /* Set Comments */
-EXEC sp_addextendedproperty 'MS_Description', 'Log table to hold all OAuth request when you enabled logging ', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'Log table to hold all OAuth request when you enabled logging ',
 	'table', t_oauth_logs, null, null;
 
 /* Add Indexes for: t_oauth_logs */
@@ -113,35 +113,35 @@ ALTER TABLE t_oauth_servers ADD CONSTRAINT pkt_oauth_servers
 	PRIMARY KEY (server_id);
 
 /* Set Comments */
-EXEC sp_addextendedproperty 'MS_Description', 'AKA. API key', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'AKA. API key',
 	'table', 't_oauth_servers', 'column', 'client_id';
-EXEC sp_addextendedproperty 'MS_Description', 'AKA. API secret', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'AKA. API secret',
 	'table', 't_oauth_servers', 'column', 'client_secret';
-EXEC sp_addextendedproperty 'MS_Description', 'AKA. Callback URI', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'AKA. Callback URI',
 	'table', 't_oauth_servers', 'column', 'redirect_uri';
-EXEC sp_addextendedproperty 'MS_Description', 'May be create, read, update or delete. so on so for', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'May be create, read, update or delete. so on so for',
 	'table', 't_oauth_servers', 'column', 'scope';
-EXEC sp_addextendedproperty 'MS_Description', 'Secret signature encrypt type. e.g', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'Secret signature encrypt type. e.g',
 	'table', 't_oauth_servers', 'column', 'secret_type';
-EXEC sp_addextendedproperty 'MS_Description', 'SSH public keys', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'SSH public keys',
 	'table', 't_oauth_servers', 'column', 'ssh_key';
-EXEC sp_addextendedproperty 'MS_Description', 'Application Name', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'Application Name',
 	'table', 't_oauth_servers', 'column', 'app_name';
-EXEC sp_addextendedproperty 'MS_Description', 'Application Description, When users authenticate via your app, this is what they''ll see.', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'Application Description, When users authenticate via your app, this is what they''ll see.',
 	'table', 't_oauth_servers', 'column', 'app_desc';
-EXEC sp_addextendedproperty 'MS_Description', 'Application Profile: Web Server Application, Native Application, Browser Application, Autonomous clients', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'Application Profile: Web Server Application, Native Application, Browser Application, Autonomous clients',
 	'table', 't_oauth_servers', 'column', 'app_profile';
-EXEC sp_addextendedproperty 'MS_Description', 'Ref# from users table', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'Ref# from users table',
 	'table', 't_oauth_servers', 'column', 'user_id';
-EXEC sp_addextendedproperty 'MS_Description', 'diferent client levels have different max request times', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'diferent client levels have different max request times',
 	'table', 't_oauth_servers', 'column', 'user_level';
-EXEC sp_addextendedproperty 'MS_Description', '0: waiting for system administrator audit; 1: acceptable; 2: ban', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', '0: waiting for system administrator audit; 1: acceptable; 2: ban',
 	'table', 't_oauth_servers', 'column', 'enabled';
-EXEC sp_addextendedproperty 'MS_Description', 'create datetime', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'create datetime',
 	'table', 't_oauth_servers', 'column', 'created';
-EXEC sp_addextendedproperty 'MS_Description', 'modified datetime', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'modified datetime',
 	'table', 't_oauth_servers', 'column', 'modified';
-EXEC sp_addextendedproperty 'MS_Description', 'Used for verification of incoming requests. ', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'Used for verification of incoming requests. ',
 	'table', t_oauth_servers, null, null;
 
 /* Add Indexes for: t_oauth_servers */
@@ -168,9 +168,9 @@ ALTER TABLE t_oauth_tokens ADD CONSTRAINT pkt_oauth_tokens
 	PRIMARY KEY (token_id);
 
 /* Set Comments */
-EXEC sp_addextendedproperty 'MS_Description', 'Ref# from users table', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'Ref# from users table',
 	'table', 't_oauth_tokens', 'column', 'user_id';
-EXEC sp_addextendedproperty 'MS_Description', 'Table used to verify signed requests sent to a server by the consumer.When the verification is succesful then the associated user id is returned. ', 'schema', 'Server', 
+EXEC sp_addextendedproperty 'MS_Description', 'Table used to verify signed requests sent to a server by the consumer.When the verification is succesful then the associated user id is returned. ',
 	'table', t_oauth_tokens, null, null;
 
 /* Add Indexes for: t_oauth_tokens */

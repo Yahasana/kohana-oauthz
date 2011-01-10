@@ -27,7 +27,7 @@
 
 ### Demo explaination ###
 
-    [Demo guide](guide/demo.md)
+[Demo guide](OAuth-2.0/guide/demo.md)
 
 ## ISC License (ISCL) ##
 

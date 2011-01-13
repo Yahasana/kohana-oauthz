@@ -106,7 +106,7 @@ CREATE TABLE t_oauth_servers
 		COMMENT 'Ref# from users table',
 	user_level TINYINT UNSIGNED NOT NULL DEFAULT 0
 		COMMENT 'diferent client levels have different max request times',
-	enabled TINYINT UNSIGNED NOT NULL DEFAULT 0
+	enabled TINYINT UNSIGNED NOT NULL DEFAULT 1
 		COMMENT '0: waiting for system administrator audit; 1: acceptable; 2: ban',
 	created INTEGER UNSIGNED NOT NULL
 		COMMENT 'create datetime',

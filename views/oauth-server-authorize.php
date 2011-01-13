@@ -4,8 +4,8 @@
 if($authorized) 
 {
     $redirect_uri = Oauth::parse_query($query, 'redirect_uri');
-    ?>do you want to let the <?php echo $redirect_uri; ?> to access your information?
-    <br /><a href="<?php echo Oauth::grant_access_uri('http://docs/oauth/authorize'); ?>" title="">Approve access</a>
+    ?>do you want to let the <strong><?php echo $redirect_uri; ?></strong> to access your information?
+    <br /><br /><a href="<?php echo Oauth::grant_access_uri('http://docs/oauth/authorize'); ?>" title="">Approve access</a>
     <a href="<?php echo Oauth::access_denied_uri(); ?>" title="">Deny access</a><?php 
 } 
 else 

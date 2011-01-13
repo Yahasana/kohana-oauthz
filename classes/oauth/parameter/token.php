@@ -131,7 +131,7 @@ class Oauth_Parameter_Token extends Oauth_Parameter {
 
         if(isset($this->_params['timestamp']) AND $client['timestamp'] < $this->_params['timestamp'])
         {
-            throw new Oauth_Exception_Token('expired_token');
+            throw new Oauth_Exception_Token('invalid_token');
         }
 
         // Verify the signature

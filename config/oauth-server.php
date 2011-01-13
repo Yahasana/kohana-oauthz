@@ -202,10 +202,6 @@ return array(
                 'error_description' => '',
                 'error_uri'         => '',
             ),
-            'expired_token'         => array(
-                'error_description' => '',
-                'error_uri'         => '',
-            ),
             'insufficient_scope'    => array(
                 'error_description' => '',
                 'error_uri'         => '',

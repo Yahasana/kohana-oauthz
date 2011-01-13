@@ -35,7 +35,7 @@ class Oauth_Server extends Kohana_Controller {
 
             if($valid instanceOf Validate)
             {
-                $data += $valid->as_array();
+                $data = $valid->as_array();
                 $data['errors'] = $valid->errors('validate');
             }
             else
@@ -51,9 +51,11 @@ class Oauth_Server extends Kohana_Controller {
 
     public function action_client()
     {
-        $data['clients'] = $this->oauth->list_client('0');
+        $server = new Model_Oauth_Server;
 
-        $this->template->content = new View('oauth-client', $data);
+        $data = $server->lists();
+
+        $this->template->content = new View('oauth-server-client', $data);
 
         $this->request->response = $this->template->render();
     }

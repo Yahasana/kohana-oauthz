@@ -80,7 +80,7 @@ abstract class Oauth_Controller extends Kohana_Controller {
                 $token = new Model_Oauth_Access;
 
                 // Load the token information from database
-                if( ! $access_token = $token->access_token($parameter->oauth_token))
+                if( ! $access_token = $token->access_token($parameter->client_id, $parameter->oauth_token))
                 {
                     throw new Oauth_Exception_Access('invalid_token');
                 }
@@ -98,19 +98,6 @@ abstract class Oauth_Controller extends Kohana_Controller {
                 $this->request->action = 'unauthenticated';
             }
         }
-    }
-
-    /**
-     * OAuth server auto-discovery for user
-     *
-     * @access	public
-     * @return	void
-     * @todo    Add list of error codes
-     */
-    public function action_xrds()
-    {
-        $this->request->headers['Content-Type'] = 'application/xrds+xml';
-        $this->request->response = View::factory('oauth-xrds')->render();
     }
 
     /**
@@ -155,5 +142,18 @@ abstract class Oauth_Controller extends Kohana_Controller {
     abstract public function action_update();
 
     abstract public function action_delete();
+
+    /**
+     * OAuth server auto-discovery for user
+     *
+     * @access	public
+     * @return	void
+     * @todo    Add list of error codes
+     */
+    public function action_xrds()
+    {
+        $this->request->headers['Content-Type'] = 'application/xrds+xml';
+        $this->request->response = View::factory('oauth-server-xrds')->render();
+    }
 
 } // END Oauth Controller

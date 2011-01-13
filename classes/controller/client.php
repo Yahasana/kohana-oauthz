@@ -14,7 +14,11 @@ class Controller_Client extends Oauth_Client_Controller {
 
     public function action_index()
     {
-        parent::request_code();
+        $template = new View('oauth');
+
+        $template->content = new View('oauth-client');
+
+        $this->request->response = $template->render();
     }
 
     public function action_test()

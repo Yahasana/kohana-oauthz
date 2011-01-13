@@ -68,7 +68,9 @@ class Oauth_Parameter_Webserver extends Oauth_Parameter {
 
         $this->code = $params['code'];
 
-        unset($params['code']);
+        $this->client_id = $params['client_id'];
+
+        unset($params['code'], $params['client_id']);
 
         $this->_params = $params;
     }

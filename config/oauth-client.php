@@ -9,11 +9,19 @@ return array(
         'token_uri'     => 'http://docs/oauth/token',
         'access_uri'    => 'http://docs/api',
         'redirect_uri'  => 'http://docs/client/do',
-        // parameters for oauth request
+        /**
+         * "code" for requesting an authorization code, or 
+         * "token" for requesting an access token, or
+         * "code_and_token" to request both.
+         */
         'response_type' => 'code',
+        /**
+         * "authorization_code", "password", "refresh_token", "client_credentials", 
+         * or an absolute URI identifying an assertion format supported by the authorization
+         */
         'grant_type'    => 'authorization_code',
-        'client_id'     => 'OA_4bfbc43769917',
-        'client_secret' => 'asdf',
+        'client_id'     => 'OAL_4D2EA62621E4F',
+        'client_secret' => 'sss',
         'state'         => '',
         'secret_type'   => 'plaintext', // PLAINTEXT, HMAC-SHA1, RSA-SHA1, MD5
         'nonce'         => uniqid()

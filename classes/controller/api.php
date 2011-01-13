@@ -12,6 +12,8 @@
  */
 class Controller_Api extends Oauth_Controller {
 
+    protected $_exclude = array('xrds', 'index');
+
     /**
      * Accessing Protected Resources
      *

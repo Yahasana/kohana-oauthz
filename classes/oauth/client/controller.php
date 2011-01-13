@@ -39,15 +39,9 @@ class Oauth_Client_Controller extends Kohana_Controller {
     public function before()
     {
         $this->_configs  = Kohana::config('oauth-client.'.$this->_type);
-        // We have a WWW-Authenticate-header with OAuth data. Parse the header
-        // and add those overriding any duplicates from GET or POST
-        // if (isset($headers['www-authenticate']) && substr($headers['www-authenticate'], 0, 12) === 'Token realm=')
-        // {
-            // $this->_configs = Oauth::parse_header($headers['www-authenticate']) + $this->_configs;
-        // }
     }
 
-    protected function request_code($uri = NULL, $type = NULL)
+    public function action_code($uri = NULL, $type = NULL)
     {
         if($uri === NULL) $uri = $this->_configs['oauth_uri'];
 
@@ -98,7 +92,7 @@ class Oauth_Client_Controller extends Kohana_Controller {
             ));
 
             $token = json_decode($token);
-            if(property_exists($token, 'error'))
+            if(isset($token->error))
             {
                 throw new Oauth_Exception($token->error);
             }
@@ -109,7 +103,7 @@ class Oauth_Client_Controller extends Kohana_Controller {
                 CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=utf-8'),
                 CURLOPT_POSTFIELDS  => Oauth::build_query(array(
                     'oauth_token'   => $token->access_token,
-                    'timestamp'     => time(),
+                    'timestamp'     => $_SERVER['REQUEST_TIME'],
                     'refresh_token' => $token->refresh_token,
                     'expires_in'    => $token->expires_in,
                     'client_id'     => $this->_configs['client_id']

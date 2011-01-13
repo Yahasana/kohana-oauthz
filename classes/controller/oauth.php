@@ -23,7 +23,7 @@ class Controller_Oauth extends Oauth_Server_Controller {
     {
         $query = URL::query();
         $template = new View('oauth');
-        $view = new View('oauth-authorize', array('authorized' => TRUE, 'query' => $query));
+        $view = new View('oauth-server-authorize', array('authorized' => TRUE, 'query' => $query));
         $template->content = $view->render();
         $this->request->response = $template;
     }
@@ -61,7 +61,7 @@ class Controller_Oauth extends Oauth_Server_Controller {
         }
 
         $template = new View('oauth');
-        $view = new View('oauth-error', $errors);
+        $view = new View('oauth-server-error', $errors);
         $template->content = $view->render();
         $this->request->response = $template;
     }
@@ -85,7 +85,7 @@ class Controller_Oauth extends Oauth_Server_Controller {
         }
 
         $template = new View('oauth');
-        $view = new View('oauth-signin');
+        $view = new View('oauth-server-signin');
         $template->content = $view->render();
         $this->request->response = $template;
     }

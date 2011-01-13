@@ -27,7 +27,7 @@
 
 ### Demo explaination ###
 
-[Demo guide](guide/demo.md)
+[Demo guide](Yahasana/OAuth-2.0/tree/master/guide/demo.md)
 
 ## ISC License (ISCL) ##
 

@@ -21,7 +21,16 @@ class Model_Oauth_Server extends Model_Oauth {
                 ->execute($this->_db)
                 ->current();
     }
-
+    
+    public function lookup($client_id)
+    {
+        return DB::select('*')
+            ->from('t_oauth_servers')
+            ->where('client_id', '=', $client_id)
+            ->execute($this->_db)
+            ->current();
+    }
+    
     /**
      * Insert server
      *
@@ -78,7 +87,7 @@ class Model_Oauth_Server extends Model_Oauth {
         {
             $valid = $valid->as_array();
 
-            if($this->unique_server($valid['redirect_uri'], $params['user_id']))
+            if($this->unique_client($valid['redirect_uri'], $params['user_id']))
             {
                 return $valid->error('redirect_uri', 'not unique');
             }
@@ -88,8 +97,9 @@ class Model_Oauth_Server extends Model_Oauth {
                 if($val === '') $valid[$key] = NULL;
             }
 
-            $valid['user_id'] = $params['user_id'];
-            $valid['created'] = $_SERVER['REQUEST_TIME'];
+            $valid['user_id']       = $params['user_id'];
+            $valid['created']       = $_SERVER['REQUEST_TIME'];
+            $valid['client_secret'] = sha1($params['client_secret']);
 
             $query = DB::insert('t_oauth_servers', array_keys($valid))
                 ->values(array_values($valid))
@@ -160,7 +170,7 @@ class Model_Oauth_Server extends Model_Oauth {
         {
             $valid = $valid->as_array();
 
-            if($this->unique_server($valid['redirect_uri'], $params['user_id']) === 1)
+            if($this->unique_client($valid['redirect_uri'], $params['user_id']) === 1)
             {
                 unset($valid['redirect_uri']);
             }
@@ -184,11 +194,12 @@ class Model_Oauth_Server extends Model_Oauth {
         return $valid;
     }
 
-    public function delete($server_id)
+    public function delete($server_id, $user_id)
     {
         return ctype_digit($server_id)
             ? DB::delete('t_oauth_servers')
                 ->where('server_id', '=', $server_id)
+                ->where('user_id','=', $user_id)
                 ->execute($this->_db)
             : NULL;
     }
@@ -257,7 +268,7 @@ class Model_Oauth_Server extends Model_Oauth {
         return $data;
     }
 
-    protected function unique_server($redirect_uri, $user_id)
+    protected function unique_client($redirect_uri, $user_id)
     {
         // Check if the username already exists in the database
         return DB::select(array(DB::expr('COUNT(1)'), 'total'))

@@ -66,9 +66,13 @@ class Oauth_Parameter_Code extends Oauth_Parameter {
                 else
                 {
                     $e = new Oauth_Exception_Authorize('invalid_request');
+
                     $e->redirect_uri = isset($params['redirect_uri'])
-                        ? $params['redirect_uri'] : Oauth::urldecode($_GET['redirect_uri']);
+                        ? $params['redirect_uri']
+                        : Oauth::urldecode($_GET['redirect_uri']);
+
                     $e->state = $this->state;
+
                     throw $e;
                 }
             }
@@ -90,18 +94,24 @@ class Oauth_Parameter_Code extends Oauth_Parameter {
         if($client['redirect_uri'] !== $this->redirect_uri)
         {
             $e = new Oauth_Exception_Authorize('redirect_uri_mismatch');
+
             $e->redirect_uri = $this->redirect_uri;
+
             $e->state = $this->state;
+
             throw $e;
         }
 
-        if(! empty($this->_params['scope']) AND ! empty($client['scope']))
+        if( ! empty($this->_params['scope']) AND ! empty($client['scope']))
         {
             if( ! in_array($this->_params['scope'], explode(' ', $client['scope'])))
             {
                 $e = new Oauth_Exception_Authorize('invalid_scope');
+
                 $e->redirect_uri = $this->redirect_uri;
+
                 $e->state = $this->state;
+
                 throw $e;
             }
         }

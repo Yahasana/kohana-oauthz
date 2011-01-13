@@ -84,7 +84,7 @@ class Oauth_Parameter_Refresh extends Oauth_Parameter {
 
         if($client['timestamp'] + 300 < $_SERVER['REQUEST_TIME'])
         {
-            $response->error = 'expired_token';
+            $response->error = 'invalid_grant';
             return $response;
         }
 

@@ -68,39 +68,27 @@ header, section, footer, aside, nav, article, figure { display: block;}
 */
 * html .clearfix,*:first-child+html .clearfix {zoom: 1;}
 
-.page{text-align:left;margin:0 auto;width:1024px;background:#eee}
+.page{text-align:left;margin:0 auto;width:1024px}
 header, #main, footer { clear:both; }
 header{ position:relative;border:1px solid #aaa;border-bottom-radius: 10px;-moz-border-radius-bottomleft: 10px;-moz-border-radius-bottomright:10px;-webkit-border-bottom-radius: 10px;
-  color: #000; background:#fff url(/logo.jpg) no-repeat left 100%;
-  padding:1.8em 2em 0 0;margin-bottom:10px
+  color: #000; padding:1.8em 2em 0 0;margin-bottom:10px
 }
 nav ul li { display:inline}
 header {border-bottom:2px solid #555;padding-top:1em}
 footer {border-top:2px solid #555;padding-top:1em}
-section {background:#eee}
+section {background:#fff}
 
-#main{margin:10px auto;display:block;padding:10px 5px}
-
-.date{position:relative;width:66px;padding:45px 5px 0;}
-.date .day{line-height:45px;font-size:45px;position:absolute;top:0}
-.date .month{font-size:25px;text-transform:uppercase;}
-.date .year{display:block; position:absolute;right:-5px;top:15px;
-rotation: 90deg !important;
--webkit-transform: rotate(-90deg);
--moz-transform: rotate(-90deg);
--ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=3)";
-filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
-}
+#main{margin:10px auto;display:block;padding:10px 5px;border:1px solid #ddd;}
 
 dl {margin: 20px;border-left: 1px solid #999;padding-left: 10px;}
 dt {font-size: 2.0em;margin-bottom: 10px;}
 dt span {font-style: italic;font-size: 1.3em;}
 dd {font-size: 1.4em;margin-left: 20px;	margin-bottom: 10px;}
 
-footer { border:1px solid #aaa;
+footer { border:1px solid #ddd;
 border-bottom-radius: 10px;
--moz-border-radius-topleft: 10px;
--moz-border-radius-topright:10px;
+-moz-border-radius-bottomleft: 10px;
+-moz-border-radius-bottomright:10px;
 -webkit-border-bottom-radius: 10px;padding:10px 5px
 }
 
@@ -114,13 +102,14 @@ tbody{
 th{
     vertical-align: middle; padding:5px 1em
 }
+h1{text-align:right}
 </style>
 </head>
 <body><div class="page">
 <header>
-    <div style="width:90%;float:right">
-    <h1><?php if($user) echo 'Welcome '.$user['mail'].', '; ?>OAuth 2.0 Test</h1>
+    <div>
     <nav>
+    <h1><?php if($user) echo 'Welcome '.$user['mail'].', '; ?>OAuth 2.0 Test</h1>
       <ul>
         <li><a href="/client/index">Client</a></li>
         <li><a href="/server/index">Server</a></li>
@@ -136,11 +125,6 @@ th{
         }
     ?></ul>
     </nav></div>
-    <div class="date">
-    <span class="day"><?php echo date('d'); ?></span>
-    <span class="month"><?php echo date('F'); ?></span>
-    <span class="year"><?php echo date('Y'); ?></span>
-    </div>
 </header><section id="main"><?php echo $content;?></section>
 <footer>
   <section id="extras" class="body">

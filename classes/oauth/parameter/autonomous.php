@@ -80,7 +80,7 @@ class Oauth_Parameter_Autonomous extends Oauth_Parameter {
         }
     }
 
-    public function oauth_token($client)
+    public function access_token($client)
     {
         $response = new Oauth_Token;
 

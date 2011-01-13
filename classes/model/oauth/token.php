@@ -15,7 +15,7 @@ class Model_Oauth_Token extends Model_Oauth {
     public function get($token_id)
     {
         return ctype_digit($token_id)
-            ? DB::select('token_id','client_id','code','access_token','refresh_token','expire_in','timestamp','nonce','user_id')
+            ? DB::select('token_id','client_id','code','access_token','refresh_token','expires_in','timestamp','nonce','user_id')
                 ->from('t_oauth_tokens')
                 ->where('token_id', '=', $token_id)
                 ->execute($this->_db)
@@ -32,19 +32,21 @@ class Model_Oauth_Token extends Model_Oauth {
 	 *
      * @return	array     token
      */
-    public function code($client_id, $expired_in = 3600)
+    public function code($client_id, $expires_in = 3600)
     {
         if($client_id AND $client = DB::select('client_secret','server_id','redirect_uri','user_id')
             ->from('t_oauth_servers')
             ->where('client_id' , '=', $client_id)
+            ->where('enabled' , '=', 1)
             ->execute($this->_db)
             ->current())
         {
             $client['code'] = uniqid();
             $access_token   = sha1(md5($_SERVER['REQUEST_TIME']));
             $refresh_token  = sha1(sha1(mt_rand()));
-            DB::insert('t_oauth_tokens', array('client_id','code','user_id','access_token','timestamp','expire_in','refresh_token'))
-                ->values(array($client_id, $client['code'], $client['user_id'], $access_token, $_SERVER['REQUEST_TIME'], $expired_in, $refresh_token))
+
+            DB::insert('t_oauth_tokens', array('client_id','code','user_id','access_token','timestamp','expires_in','refresh_token'))
+                ->values(array($client_id, $client['code'], $client['user_id'], $access_token, $_SERVER['REQUEST_TIME'], $expires_in, $refresh_token))
                 ->execute($this->_db);
 
             return $client;
@@ -53,51 +55,47 @@ class Model_Oauth_Token extends Model_Oauth {
         return NULL;
     }
 
-    public function oauth_token($client_id, $code, $expired_in = 3600)
-    {
-        if($client_id AND $client = DB::select('client_secret','server_id','redirect_uri','user_id')
+    public function oauth_token($client_id, $code, $expires_in = 3600)
+    {        
+        if($client = DB::select('server_id','client_secret','redirect_uri','user_id')
             ->from('t_oauth_servers')
             ->where('client_id' , '=', $client_id)
             ->execute($this->_db)
             ->current())
         {
-            $client['code'] = uniqid();
-            $access_token   = sha1(md5($_SERVER['REQUEST_TIME']));
-            $refresh_token  = sha1(sha1(mt_rand()));
-            DB::insert('t_oauth_tokens', array('client_id','code','user_id','access_token','timestamp','expire_in','refresh_token'))
-                ->values(array($client_id, $client['code'], $client['user_id'], $access_token, $_SERVER['REQUEST_TIME'], $expired_in, $refresh_token))
-                ->execute($this->_db);
-
-            return $client;
-        }
-
-        return NULL;
-    }
-
-    public function access_token($client_id, $oauth_token, $expired_in = 3600)
-    {
-        if($client_id AND $client = DB::select('client_secret','server_id','redirect_uri','user_id')
-            ->from('t_oauth_servers')
-            ->where('client_id' , '=', $client_id)
-            ->execute($this->_db)
-            ->current())
-        {
-            return DB::select('*')
+            $client += (array) DB::select('*')
                 ->from('t_oauth_tokens')
-                ->where('access_token' , '=', $oauth_token)
-                ->where('expired_in' , '>', $expired_in + $_SERVER['REQUEST_TIME'])
+                ->where('client_id' , '=', $client_id)
+                ->where('code' , '=', $code)
+                //->where('timestamp' , '>=', $_SERVER['REQUEST_TIME'] - $expires_in)
                 ->execute($this->_db)
                 ->current();
         }
-
-        return NULL;
+        return $client;
     }
 
+    public function access_token($client_id, $code, $expires_in = 3600)
+    {
+        return DB::select('*')
+            ->from('t_oauth_tokens')
+            ->where('client_id' , '=', $client_id)
+            ->where('code' , '=', $code)
+            //->where('timestamp' , '>=', $_SERVER['REQUEST_TIME'] - $expires_in)
+            ->execute($this->_db)
+            ->current();
+    }
+
+    // TODO
     public function refresh_token(Oauth_Token $token)
     {
         DB::delete('t_oauth_tokens')
             ->where('token', '=', $token->key)
             ->execute($this->_db);
+    }
+
+    public function assertion($client_id)
+    {
+        // TODO
     }
 
     /**
@@ -119,7 +117,7 @@ class Model_Oauth_Token extends Model_Oauth {
             'code'          => array ('not_empty'   => NULL, 'max_length' => array (128)),
             'access_token'  => array ('not_empty'   => NULL, 'max_length' => array (64)),
             'refresh_token' => array ('max_length'  => array (64)),
-            'expire_in'     => array ('range'       => array (0,4294967295)),
+            'expires_in'     => array ('range'       => array (0,4294967295)),
             'timestamp'     => array ('not_empty'   => NULL, 'range' => array (0,4294967295)),
             'nonce'         => array ('max_length'  => array (64)),
             'user_id'       => array ('not_empty'   => NULL,),

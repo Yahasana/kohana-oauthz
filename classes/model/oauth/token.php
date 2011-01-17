@@ -10,7 +10,7 @@
  * @see         Model_Oauth
  * *
  */
-class Model_Oauth_Token extends Model_Oauth {
+class Model_Oauth2_Token extends Model_Oauth2 {
 
     public function get($token_id)
     {
@@ -86,7 +86,7 @@ class Model_Oauth_Token extends Model_Oauth {
     }
 
     // TODO
-    public function refresh_token(Oauth_Token $token)
+    public function refresh_token(Oauth2_Token $token)
     {
         DB::delete('t_oauth_tokens')
             ->where('token', '=', $token->key)

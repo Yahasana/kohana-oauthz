@@ -10,7 +10,7 @@
  * @see         Oauth_Consumer_Controller
  * *
  */
-class Controller_Client extends Oauth_Client_Controller {
+class Controller_Client extends Oauth2_Client_Controller {
 
     public function action_index()
     {

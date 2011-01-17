@@ -10,7 +10,7 @@
  * @see        Oauth_Server
  * *
  */
-class Controller_Server extends Oauth_Server {
+class Controller_Server extends Oauth2_Server {
 
     public function __construct(Request $request)
     {

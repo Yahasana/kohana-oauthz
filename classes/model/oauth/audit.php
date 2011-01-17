@@ -10,7 +10,7 @@
  * @see         Model_Oauth
  * *
  */
-class Model_Oauth_Audit extends Model_Oauth {
+class Model_Oauth2_Audit extends Model_Oauth2 {
 
     public function get($access_token)
     {

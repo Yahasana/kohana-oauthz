@@ -10,7 +10,7 @@
  * @see         Model_Oauth
  * *
  */
-class Model_Oauth_Server extends Model_Oauth {
+class Model_Oauth2_Server extends Model_Oauth2 {
 
     public function get($server_id, $user_id)
     {

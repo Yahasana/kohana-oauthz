@@ -10,7 +10,7 @@
  * @see        Oauth_Server_Controller
  * *
  */
-class Controller_Oauth extends Oauth_Server_Controller {
+class Controller_Oauth2 extends Oauth2_Server_Controller {
 
     public function action_index()
     {

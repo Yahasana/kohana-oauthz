@@ -1,4 +1,5 @@
 <?php defined('SYSPATH') or die('No direct script access.');
+
 /**
  * OAuth controller
  *
@@ -10,7 +11,7 @@
  * @see         Oauth_Controller
  * *
  */
-class Controller_Api extends Oauth_Controller {
+class Controller_Api extends Oauth2_Controller {
 
     protected $_exclude = array('xrds', 'index');
 

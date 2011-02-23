@@ -12,7 +12,7 @@
  */
 class Oauthy_Server extends Kohana_Controller {
 
-    protected $template = 'oauth';
+    protected $template = 'oauth-template';
 
     public function before()
     {

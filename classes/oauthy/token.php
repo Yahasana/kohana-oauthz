@@ -21,7 +21,7 @@ class Oauthy_Token {
         }
     }
 
-    public function json()
+    public function as_json()
     {
         if(empty($this->error))
         {
@@ -40,7 +40,7 @@ class Oauthy_Token {
         return json_encode($json);
     }
 
-    public function xml()
+    public function as_xml()
     {
         $doc = new DOMDocument('1.0', 'UTF-8');
         $doc->formatOutput = true;
@@ -75,7 +75,7 @@ class Oauthy_Token {
         return $doc->saveXML();
     }
 
-    public function query()
+    public function as_query()
     {
         if(empty($this->error))
         {
@@ -98,7 +98,7 @@ class Oauthy_Token {
         return Oauthy::build_query($form);
     }
 
-    public function html()
+    public function as_html()
     {
         $text = '<dl>';
         if(empty($this->error))
@@ -134,19 +134,19 @@ class Oauthy_Token {
         {
             case 'xml':
             case 'application/xhtml+xml':
-                $res = $this->xml();
+                $res = $this->as_xml();
                 $this->format = 'application/xml';
                 break;
             case 'form':
-                $res = $this->query();
+                $res = $this->as_query();
                 $this->format = 'application/x-www-form-urlencoded';
                 break;
             case 'text/html':
-                $res = $this->html();
+                $res = $this->as_html();
                 $this->format = 'text/html';
                 break;
             default:
-                $res = $this->json();
+                $res = $this->as_json();
                 $this->format = 'application/json';
                 break;
         }

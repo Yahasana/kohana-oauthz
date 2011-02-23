@@ -71,18 +71,18 @@ abstract class Oauthy_Api extends Kohana_Controller {
                 // Verify the request method supported in the config settings
                 if(empty($this->_configs['request_methods'][Request::$method]))
                 {
-                    throw new Oauthy_Exception_Access('invalid_request');
+                    throw new Oauthy_Exception_Token('invalid_request');
                 }
 
                 // Process the access token from the request header or body
                 $parameter = new Oauthy_Type_Token($this->_configs['access_params']);
 
-                $token = new Model_Oauthy_Access;
+                $token = new Model_Oauthy_Token;
 
                 // Load the token information from database
                 if( ! $access_token = $token->access_token($parameter->client_id, $parameter->oauth_token))
                 {
-                    throw new Oauthy_Exception_Access('unauthorized_client');
+                    throw new Oauthy_Exception_Token('unauthorized_client');
                 }
 
                 $access_token['timestamp'] += $this->_configs['durations']['oauth_token'];

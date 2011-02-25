@@ -24,15 +24,14 @@ class Oauthy_Exception_Authorize extends Oauthy_Exception {
 	 */
 	public function __toString()
 	{
-        $code = $this->getMessage();
+        $desc = parent::$errors[parent::$type]['token_errors'][$this->error];
 
-        $desc = parent::$errors[parent::$type]['code_errors'][$code];
+        $params['error'] = $this->error;
 
-        $params['error'] = $code;
+		// Set the error uri from config settings if it's not set. e.g. redirect_uri mismatch
+        $params['error_uri'] = empty($this->error_uri) ? $desc['error_uri'] : $this->error_uri;
 
-        empty($desc['error_description']) OR $params['error_description'] = $desc['error_description'];
-
-        empty($desc['error_uri']) OR $params['error_uri'] = $desc['error_uri'];
+        $params['error_description'] = empty($this->error_description) ? $desc['error_description'] : $this->error_description;
 
         empty($this->state) OR $params['state'] = $this->state;
 

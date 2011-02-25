@@ -16,6 +16,33 @@ class Oauthy_Exception extends Exception {
     public static $errors = array();
 
 	/**
+	 * REQUIRED.  A single error code
+	 *
+	 * @access	public
+	 * @var		string	$error
+	 */
+    public $error;
+
+	/**
+	 * OPTIONAL.  A human-readable text providing additional information,
+	 *   used to assist in the understanding and resolution of the error occurred.
+	 *
+	 * @access	public
+	 * @var		string	$error_description
+	 */
+    public $error_description;
+
+	/**
+	 * OPTIONAL.  A URI identifying a human-readable web page with
+     *   information about the error, used to provide the resource owner
+     *   with additional information about the error.
+	 *
+	 * @access	public
+	 * @var		string	$error_uri
+	 */
+    public $error_uri;
+
+	/**
 	 * Initial OAuth error codes from config settings
 	 *
 	 * @access	public

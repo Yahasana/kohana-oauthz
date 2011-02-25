@@ -154,7 +154,7 @@ abstract class Oauthy_Controller extends Kohana_Controller {
 
     #endregion
 
-    #region get authorization code and token ( response_type )
+    #region get authorization code or token ( response_type )
 
     /**
      * the client directs the resource owner to an authorization server (via its user-agent),
@@ -192,7 +192,7 @@ abstract class Oauthy_Controller extends Kohana_Controller {
     }
 
     /**
-     * get the access token thru client id and code
+     * get the access token via Implicit Grant Flow
      *
      * @access	protected
      * @return	string  redirect uri
@@ -214,7 +214,7 @@ abstract class Oauthy_Controller extends Kohana_Controller {
         else
         {
             // Invalid client_id
-            $exception = new Oauthy_Exception_Authorize('invalid_client');
+            $exception = new Oauthy_Exception_Token('invalid_client');
 
             $exception->redirect_uri = $type->redirect_uri;
 

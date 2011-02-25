@@ -157,11 +157,12 @@ abstract class Oauthy_Controller extends Kohana_Controller {
     #region get authorization code and token ( response_type )
 
     /**
-     * Client Requests Authorization by web_server
+     * the client directs the resource owner to an authorization server (via its user-agent),
+     * which in turns directs the resource owner back to the client with the authorization code.
      *
      * @access    protected
      * @return    string    redirect_uri?[code,state]
-     * @throw     Oauthy_Exception_Authorize    Error Codes: invalid_request, invalid_client, unauthorized_client, invalid_grant
+     * @throw     Oauthy_Exception_Authorize    Error Codes: invalid_request
      */
     protected function code()
     {
@@ -204,7 +205,7 @@ abstract class Oauthy_Controller extends Kohana_Controller {
         $type = new Oauthy_Type_Token($params);
 
         // Verify the client and the code, load the access token if successes
-        if($access_token = Oauthy_Model::factory('Token')->access_token($parameter->client_id, $type->code))
+        if($access_token = Oauthy_Model::factory('Token')->access_token($type->client_id, $type->code))
         {
             $oauth_token['expires_in'] = $this->_configs['durations']['oauth_token'];
 
@@ -227,10 +228,10 @@ abstract class Oauthy_Controller extends Kohana_Controller {
 
     #endregion
 
-    #region get access token ( grant_type )
+    #region An authorization grant is used by the client to obtain an access token. ( grant_type )
 
     /**
-     * Web-server flow
+     * Obtain an access token via authorization code
      *
      * @access	protected
      * @return	array
@@ -240,7 +241,7 @@ abstract class Oauthy_Controller extends Kohana_Controller {
     {
         $type = new Oauthy_Type_Authorization_Code($this->_configs['grant_params']['authorization_code']);
 
-        if($oauth_token = Oauthy_Model::factory('Token')->oauth_token($parameter->client_id, $type->code))
+        if($oauth_token = Oauthy_Model::factory('Token')->oauth_token($type->client_id, $type->code))
         {
             //$audit = new Model_Oauthy_Audit;
             //$audit->audit_token($response);
@@ -256,12 +257,30 @@ abstract class Oauthy_Controller extends Kohana_Controller {
         return $response;
     }
 
-    // TODO
+    // can be used directly as an authorization grant to obtain an access token
     protected function password()
     {
         $type = new Oauthy_Type_Password;
 
-        if($client = Oauthy_Model::factory('Server')->lookup($parameter->client_id))
+        if($client = Oauthy_Model::factory('Server')->lookup($type->client_id))
+        {
+            // Verify the user information send by client
+            $response = $type->access_token($client);
+        }
+        else
+        {
+            throw new Oauthy_Exception_Token('invalid_client');
+        }
+
+        return $response;
+    }
+
+    // the client is acting on its own behalf (the client is also the resource owner)
+    protected function client_credentials()
+    {
+        $type = new Oauthy_Type_Client_Credentials;
+
+        if($client = Oauthy_Model::factory('Server')->lookup($type->client_id))
         {
             // Verify the user information send by client
             $response = $type->access_token($client);
@@ -279,28 +298,10 @@ abstract class Oauthy_Controller extends Kohana_Controller {
     {
         $type = new Oauthy_Type_Refresh_Token;
 
-        if($refresh_token = Oauthy_Model::factory('Token')->refresh_token($parameter->client_id))
+        if($refresh_token = Oauthy_Model::factory('Token')->refresh_token($type->client_id))
         {
             // Verify the oauth token send by client
             $response = $type->access_token($refresh_token);
-        }
-        else
-        {
-            throw new Oauthy_Exception_Token('invalid_client');
-        }
-
-        return $response;
-    }
-
-    // TODO
-    protected function client_credentials()
-    {
-        $type = new Oauthy_Type_Client_Credentials;
-
-        if($client = Oauthy_Model::factory('Server')->lookup($parameter->client_id))
-        {
-            // Verify the user information send by client
-            $response = $type->access_token($client);
         }
         else
         {

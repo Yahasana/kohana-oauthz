@@ -115,10 +115,7 @@ class Oauthy_Client extends Kohana_Controller {
         catch(Exception $e)
         {
             $error = $e->getMessage();
-        }
 
-        if(isset($error))
-        {
             switch($error)
             {
                 case 'access_denied':

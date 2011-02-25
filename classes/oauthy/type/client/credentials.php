@@ -1,6 +1,6 @@
 <?php
 /**
- * Oauth parameter handler for user-agent flow
+ * Oauth parameter handler for client credentials flow
  *
  * @author      sumh <oalite@gmail.com>
  * @package     Oauthy
@@ -14,9 +14,28 @@ class Oauthy_Type_Client_Credentials extends Oauthy_Type {
 
     /**
      * client_id
-     *      REQUIRED.  The client identifier as described in Section 3.1.
+     *      REQUIRED.  The client identifier
      */
     public $client_id;
+
+    /**
+     * client_secret
+     *      REQUIRED.  The client secret
+     *      OPTIONAL if no client secret was issued.
+     */
+    public $client_secret;
+
+    /**
+     * username
+     *       REQUIRED.  The end-user¡¯s username.
+     */
+    public $username;
+
+    /**
+     * password
+     *      REQUIRED.  The end-user¡¯s password.
+     */
+    public $password;
 
     /**
      * redirect_uri
@@ -51,46 +70,84 @@ class Oauthy_Type_Client_Credentials extends Oauthy_Type {
      */
     public function __construct($args = NULL)
     {
-        $params = Oauthy::parse_query();
-        $this->client_id = Arr::get($params, 'client_id');
-        $this->redirect_uri = Arr::get($params, 'redirect_uri');
+        isset($_SERVER['CONTENT_TYPE']) OR $_SERVER['CONTENT_TYPE'] = getenv('CONTENT_TYPE');
 
-        // OPTIONAL.  An opaque value used by the client to maintain state between the request and callback.
-        if(NULL !== $state = Arr::get($params, 'state'))
-            $this->state = $state;
+        // oauth_token already send in authorization header or the encrypt Content-Type is not single-part
+        if(empty($_POST) OR stripos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') === FALSE)
+        {
+            throw new Oauthy_Exception_Token('invalid_request');
+        }
+        else
+        {
+            if(isset($_SERVER['PHP_AUTH_USER']) AND isset($_SERVER['PHP_AUTH_PW']))
+            {
+                $_POST += array('username' => $_SERVER['PHP_AUTH_USER'], 'password' => $_SERVER['PHP_AUTH_PW']);
+            }
+            // TODO Digest HTTP authentication
+            //else if( ! empty($_SERVER['PHP_AUTH_DIGEST']) AND $digest = parent::parse_digest($_SERVER['PHP_AUTH_DIGEST']))
+            //{
+            //    $_POST += array('username' => $digest['username'], 'password' => $digest['']);
+            //}
 
-        // OPTIONAL.  The scope of the access request expressed as a list of space-delimited strings.
-        if(NULL !== $scope = Arr::get($params, 'scope'))
-            $this->scope = $scope;
+            // Check all required parameters from form-encoded body
+            foreach($args as $key => $val)
+            {
+                if($val === TRUE)
+                {
+                    if(isset($_POST[$key]) AND $value = Oauthy::urldecode($_POST[$key]))
+                    {
+                        $params[$key] = $value;
+                    }
+                    else
+                    {
+                        throw new Oauthy_Exception_Token('invalid_request');
+                    }
+                }
+            }
+        }
+
+        if(empty($params))
+        {
+            throw new Oauthy_Exception_Token('invalid_request');
+        }
+
+        $this->username = $params['username'];
+        $this->password = $params['password'];
+        $this->client_id = $params['client_id'];
+        $this->client_secret = $params['client_secret'];
+        $this->redirect_uri = $params['redirect_uri'];
+
+        $this->_params = $params;
     }
 
-    public function oauth_token($client)
+    public function access_token($client)
     {
         $response = new Oauthy_Token;
 
-        if(property_exists($this, 'state'))
+        isset($this->_params['state']) AND $response->state = $this->state;
+
+        if($client['client_secret'] !== sha1($this->client_secret)
+            OR $client['username'] !== $this->username
+            OR $client['password'] !== sha1($this->password)
+            OR $client['redirect_uri'] !== $this->redirect_uri)
         {
-            $response->state = $this->state;
+            throw new Oauthy_Exception_Token('invalid_request');
         }
 
-        if($client['redirect_uri'] !== $this->redirect_uri)
+        if(isset($this->_params['scope']) AND ! empty($client['scope']))
         {
-            $response->error = 'redirect_uri_mismatch';
-            return $response;
-        }
-
-        if(property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
-        {
-            $response->error = 'invalid_scope';
-            return $response;
+            if( ! in_array($this->_params['scope'], explode(' ', $client['scope'])))
+                throw new Oauthy_Exception_Token('invalid_scope');
         }
 
         // Grants Authorization
-        $response->expires_in = 3000;
+        $response->expires_in = 3600;
+        // TODO configurable token type
+        $response->token_type = 'BEARER';
         $response->access_token = $client['access_token'];
         $response->refresh_token = $client['refresh_token'];
 
         return $response;
     }
 
-} // END Oauthy_Type_Useragent
+} // END Oauthy_Type_Client_Credentials

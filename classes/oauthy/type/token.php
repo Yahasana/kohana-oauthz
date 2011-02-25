@@ -184,11 +184,6 @@ class Oauthy_Type_Token extends Oauthy_Type {
             throw new Oauthy_Exception_Token('invalid_request');
         }
 
-        //if(isset($this->_params['nonce']) AND $client['nonce'] !== $this->nonce)
-        //{
-        //    throw new Oauthy_Exception_Token('invalid_request');
-        //}
-
         if(isset($this->_params['timestamp']) AND $client['timestamp'] < $this->_params['timestamp'])
         {
             throw new Oauthy_Exception_Token('unauthorized_client');

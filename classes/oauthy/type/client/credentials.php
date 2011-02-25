@@ -26,18 +26,6 @@ class Oauthy_Type_Client_Credentials extends Oauthy_Type {
     public $client_secret;
 
     /**
-     * username
-     *       REQUIRED.  The end-user¡¯s username.
-     */
-    public $username;
-
-    /**
-     * password
-     *      REQUIRED.  The end-user¡¯s password.
-     */
-    public $password;
-
-    /**
      * redirect_uri
      *      REQUIRED unless a redirection URI has been established between
      *      the client and authorization server via other means.  An
@@ -111,8 +99,6 @@ class Oauthy_Type_Client_Credentials extends Oauthy_Type {
             throw new Oauthy_Exception_Token('invalid_request');
         }
 
-        $this->username = $params['username'];
-        $this->password = $params['password'];
         $this->client_id = $params['client_id'];
         $this->client_secret = $params['client_secret'];
         $this->redirect_uri = $params['redirect_uri'];
@@ -127,8 +113,6 @@ class Oauthy_Type_Client_Credentials extends Oauthy_Type {
         isset($this->_params['state']) AND $response->state = $this->state;
 
         if($client['client_secret'] !== sha1($this->client_secret)
-            OR $client['username'] !== $this->username
-            OR $client['password'] !== sha1($this->password)
             OR $client['redirect_uri'] !== $this->redirect_uri)
         {
             throw new Oauthy_Exception_Token('invalid_request');

@@ -1,6 +1,6 @@
 <?php
 /**
- * Oauth parameter handler for client credentials flow
+ * Oauth parameter handler for password credentials flow
  *
  * @author      sumh <oalite@gmail.com>
  * @package     Oauthy

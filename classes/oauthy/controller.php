@@ -296,12 +296,12 @@ abstract class Oauthy_Controller extends Kohana_Controller {
     // TODO
     protected function refresh_token()
     {
-        $type = new Oauthy_Type_Refresh_Token;
+        $type = new Oauthy_Type_Client_Credentials;
 
         if($refresh_token = Oauthy_Model::factory('Token')->refresh_token($type->client_id))
         {
             // Verify the oauth token send by client
-            $response = $type->access_token($refresh_token);
+            $response = $type->refresh_token($refresh_token);
         }
         else
         {

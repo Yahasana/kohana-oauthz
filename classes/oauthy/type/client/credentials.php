@@ -134,4 +134,44 @@ class Oauthy_Type_Client_Credentials extends Oauthy_Type {
         return $response;
     }
 
+    public function refresh_token($client)
+    {
+        $response = new Oauthy_Token;
+
+
+        if(property_exists($this, 'state'))
+        {
+            $response->state = $this->state;
+        }
+
+        if(property_exists($this, 'format'))
+        {
+            $response->format = $this->format;
+        }
+
+        if($client['client_secret'] !== sha1($this->client_secret))
+        {
+            $response->error = 'unauthorized_client';
+            return $response;
+        }
+
+        if($client['refresh_token'] !== $this->refresh_token)
+        {
+            $response->error = 'unauthorized_client';
+            return $response;
+        }
+
+        if($client['timestamp'] + 300 < $_SERVER['REQUEST_TIME'])
+        {
+            $response->error = 'invalid_grant';
+            return $response;
+        }
+
+        // Grants Authorization
+        $response->expires_in = 3000;
+        $response->access_token = $client['access_token'];
+
+        return $response;
+    }
+
 } // END Oauthy_Type_Client_Credentials

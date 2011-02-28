@@ -188,7 +188,7 @@ abstract class Oauthy_Controller extends Kohana_Controller {
             throw $exception;
         }
 
-        return $type->redirect_uri.'?'.$response->query();
+        return $type->redirect_uri.'?'.$response->as_query();
     }
 
     /**
@@ -205,11 +205,11 @@ abstract class Oauthy_Controller extends Kohana_Controller {
         $type = new Oauthy_Type_Token($params);
 
         // Verify the client and the code, load the access token if successes
-        if($access_token = Oauthy_Model::factory('Token')->access_token($type->client_id, $type->code))
+        if($token = Oauthy_Model::factory('Token')->oauth_token($type->client_id, $type->code))
         {
-            $oauth_token['expires_in'] = $this->_configs['durations']['oauth_token'];
+            $token['expires_in'] = $this->_configs['durations']['oauth_token'];
 
-            $response = $type->oauth_token($access_token);
+            $response = $type->oauth_token($token);
         }
         else
         {
@@ -223,7 +223,7 @@ abstract class Oauthy_Controller extends Kohana_Controller {
             throw $exception;
         }
 
-        return $type->redirect_uri.'#'.$response->query();
+        return $type->redirect_uri.'#'.$response->as_query();
     }
 
     #endregion

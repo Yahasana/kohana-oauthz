@@ -10,7 +10,7 @@
  * @see         Oauthy_Controller
  * *
  */
-class Controller_Oauthy extends Oauthy_Controller {
+class Controller_Oauth extends Oauthy_Controller {
 
     public function action_index()
     {

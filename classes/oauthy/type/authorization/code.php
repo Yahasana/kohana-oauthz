@@ -81,7 +81,9 @@ class Oauthy_Type_Authorization_Code extends Oauthy_Type {
 
         if($client['redirect_uri'] !== $this->_params['redirect_uri'])
         {
-            throw new Oauthy_Exception_Token('redirect_uri_mismatch');
+            $exception = new Oauthy_Exception_Token('invalid_request');
+            
+            throw $exception;
         }
 
         if($client['client_secret'] !== sha1($this->_params['client_secret']))
@@ -96,4 +98,4 @@ class Oauthy_Type_Authorization_Code extends Oauthy_Type {
         return $response;
     }
 
-} // END Oauthy_Type_Webserver
+} // END Oauthy_Type_Authorization_Code

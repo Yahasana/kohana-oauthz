@@ -75,12 +75,12 @@ abstract class Oauthy_Api extends Kohana_Controller {
                 }
 
                 // Process the access token from the request header or body
-                $parameter = new Oauthy_Type_Token($this->_configs['access_params']);
+                $type = new Oauthy_Type_Token($this->_configs['access_params']);
 
                 $token = new Model_Oauthy_Token;
 
                 // Load the token information from database
-                if( ! $access_token = $token->access_token($parameter->client_id, $parameter->oauth_token))
+                if( ! $access_token = $token->access_token($type->client_id, $type->oauth_token))
                 {
                     throw new Oauthy_Exception_Token('unauthorized_client');
                 }
@@ -88,11 +88,11 @@ abstract class Oauthy_Api extends Kohana_Controller {
                 $access_token['timestamp'] += $this->_configs['durations']['oauth_token'];
 
                 // Verify the access token
-                $parameter->access_token($access_token);
+                $type->access_token($access_token);
             }
             catch (Oauthy_Exception $e)
             {
-                $this->exception = array('error' => $e->getMessage(), '' => $parameter->method);
+                $this->error = $e->getMessage();
 
                 // Redirect the action to unauthenticated
                 $request->action = 'unauthenticated';
@@ -112,7 +112,7 @@ abstract class Oauthy_Api extends Kohana_Controller {
      */
     public function action_unauthenticated()
     {
-        $error['error'] = $this->error_code;
+        $error['error'] = $this->error;
 
         // Get the error description from config settings
         $error += $this->_configs['access_errors'][$error['error']];

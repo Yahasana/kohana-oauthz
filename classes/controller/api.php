@@ -34,9 +34,14 @@ class Controller_Api extends Oauthy_Api {
         $this->request->response = json_encode($methods);
     }
 
-    public function action_get()
+    public function action_get($id = 0)
     {
-        $this->request->response = json_encode(array('Hello', 'OAuth', '2.0'));
+        $data = array(
+            array('Humm', 'Hah'),
+            array('Zzz', 'Yaaa'),
+            array('Giii', 'Neee')
+        );
+        $this->request->response = json_encode(isset($data[$id]) ? $data[$id] : array('Hello', 'OAuth', '2.0'));
     }
 
     public function action_create()

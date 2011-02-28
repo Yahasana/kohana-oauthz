@@ -18,8 +18,8 @@ return array(
         'http_accept'=> FALSE,
 
         'formats'   => array(
-            'json'      => TRUE,    # 'application/json'
-            'xml'       => TRUE,    # 'application/xml'
+            'json'      => FALSE,    # 'application/json'
+            'xml'       => FALSE,    # 'application/xml'
             'form'      => FALSE,   # 'text/plain'
             'html'      => FALSE,   # 'text/html'
             'csv'       => FALSE,   # 'application/csv'

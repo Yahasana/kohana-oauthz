@@ -10,9 +10,9 @@
  * @see         Oauthy_Signature
  * *
  */
-class Oauthy_Signature_Plaintext extends Oauthy_Signature {
+class Oauthy_Signature_Bearer extends Oauthy_Signature {
 
-    public static $algorithm = 'PLAINTEXT';
+    public static $algorithm = 'BEARER';
 
     public function build(Oauthy_Token $token)
     {
@@ -26,4 +26,4 @@ class Oauthy_Signature_Plaintext extends Oauthy_Signature {
         return $signature;
     }
     
-} // END Oauthy_Signature_Plaintext
+} // END Oauthy_Signature_Bearer

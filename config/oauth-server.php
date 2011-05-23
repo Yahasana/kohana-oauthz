@@ -17,16 +17,6 @@ return array(
          */
         'http_accept'=> FALSE,
 
-        'formats'   => array(
-            'json'      => FALSE,   # 'application/json'
-            'xml'       => FALSE,   # 'application/xml'
-            'form'      => FALSE,   # 'text/plain'
-            'html'      => FALSE,   # 'text/html'
-            'csv'       => FALSE,   # 'application/csv'
-            'php'       => FALSE,   # 'text/plain'
-            'serialize' => FALSE    # 'application/vnd.php.serialized'
-        ),
-
         'extension' => array(
             'grant_type'    => array(
                 //'type-name' => 'action-name' or 'class-name'
@@ -42,13 +32,13 @@ return array(
             'refresh_token' => '',
             'scope'         => '',
         ),
-
-        'request_methods'   => array(
-            'HEAD'      => TRUE,
-            'GET'       => TRUE,
-            'POST'      => TRUE,
-            'PUT'       => TRUE,
-            'DELETE'    => TRUE
+        
+        /**
+         *  TODO: Authentication methods for each flows
+         */
+        'methods'   => array(
+            'authorization_code' => array('basic', 'digest', 'mac'),
+            'access_token'       => array('bearer', 'mac'),
         ),
 
         /**
@@ -97,13 +87,6 @@ return array(
             'nonce'         => FALSE,
             'algorithm'     => FALSE,
             'signature'     => FALSE
-        ),
-
-        'secret_types'  => array(
-            'plaintext' => TRUE,
-            'rsa-sha1'  => TRUE,
-            'hmac-sha1' => TRUE,
-            'md5'       => FALSE
         ),
 
         'scopes'    => array(

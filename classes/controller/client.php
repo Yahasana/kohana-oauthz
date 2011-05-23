@@ -3,20 +3,20 @@
  * OAuth consumer controller
  *
  * @author      sumh <oalite@gmail.com>
- * @package     Oauthy
+ * @package     Oauthz
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
- * @link		http://www.oalite.cn
- * @see         Oauthy_Client_Controller
+ * @link		http://www.oalite.com
+ * @see         Oauthz_Client_Controller
  * *
  */
-class Controller_Client extends Oauthy_Client {
+class Controller_Client extends Oauthz_Client {
 
     public function action_index()
     {
-        $template = new View('oauth-template');
+        $template = new View('oauthz-template');
 
-        $template->content = new View('oauth-client');
+        $template->content = new View('oauthz-client');
 
         $this->request->response = $template->render();
     }
@@ -28,7 +28,7 @@ class Controller_Client extends Oauthy_Client {
             $resource = Remote::get('http://docs/api/get/1',array(
                 CURLOPT_POST        => TRUE,
                 CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=UTF-8'),
-                CURLOPT_POSTFIELDS  => Oauthy::build_query(array(
+                CURLOPT_POSTFIELDS  => Oauthz::build_query(array(
                      'client_id'         => 'OA_4bfbc43769917',
                      //'oauth_token'       => $token->access_token,
                      //'refresh_token'     => $token->refresh_token,

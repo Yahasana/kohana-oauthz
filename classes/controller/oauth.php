@@ -3,18 +3,18 @@
  * OAuth server controller
  *
  * @author      sumh <oalite@gmail.com>
- * @package     Oauthy
+ * @package     Oauthz
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
- * @link		http://www.oalite.cn
- * @see         Oauthy_Controller
+ * @link		http://www.oalite.com
+ * @see         Oauthz_Controller
  * *
  */
-class Controller_Oauth extends Oauthy_Controller {
+class Controller_Oauth extends Oauthz_Controller {
 
     public function action_index()
     {
-        $template = new View('oauth-template');
+        $template = new View('oauthz-template');
         $template->content = '<h3>Hello guest.</h3>';
         $this->request->response = $template;
     }
@@ -22,8 +22,8 @@ class Controller_Oauth extends Oauthy_Controller {
     public function action_code()
     {
         $query = URL::query();
-        $template = new View('oauth-template');
-        $view = new View('oauth-server-authorize', array('authorized' => TRUE, 'query' => $query));
+        $template = new View('oauthz-template');
+        $view = new View('oauthz-server-authorize', array('authorized' => TRUE, 'query' => $query));
         $template->content = $view->render();
         $this->request->response = $template;
     }
@@ -60,8 +60,8 @@ class Controller_Oauth extends Oauthy_Controller {
             $errors['access_errors'] = $config['code_errors'];
         }
 
-        $template = new View('oauth-template');
-        $view = new View('oauth-server-error', $errors);
+        $template = new View('oauthz-template');
+        $view = new View('oauthz-server-error', $errors);
         $template->content = $view->render();
         $this->request->response = $template;
     }
@@ -84,8 +84,8 @@ class Controller_Oauth extends Oauthy_Controller {
             $this->request->redirect('server/index');
         }
 
-        $template = new View('oauth-template');
-        $view = new View('oauth-server-signin');
+        $template = new View('oauthz-template');
+        $view = new View('oauthz-server-signin');
         $template->content = $view->render();
         $this->request->response = $template;
     }

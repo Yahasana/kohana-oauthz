@@ -9,22 +9,17 @@
  * @link        http://www.oalite.com
  * *
  */
-abstract class Oauthz_Authentication_Digest extends Oauthz_Authentication {
-
-    public function headers()
-    {
-
-    }
+abstract class Oauthz_Authorization_Digest extends Oauthz_Authorization {
 
     public function authenticate($client_id, $client_secret)
     {
-        if($data = Oauthz_Authentication_Digest::parse() AND $data['username'] === $client_id)
+        if($data = Oauthz_Authorization_Digest::parse() AND $data['username'] === $client_id)
         {
             // generate the valid response
-            $A1 = md5($client_id.':'.$realm.':'.$client_secret);
-            $A2 = md5($_SERVER['REQUEST_METHOD'].':'.$data['uri']);
+            $realm = md5("$client_id:$data['realm']:$client_secret");
+            $method = md5("$_SERVER['REQUEST_METHOD']:$data['uri']");
 
-            $data = $data['response'] === md5("$A1:$data['nonce']:$data['nc']:$data['cnonce']:$data['qop']:$A2");
+            $data = $data['response'] === md5("$realm:$data['nonce']:$data['nc']:$data['cnonce']:$data['qop']:$method");
         }
 
         return $data;
@@ -41,8 +36,7 @@ abstract class Oauthz_Authentication_Digest extends Oauthz_Authentication {
                 $digest = $_SERVER['PHP_AUTH_DIGEST'];
             }
             // most other servers
-            elseif ((isset($_SERVER['HTTP_AUTHENTICATION']) OR $_SERVER['HTTP_AUTHORIZATION'] = getenv('HTTP_AUTHORIZATION'))
-                AND strpos(strtolower($_SERVER['HTTP_AUTHENTICATION']), 'digest') === 0)
+            elseif (isset($_SERVER['HTTP_AUTHORIZATION']) AND strpos(strtolower($_SERVER['HTTP_AUTHORIZATION']), 'digest') === 0)
             {
                 $digest = substr($_SERVER['HTTP_AUTHORIZATION'], 7);
             }
@@ -53,9 +47,9 @@ abstract class Oauthz_Authentication_Digest extends Oauthz_Authentication {
         if($digest)
         {
             // protect against missing data
-            $fields = array('nonce' => 1, 'nc' => 1, 'cnonce' => 1, 'qop'=> 1, 'username' => 1, 'uri' => 1, 'response' => 1);
+            $fields = array('nonce' => 1, 'nc' => 1, 'cnonce' => 1, 'qop'=> 1, 'username' => 1, 'uri' => 1, 'response' => 1, 'realm'=>1);
 
-            preg_match_all('@(\w+)=(?:(?:\'([^\']+)\'|"([^"]+)")|([^\s,]+))@', $digest, $matches, PREG_SET_ORDER);
+            preg_match_all('@('.implode('|', array_keys($fields)).')=[\'"]?([^\'",]+)@', $digest, $matches, PREG_SET_ORDER);
 
             $data = array();
 
@@ -71,4 +65,4 @@ abstract class Oauthz_Authentication_Digest extends Oauthz_Authentication {
         return $info;
     }
 
-} // END Oauthz_Authentication_Digest
+} // END Oauthz_Authorization_Digest

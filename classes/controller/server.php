@@ -3,14 +3,14 @@
  * OAuth Server management
  *
  * @author      sumh <oalite@gmail.com>
- * @package     Oauthy
+ * @package     Oauthz
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
- * @link        http://www.oalite.cn
- * @see         Oauthy_Server
+ * @link        http://www.oalite.com
+ * @see         Oauthz_Server
  * *
  */
-class Controller_Server extends Oauthy_Server {
+class Controller_Server extends Oauthz_Server {
 
     public function __construct(Request $request)
     {
@@ -24,11 +24,11 @@ class Controller_Server extends Oauthy_Server {
 
     public function action_index()
     {
-        $server = new Model_Oauthy_Server;
+        $server = new Model_Oauthz_Server;
 
         $data = $server->lists(array('user_id' => $_SESSION['user']['uid']));
 
-        $this->template->content = new View('oauth-server', $data);
+        $this->template->content = new View('oauthz-server', $data);
 
         $this->request->response = $this->template->render();
     }

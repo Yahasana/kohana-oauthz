@@ -9,11 +9,11 @@
  * @link        http://www.oalite.com
  * *
  */
-abstract class Oauthz_Authentication_Basic extends Oauthz_Authentication {
+abstract class Oauthz_Authorization_Basic extends Oauthz_Authorization {
 
     public function authenticate($client_id, $client_secret)
     {
-        if($data = Oauthz_Authentication_Basic::parse())
+        if($data = Oauthz_Authorization_Basic::parse())
         {
             $data = $data['client_id'] === $client_id AND $data['client_secret'] === $client_secret;
         }
@@ -29,8 +29,8 @@ abstract class Oauthz_Authentication_Basic extends Oauthz_Authentication {
             $data = array('client_id' => $_SERVER['PHP_AUTH_USER'], 'client_secret' => $_SERVER['PHP_AUTH_PW']);
         }
         // most other servers
-        elseif ((isset($_SERVER['HTTP_AUTHENTICATION']) OR $_SERVER['HTTP_AUTHORIZATION'] = getenv('HTTP_AUTHORIZATION'))
-            AND strpos(strtolower($_SERVER['HTTP_AUTHENTICATION']), 'basic') === 0)
+        elseif (isset($_SERVER['HTTP_AUTHORIZATION'])
+            AND strpos(strtolower($_SERVER['HTTP_AUTHORIZATION']), 'basic') === 0)
         {
             $params = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)), 2);
 
@@ -40,4 +40,4 @@ abstract class Oauthz_Authentication_Basic extends Oauthz_Authentication {
         return empty($data) ? FALSE : $data;
     }
 
-} // END Oauthz_Authentication_Basic
+} // END Oauthz_Authorization_Basic

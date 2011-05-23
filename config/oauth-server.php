@@ -18,8 +18,8 @@ return array(
         'http_accept'=> FALSE,
 
         'formats'   => array(
-            'json'      => FALSE,    # 'application/json'
-            'xml'       => FALSE,    # 'application/xml'
+            'json'      => FALSE,   # 'application/json'
+            'xml'       => FALSE,   # 'application/xml'
             'form'      => FALSE,   # 'text/plain'
             'html'      => FALSE,   # 'text/html'
             'csv'       => FALSE,   # 'application/csv'
@@ -129,13 +129,12 @@ return array(
         'code_errors'   => array(
             'invalid_request'       => array(
                 'error_description' => 'The request is missing a required parameter, includes an
-               unsupported parameter or parameter value, or is otherwise
-               malformed.',
+                    unsupported parameter or parameter value, or is otherwise malformed.',
                 'error_uri'         => '',
             ),
             'unauthorized_client'   => array(
                 'error_description' => 'The client is not authorized to request an authorization
-               code using this method.',
+                    code using this method.',
                 'error_uri'         => '',
             ),
             'access_denied'         => array(
@@ -144,7 +143,7 @@ return array(
             ),
             'unsupported_response_type' => array(
                 'error_description' => 'The authorization server does not support obtaining an
-               authorization code using this method.',
+                    authorization code using this method.',
                 'error_uri'         => '',
             ),
             'invalid_scope'         => array(
@@ -156,13 +155,11 @@ return array(
         'token_errors'  => array(
             'invalid_request'       => array(
                 'error_description' => 'The request is missing a required parameter, includes an
-               unsupported parameter or parameter value, or is otherwise
-               malformed.',
+                    unsupported parameter or parameter value, or is otherwise malformed.',
                 'error_uri'         => '',
             ),
             'unauthorized_client'   => array(
-                'error_description' => 'The client is not authorized to request an access token
-               using this method.',
+                'error_description' => 'The client is not authorized to request an access token using this method.',
                 'error_uri'         => '',
             ),
             'access_denied'         => array(
@@ -170,8 +167,7 @@ return array(
                 'error_uri'         => '',
             ),
             'unsupported_response_type' => array(
-                'error_description' => 'The authorization server does not support obtaining an
-               access token using this method.',
+                'error_description' => 'The authorization server does not support obtaining an access token using this method.',
                 'error_uri'         => '',
             ),
             'invalid_scope'         => array(
@@ -183,37 +179,37 @@ return array(
         'access_errors' => array(
             'invalid_request'       => array(
                 'error_description' => 'The request is missing a required parameter, includes an
-               unsupported parameter or parameter value, repeats a
-               parameter, includes multiple credentials, utilizes more
-               than one mechanism for authenticating the client, or is
-               otherwise malformed.',
+                    unsupported parameter or parameter value, repeats a
+                    parameter, includes multiple credentials, utilizes more
+                    than one mechanism for authenticating the client, or is
+                    otherwise malformed.',
                 'error_uri'         => '',
             ),
             'invalid_client'        => array(
                 'error_description' => 'Client authentication failed (e.g. unknown client, no
-               client credentials included, multiple client credentials
-               included, or unsupported credentials type).',
+                    client credentials included, multiple client credentials
+                    included, or unsupported credentials type).',
                 'error_uri'         => '',
             ),
             'invalid_grant'        => array(
                 'error_description' => 'The provided authorization grant is invalid, expired,
-               revoked, or does not match the redirection URI used in
-               the authorization request.',
+                    revoked, or does not match the redirection URI used in
+                    the authorization request.',
                 'error_uri'         => '',
             ),
             'unauthorized_client'   => array(
                 'error_description' => 'The authenticated client is not authorized to use this
-               authorization grant type.',
+                    authorization grant type.',
                 'error_uri'         => '',
             ),
             'unsupported_grant_type'=> array(
                 'error_description' => 'The authorization grant type is not supported by the
-               authorization server.',
+                    authorization server.',
                 'error_uri'         => '',
             ),
             'invalid_scope'    => array(
                 'error_description' => 'The requested scope is invalid, unknown, malformed, or
-               exceeds the previously granted scope.',
+                    exceeds the previously granted scope.',
                 'error_uri'         => '',
             )
         ),
@@ -221,12 +217,12 @@ return array(
         'extensions' => array(
             'grant_type' => array(),
             'token_type' => array(
-                'assertion'             => array(
+                'assertion' => array(
                     'assertion_type'    => TRUE,
                     'assertion'         => TRUE,
                     'client_id'         => TRUE,
                     'client_secret'     => TRUE
-                ),
+                )
             )
         )
     )

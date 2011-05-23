@@ -14,23 +14,6 @@ abstract class Oauthz_Core {
     public static $headers = NULL;
 
     /**
-     * Normalized request string for signature verify
-     *
-     * @access  public
-     * @param   string    $method
-     * @param   string    $uri
-     * @param   array     $params
-     * @return  string
-     */
-    public static function normalize($method, $uri, array $params)
-    {
-        // ~ The Oauthz_Signature parameter MUST be excluded.
-        unset($params['signature']);
-
-        return $method.'&'.Oauthz::urlencode($uri).'&'.Oauthz::build_query($params);
-    }
-
-    /**
      * Oauthz_Signature::factory alias
      *
      * @access  public
@@ -89,73 +72,6 @@ abstract class Oauthz_Core {
         }
 
         return rtrim($query, '&');
-    }
-
-    /**
-     * Explode the oauth parameter from $_POST and returns the parsed
-     *
-     * @access  public
-     * @param   string  $query
-     * @return  array
-     */
-    public static function parse_post($post = NULL)
-    {
-        $params = array();
-
-        if($post === NULL) $post = $_POST;
-
-        if ( ! empty($post))
-        {
-            //
-        }
-
-        return $params;
-    }
-
-    /**
-     * Utility function for turning the Authorization: header into parameters
-     * has to do some unescaping
-     * Can filter out any non-oauth parameters if needed (default behaviour)
-     *
-     * @access  public
-     * @param   string    $headers
-     * @param   string    $oauth_only    default [ TRUE ]
-     * @return  array
-     */
-    public static function parse_header()
-    {
-        $offset     = 0;
-        $params     = array();
-        $pattern    = '/(([-_a-z]*)=("([^"]*)"|([^,]*)),?)/';
-
-        if (isset($_SERVER['HTTP_AUTHORIZATION']) && substr($_SERVER['HTTP_AUTHORIZATION'], 0, 12) === 'Token token=')
-        {
-            while(preg_match($pattern, $_SERVER['HTTP_AUTHORIZATION'], $matches, PREG_OFFSET_CAPTURE, $offset) > 0)
-            {
-                $match          = $matches[0];
-                $name           = $matches[2][0];
-                $offset         = $match[1] + strlen($match[0]);
-                $params[$name]  = Oauthz::urldecode(isset($matches[5]) ? $matches[5][0] : $matches[4][0]);
-            }
-        }
-
-        unset($params['realm']);
-
-        return $params;
-    }
-
-    public static function build_header(array $params, $realm = '')
-    {
-        $header ='Authorization: Token token="'.$realm.'"';
-        foreach ($params as $key => $value)
-        {
-            if (is_array($value))
-            {
-                throw new Oauthz_Exception('Arrays not supported in headers');
-            }
-            $header .= ','.Oauthz::urlencode($key).'="'.Oauthz::urlencode($value).'"';
-        }
-        return $header;
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * OAuth authentication method handlers
+ * OAuth authorization method handlers
  *
  * @author      sumh <oalite@gmail.com>
  * @package     Oauthz
@@ -9,10 +9,10 @@
  * @link        http://www.oalite.com
  * *
  */
-abstract class Oauthz_Authentication {
-    
-    abstract public function headers();
-    
-    abstract public function authenticate();
+abstract class Oauthz_Authorization {
 
-} // END Oauthz_Authentication
+    abstract public function parse($digest);
+
+    abstract public function authenticate($client_id, $client_secret);
+
+} // END Oauthz_Authorization

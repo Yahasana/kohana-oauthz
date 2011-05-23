@@ -3,14 +3,14 @@
  * OAuth consumer controller
  *
  * @author      sumh <oalite@gmail.com>
- * @package     Oauthy
+ * @package     Oauthz
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
- * @link		http://www.oalite.cn
- * @see         Oauthy_Controller
+ * @link		http://www.oalite.com
+ * @see         Oauthz_Controller
  * *
  */
-class Controller_Authorize extends Oauthy_Controller {
+class Controller_Authorize extends Oauthz_Controller {
 
     public function action_index()
     {

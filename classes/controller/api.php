@@ -3,14 +3,14 @@
  * OAuth controller
  *
  * @author      sumh <oalite@gmail.com>
- * @package     Oauthy
+ * @package     Oauthz
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
- * @link		http://www.oalite.cn
- * @see         Oauthy_Api
+ * @link		http://www.oalite.com
+ * @see         Oauthz_Api
  * *
  */
-class Controller_Api extends Oauthy_Api {
+class Controller_Api extends Oauthz_Api {
 
     protected $_exclude = array('xrds', 'index');
 

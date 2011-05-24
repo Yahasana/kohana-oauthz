@@ -6,7 +6,7 @@
  * @package     Oauthz
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
- * @link        http://www.oalite.com
+ * @link        http://oalite.com
  * @see         Oauthz_Type
  * *
  */
@@ -40,6 +40,7 @@ class Oauthz_Type_Token extends Oauthz_Type {
     {
         $params = array();
         /**
+         * TODO move this request data detect into authorization handler
          * Load oauth token from authorization header
          */
         if (isset($_SERVER['HTTP_AUTHORIZATION']) OR $_SERVER['HTTP_AUTHORIZATION'] = getenv('HTTP_AUTHORIZATION'))
@@ -93,6 +94,7 @@ class Oauthz_Type_Token extends Oauthz_Type {
             }
             else
             {
+                // TODO move this request data detect into authorization handler
                 if(isset($_SERVER['PHP_AUTH_USER']) AND isset($_SERVER['PHP_AUTH_PW']))
                 {
                     $_POST += array('client_id' => $_SERVER['PHP_AUTH_USER'], 'client_secret' => $_SERVER['PHP_AUTH_PW']);
@@ -254,7 +256,7 @@ class Oauthz_Type_Token extends Oauthz_Type {
             throw new Oauthz_Exception_Token('unauthorized_client');
         }
 
-        // Verify the signature
+        // TODO Verify the signature should be hold in authorization handler
         if( ! empty($this->_params['signature']) AND ! empty($this->_params['algorithm']))
         {
             $uri = URL::base(FALSE, TRUE).Request::$instance->uri;

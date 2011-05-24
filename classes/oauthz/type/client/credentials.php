@@ -6,7 +6,7 @@
  * @package     Oauthz
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
- * @link        http://www.oalite.com
+ * @link        http://oalite.com
  * @see         Oauthz_Type
  * *
  */
@@ -55,6 +55,7 @@ class Oauthz_Type_Client_Credentials extends Oauthz_Type {
      *
      * @access    public
      * @return    void
+     * @throw   Oauthz_Exception_Token    Error Codes: invalid_request
      */
     public function __construct($args = NULL)
     {
@@ -106,6 +107,14 @@ class Oauthz_Type_Client_Credentials extends Oauthz_Type {
         $this->_params = $params;
     }
 
+    /**
+     * Populate the access token thu the request info and client info stored in the server
+     *
+     * @access	public
+     * @param	array	$client
+     * @return	Oauthz_Token
+     * @throw   Oauthz_Exception_Authorize    Error Codes: invalid_request, invalid_scope
+     */
     public function access_token($client)
     {
         $response = new Oauthz_Token;
@@ -134,10 +143,16 @@ class Oauthz_Type_Client_Credentials extends Oauthz_Type {
         return $response;
     }
 
+    /**
+     * TODO Refresh token
+     *
+     * @access	public
+     * @param	array	$client
+     * @return	Oauthz_Token
+     */
     public function refresh_token($client)
     {
         $response = new Oauthz_Token;
-
 
         if(property_exists($this, 'state'))
         {

@@ -6,7 +6,7 @@
  * @package     Oauthz
  * @copyright   (c) 2011 OALite
  * @license     ISC License (ISCL)
- * @link        http://www.oalite.com
+ * @link        http://oalite.com
  * *
  */
 abstract class Oauthz_Authorization_Bearer extends Oauthz_Authorization {
@@ -23,11 +23,11 @@ abstract class Oauthz_Authorization_Bearer extends Oauthz_Authorization {
 
     public static function parse($digest = NULL)
     {
-        if (isset($_SERVER['HTTP_AUTHORIZATION']) 
+        if ($digest === NULL AND isset($_SERVER['HTTP_AUTHORIZATION'])
             AND strpos(strtolower($_SERVER['HTTP_AUTHORIZATION']), 'bearer') === 0)
         {
             $params = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 7)), 2);
-            
+
             // TODO
         }
 

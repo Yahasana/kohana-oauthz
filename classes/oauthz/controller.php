@@ -7,7 +7,7 @@
  * @package     Oauthz
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
- * @link        http://www.oalite.com
+ * @link        http://oalite.com
  * @see         Kohana_Controller
  * *
  */
@@ -32,6 +32,7 @@ abstract class Oauthz_Controller extends Kohana_Controller {
     public function before()
     {
         $this->_configs = Kohana::config('oauth-server.'.$this->_type);
+        // TODO refactor this stupid code
         Oauthz_Exception::$errors[$this->_type]['code_errors']      = $this->_configs['code_errors'];
         Oauthz_Exception::$errors[$this->_type]['token_errors']     = $this->_configs['token_errors'];
         Oauthz_Exception::$errors[$this->_type]['access_errors']    = $this->_configs['access_errors'];
@@ -125,7 +126,7 @@ abstract class Oauthz_Controller extends Kohana_Controller {
                 }
             }
 
-            if(isset($response))
+            if(isset($response) AND $response instanceOf Oauthz_Token)
             {
                 // HTTP/1.1 200 OK
                 $this->request->status = 200;
@@ -234,7 +235,7 @@ abstract class Oauthz_Controller extends Kohana_Controller {
      * Obtain an access token via authorization code
      *
      * @access	protected
-     * @return	array
+     * @return	Oauthz_Token
      * @throw   Oauthz_Exception_Token invalid_client
      */
     protected function authorization_code()
@@ -257,7 +258,13 @@ abstract class Oauthz_Controller extends Kohana_Controller {
         return $response;
     }
 
-    // can be used directly as an authorization grant to obtain an access token
+    /**
+     * can be used directly as an authorization grant to obtain an access token
+     *
+     * @access	protected
+     * @return	Oauthz_Token
+     * @throw   Oauthz_Exception_Token invalid_client
+     */
     protected function password()
     {
         $type = new Oauthz_Type_Password;
@@ -275,7 +282,13 @@ abstract class Oauthz_Controller extends Kohana_Controller {
         return $response;
     }
 
-    // the client is acting on its own behalf (the client is also the resource owner)
+    /**
+     * the client is acting on its own behalf (the client is also the resource owner)
+     *
+     * @access	protected
+     * @return	Oauthz_Token
+     * @throw   Oauthz_Exception_Token invalid_client
+     */
     protected function client_credentials()
     {
         $type = new Oauthz_Type_Client_Credentials;
@@ -293,7 +306,13 @@ abstract class Oauthz_Controller extends Kohana_Controller {
         return $response;
     }
 
-    // TODO
+    /**
+     * Refresh token behalf the same as client credentials
+     *
+     * @access	protected
+     * @return	Oauthz_Token
+     * @throw   Oauthz_Exception_Token invalid_client
+     */
     protected function refresh_token()
     {
         $type = new Oauthz_Type_Client_Credentials;

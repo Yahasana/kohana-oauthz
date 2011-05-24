@@ -6,7 +6,7 @@
  * @package     Oauthz
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
- * @link		http://www.oalite.com
+ * @link		http://oalite.com
  * @see			Kohana_Controller
  * *
  */

@@ -6,7 +6,7 @@
  * @package     Oauthz
  * @copyright   (c) 2011 OALite
  * @license     ISC License (ISCL)
- * @link        http://www.oalite.com
+ * @link        http://oalite.com
  * *
  */
 abstract class Oauthz_Authorization_Mac extends Oauthz_Authorization {
@@ -19,12 +19,9 @@ abstract class Oauthz_Authorization_Mac extends Oauthz_Authorization {
     // function to parse the http auth header
     public static function parse($digest = NULL)
     {
-        if($digest === NULL)
+        if ($digest === NULL AND isset($_SERVER['HTTP_AUTHORIZATION']) AND strpos(strtolower($_SERVER['HTTP_AUTHORIZATION']), 'mac') === 0)
         {
-            if (isset($_SERVER['HTTP_AUTHORIZATION']) AND strpos(strtolower($_SERVER['HTTP_AUTHORIZATION']), 'mac') === 0)
-            {
-                $digest = substr($_SERVER['HTTP_AUTHORIZATION'], 4);
-            }
+            $digest = substr($_SERVER['HTTP_AUTHORIZATION'], 4);
         }
 
         $info = FALSE;

@@ -6,7 +6,7 @@
  * @package     Oauthz
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
- * @link        http://www.oalite.com
+ * @link        http://oalite.com
  * @see         Oauthz_Type
  * *
  */
@@ -65,8 +65,9 @@ class Oauthz_Type_Password extends Oauthz_Type {
      *      and each string adds an additional access range to the
      *      requested scope.
      *
-     * @access    public
-     * @return    void
+     * @access  public
+     * @return  void
+     * @throw   Oauthz_Exception_Token    Error Codes: invalid_request
      */
     public function __construct($args = NULL)
     {
@@ -79,6 +80,7 @@ class Oauthz_Type_Password extends Oauthz_Type {
         }
         else
         {
+            // TODO move this request data detect into authorization handler
             if(isset($_SERVER['PHP_AUTH_USER']) AND isset($_SERVER['PHP_AUTH_PW']))
             {
                 $_POST += array('username' => $_SERVER['PHP_AUTH_USER'], 'password' => $_SERVER['PHP_AUTH_PW']);
@@ -120,6 +122,14 @@ class Oauthz_Type_Password extends Oauthz_Type {
         $this->_params = $params;
     }
 
+    /**
+     * Populate the access token thu the request info and client info stored in the server
+     *
+     * @access	public
+     * @param	array	$client
+     * @return	Oauthz_Token
+     * @throw   Oauthz_Exception_Authorize    Error Codes: invalid_request, invalid_scope
+     */
     public function access_token($client)
     {
         $response = new Oauthz_Token;

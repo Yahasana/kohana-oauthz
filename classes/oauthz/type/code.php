@@ -6,7 +6,7 @@
  * @package     Oauthz
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
- * @link        http://www.oalite.com
+ * @link        http://oalite.com
  * @see         Oauthz_Type
  * *
  */
@@ -42,6 +42,7 @@ class Oauthz_Type_Code extends Oauthz_Type {
      * @access	public
      * @param	string	$flag	default [ FALSE ]
      * @return	void
+     * @throw   Oauthz_Exception_Authorize    Error Codes: invalid_request
      */
     public function __construct(array $args)
     {
@@ -54,7 +55,7 @@ class Oauthz_Type_Code extends Oauthz_Type {
             unset($_GET['state']);
         }
 
-        // Check all required parameters should NOT be empty
+        // Check all required parameters should not be empty
         foreach($args as $key => $val)
         {
             if($val === TRUE)
@@ -87,6 +88,14 @@ class Oauthz_Type_Code extends Oauthz_Type {
         $this->_params = $params;
     }
 
+    /**
+     * Populate the oauth token from the request info and client info store in the server
+     *
+     * @access	public
+     * @param	array	$client
+     * @return	Oauthz_Token
+     * @throw   Oauthz_Exception_Authorize    Error Codes: invalid_scope, redirect_uri_mismatch
+     */
     public function oauth_token($client)
     {
         $response = new Oauthz_Token;

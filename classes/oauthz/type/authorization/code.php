@@ -6,7 +6,7 @@
  * @package     Oauthz
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
- * @link        http://www.oalite.com
+ * @link        http://oalite.com
  * @see         Oauthz_Type
  * *
  */
@@ -75,6 +75,14 @@ class Oauthz_Type_Authorization_Code extends Oauthz_Type {
         $this->_params = $params;
     }
 
+    /**
+     * Populate the access token thu the request info and client info stored in the server
+     *
+     * @access	public
+     * @param	array	$client
+     * @return	Oauthz_Token
+     * @throw   Oauthz_Exception_Authorize    Error Codes: invalid_request, invalid_scope
+     */
     public function access_token($client)
     {
         $response = new Oauthz_Token;
@@ -82,7 +90,7 @@ class Oauthz_Type_Authorization_Code extends Oauthz_Type {
         if($client['redirect_uri'] !== $this->_params['redirect_uri'])
         {
             $exception = new Oauthz_Exception_Token('invalid_request');
-            
+
             throw $exception;
         }
 

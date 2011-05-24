@@ -6,7 +6,7 @@
  * @package     Oauthz
  * @copyright   (c) 2011 OALite
  * @license     ISC License (ISCL)
- * @link        http://www.oalite.com
+ * @link        http://oalite.com
  * *
  */
 abstract class Oauthz_Authorization_Basic extends Oauthz_Authorization {

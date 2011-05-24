@@ -73,7 +73,7 @@ http://www.opensource.org/licenses/isc-license.txt
 
 ## Want to donate ? ##
 
-If you want to donate, go to [http://kohanaframework.org/donate](http://kohanaframework.org/donate). Thanks!
+If you want to donate, via [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=42424861@qq.com&item_name=Support Oauthz further development). Thanks!
 
 ## Want to be helped and buy me some coffee ? ##
 

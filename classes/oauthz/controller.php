@@ -55,21 +55,11 @@ abstract class Oauthz_Controller extends Kohana_Controller {
             // There is handler  for this response type
             if($response_type = Arr::get($params, 'response_type'))
             {
-                if(method_exists($this, $response_type))
+                $arguments = Arr::get($this->_configs['params'], $response_type, array());
+
+                if($extension = Oauthz_Extension::factory($response_type, $arguments))
                 {
-                    $response = $this->$response_type();
-                }
-                // TODO, if is an absolute URI identifying an assertion format supported by the authorization server
-                elseif($response_type = Arr::get($this->_configs['extension']['response_type'], $response_type))
-                {
-                    if(method_exists($this, $response_type))
-                    {
-                        $response = $this->$response_type();
-                    }
-                    elseif(class_exists('Oauthz_Extension_'.$response_type))
-                    {
-                        $response = Oauthz_Extension::factory($response_type)->execute();
-                    }
+                    $response = $extension->execute();
                 }
             }
 
@@ -87,7 +77,7 @@ abstract class Oauthz_Controller extends Kohana_Controller {
         }
         catch (Oauthz_Exception $e)
         {
-            $response = (string) $e;
+            $response = $e->getMessage();
         }
 
         $this->request->status = 302; #HTTP/1.1 302 Found
@@ -108,21 +98,11 @@ abstract class Oauthz_Controller extends Kohana_Controller {
             // There is handler for this grant type
             if($grant_type = Oauthz::get('grant_type'))
             {
-                if(method_exists($this, $grant_type))
+                $arguments = Arr::get($this->_configs['params'], $grant_type, array());
+
+                if($extension = Oauthz_Extension::factory($response_type, $arguments))
                 {
-                    $response = $this->$grant_type();
-                }
-                // TODO, if is an absolute URI identifying an assertion format supported by the authorization server
-                elseif($grant_type = Arr::get($this->_configs['extension']['grant_type'], $grant_type))
-                {
-                    if(method_exists($this, $grant_type))
-                    {
-                        $response = $this->$grant_type();
-                    }
-                    elseif(class_exists('Oauthz_Extension_'.$grant_type))
-                    {
-                        $response = Oauthz_Extension::factory($grant_type)->execute();
-                    }
+                    $response = $extension->execute();
                 }
             }
 
@@ -152,184 +132,5 @@ abstract class Oauthz_Controller extends Kohana_Controller {
         $this->request->headers['Cache-Control']    = 'no-store, must-revalidate';
         $this->request->response = $response;
     }
-
-    #endregion
-
-    #region get authorization code or token ( response_type )
-
-    /**
-     * the client directs the resource owner to an authorization server (via its user-agent),
-     * which in turns directs the resource owner back to the client with the authorization code.
-     *
-     * @access    protected
-     * @return    string    redirect_uri?[code,state]
-     * @throw     Oauthz_Exception_Authorize    Error Codes: invalid_request
-     */
-    protected function code()
-    {
-        $type = new Oauthz_Type_Code($this->_configs['code_params']);
-
-        // Verify the client and generate a code if successes
-        if($token = Oauthz_Model::factory('Token')->code($type->client_id))
-        {
-            $token['expires_in'] = $this->_configs['durations']['code'];
-
-            // Populate the code
-            $response = $type->oauth_token($token);
-        }
-        else
-        {
-            // Invalid client_id
-            $exception = new Oauthz_Exception_Authorize('invalid_client');
-
-            $exception->redirect_uri = $type->redirect_uri;
-
-            $exception->state = $type->state;
-
-            throw $exception;
-        }
-
-        return $type->redirect_uri.'?'.$response->as_query();
-    }
-
-    /**
-     * get the access token via Implicit Grant Flow
-     *
-     * @access	protected
-     * @return	string  redirect uri
-     * @throw   Oauthz_Exception_Authorize  Error Codes: invalid_client
-     */
-    protected function token()
-    {
-        $params = $this->_configs['grant_params']['authorization_code'] + $this->_configs['code_params'];
-
-        $type = new Oauthz_Type_Token($params);
-
-        // Verify the client and the code, load the access token if successes
-        if($token = Oauthz_Model::factory('Token')->oauth_token($type->client_id, $type->code))
-        {
-            $token['expires_in'] = $this->_configs['durations']['oauth_token'];
-
-            $response = $type->oauth_token($token);
-        }
-        else
-        {
-            // Invalid client_id
-            $exception = new Oauthz_Exception_Token('invalid_client');
-
-            $exception->redirect_uri = $type->redirect_uri;
-
-            $exception->state = $type->state;
-
-            throw $exception;
-        }
-
-        return $type->redirect_uri.'#'.$response->as_query();
-    }
-
-    #endregion
-
-    #region An authorization grant is used by the client to obtain an access token. ( grant_type )
-
-    /**
-     * Obtain an access token via authorization code
-     *
-     * @access	protected
-     * @return	Oauthz_Token
-     * @throw   Oauthz_Exception_Token invalid_client
-     */
-    protected function authorization_code()
-    {
-        $type = new Oauthz_Type_Authorization_Code($this->_configs['grant_params']['authorization_code']);
-
-        if($oauth_token = Oauthz_Model::factory('Token')->oauth_token($type->client_id, $type->code))
-        {
-            //$audit = new Model_Oauthz_Audit;
-            //$audit->audit_token($response);
-
-            // Verify the oauth token send by client
-            $response = $type->access_token($oauth_token);
-        }
-        else
-        {
-            throw new Oauthz_Exception_Token('invalid_client');
-        }
-
-        return $response;
-    }
-
-    /**
-     * can be used directly as an authorization grant to obtain an access token
-     *
-     * @access	protected
-     * @return	Oauthz_Token
-     * @throw   Oauthz_Exception_Token invalid_client
-     */
-    protected function password()
-    {
-        $type = new Oauthz_Type_Password;
-
-        if($client = Oauthz_Model::factory('Server')->lookup($type->client_id))
-        {
-            // Verify the user information send by client
-            $response = $type->access_token($client);
-        }
-        else
-        {
-            throw new Oauthz_Exception_Token('invalid_client');
-        }
-
-        return $response;
-    }
-
-    /**
-     * the client is acting on its own behalf (the client is also the resource owner)
-     *
-     * @access	protected
-     * @return	Oauthz_Token
-     * @throw   Oauthz_Exception_Token invalid_client
-     */
-    protected function client_credentials()
-    {
-        $type = new Oauthz_Type_Client_Credentials;
-
-        if($client = Oauthz_Model::factory('Server')->lookup($type->client_id))
-        {
-            // Verify the user information send by client
-            $response = $type->access_token($client);
-        }
-        else
-        {
-            throw new Oauthz_Exception_Token('invalid_client');
-        }
-
-        return $response;
-    }
-
-    /**
-     * Refresh token behalf the same as client credentials
-     *
-     * @access	protected
-     * @return	Oauthz_Token
-     * @throw   Oauthz_Exception_Token invalid_client
-     */
-    protected function refresh_token()
-    {
-        $type = new Oauthz_Type_Client_Credentials;
-
-        if($refresh_token = Oauthz_Model::factory('Token')->refresh_token($type->client_id))
-        {
-            // Verify the oauth token send by client
-            $response = $type->refresh_token($refresh_token);
-        }
-        else
-        {
-            throw new Oauthz_Exception_Token('invalid_client');
-        }
-
-        return $response;
-    }
-
-    #endregion
 
 } // END Oauthz Server Controller

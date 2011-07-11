@@ -1,5 +1,7 @@
 <?php
 /**
+ * Response type is token
+ *
  * Oauth parameter handler for authenticate token request
  *
  * @author      sumh <oalite@gmail.com>
@@ -7,10 +9,10 @@
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
  * @link        http://oalite.com
- * @see         Oauthz_Type
+ * @see         Oauthz_Extension
  * *
  */
-class Oauthz_Type_Token extends Oauthz_Type {
+class Oauthz_Extension_Token extends Oauthz_Extension {
 
     /**
      * REQUIRED
@@ -177,8 +179,25 @@ class Oauthz_Type_Token extends Oauthz_Type {
      * @return	Oauthz_Token
      * @throw   Oauthz_Exception_Token Error codes: invalid_scope, redirect_uri_mismatch
      */
-    public function oauth_token($client)
+    public function execute()
     {
+        // Verify the client and the code, load the access token if successes
+        if($client = Oauthz_Model::factory('Token')->oauth_token($this->client_id, $this->code))
+        {
+            $client['expires_in'] = $this->_configs['durations']['oauth_token'];
+        }
+        else
+        {
+            // Invalid client_id
+            $exception = new Oauthz_Exception_Token('invalid_client');
+
+            $exception->redirect_uri = $this->redirect_uri;
+
+            $exception->state = $this->state;
+
+            throw $exception;
+        }
+
         $response = new Oauthz_Token;
 
         if(isset($this->_params['token_secret']) AND $client['token_secret'] !== sha1($this->_params['token_secret']))
@@ -191,93 +210,7 @@ class Oauthz_Type_Token extends Oauthz_Type {
             throw new Oauthz_Exception_Token('unauthorized_client');
         }
 
-        /**
-         * Verify the signature
-         * Note: this feature should only need when non-TLS http request
-         */
-        if( ! empty($this->_params['signature']) AND ! empty($this->_params['algorithm']))
-        {
-            $uri = URL::base(FALSE, TRUE).Request::$instance->uri;
-
-            $string = Oauthz::normalize(Request::$method, $uri, $this->_params);
-
-            if($this->_params['algorithm'] == 'rsa-sha1' OR $this->_params['algorithm'] == 'hmac-sha1')
-            {
-                $response->public_cert = $client['ssh_key'];
-                $response->private_cert = $this->_params['signature'];
-            }
-
-            if ( ! Oauthz::signature($this->_params['algorithm'], $string)->check($response, $this->_params['signature']))
-            {
-                throw new Oauthz_Exception_Token('invalid_signature');
-            }
-        }
-
-        return $response;
+        return $this->redirect_uri.'#'.$response->as_query();
     }
 
-    /**
-     * MUST verify that the verification code, client identity, client secret,
-     * and redirection URI are all valid and match its stored association.
-     *
-     * @access  public
-     * @param	array	$client
-     * @return  Oauthz_Token
-     * @throw   Oauthz_Exception_Token  Error codes: invalid_request, unauthorized_client
-     * @todo    impletement timestamp, nonce, signature checking
-     */
-    public function access_token($client)
-    {
-        $response = new Oauthz_Token;
-
-        if(isset($this->_params['format']))
-        {
-            $response->format = $this->_params['format'];
-        }
-
-        //if(isset($this->_params['nonce']) AND $client['nonce'] !== $this->_params['nonce'])
-        //{
-        //    throw new Oauthz_Exception_Token('invalid_request');
-        //}
-
-        if($client['access_token'] !== $this->oauth_token)
-        {
-            throw new Oauthz_Exception_Token('unauthorized_client');
-        }
-
-        if(isset($this->_params['scope']) AND ! empty($client['scope']))
-        {
-            if( ! in_array($this->_params['scope'], explode(' ', $client['scope'])))
-                throw new Oauthz_Exception_Token('invalid_scope');
-        }
-
-        if(isset($this->_params['timestamp']) AND $client['timestamp'] < $this->_params['timestamp'])
-        {
-            throw new Oauthz_Exception_Token('unauthorized_client');
-        }
-
-        // TODO Verify the signature should be hold in authorization handler
-        if( ! empty($this->_params['signature']) AND ! empty($this->_params['algorithm']))
-        {
-            $uri = URL::base(FALSE, TRUE).Request::$instance->uri;
-
-            $string = Oauthz::normalize(Request::$method, $uri, $this->_params);
-
-            $this->_params['algorithm'] = strtolower($this->_params['algorithm']);
-
-            if($this->_params['algorithm'] === 'rsa-sha1' OR $this->_params['algorithm'] === 'hmac-sha1')
-            {
-                $response->public_cert = $client['ssh_key'];
-                $response->private_cert = $this->_params['signature'];
-            }
-
-            if( ! Oauthz::signature($this->_params['algorithm'], $string)->check($response, $this->_params['signature']))
-            {
-                throw new Oauthz_Exception_Token('invalid_request');
-            }
-        }
-
-        return $response;
-    }
-
-} // END Oauthz_Type_Token
+} // END Oauthz_Extension_Token

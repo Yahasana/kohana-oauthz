@@ -17,22 +17,17 @@ return array(
          */
         'http_accept'=> FALSE,
 
-        'extension' => array(
-            'grant_type'    => array(
-                //'type-name' => 'action-name' or 'class-name'
-            ),
-            'response_type' => array(
-                //'type-name' => 'action-name' or 'class-name'
-            )
-        ),
-
+        /**
+         * Parameters should be required when access protected resource
+         * cryptographic token or bear token
+         */
         'token'    => array(
             'access_token'  => '',
             'expires_in'    => '',
             'refresh_token' => '',
             'scope'         => '',
         ),
-        
+
         /**
          *  TODO: Authentication methods for each flows
          */
@@ -45,24 +40,30 @@ return array(
          * Parameters should be required when request authorization code
          * cryptographic token or bear token
          */
-        'code_params'     => array(
-            'client_id'     => TRUE,
-            'redirect_uri'  => TRUE,
-            'scope'         => FALSE,
-            'state'         => FALSE
-        ),
-
-        /**
-         * Parameters should be required when request access token
-         */
-        'grant_params'     => array(
+        'params'     => array(
+            // Parameters should be required for response_type endpoint
+            'code'                  => array(
+                'client_id'         => TRUE,
+                'redirect_uri'      => TRUE,
+                'scope'             => FALSE,
+                'state'             => FALSE
+            ),
+            'token'                 => array(
+                'code'              => TRUE,
+                'redirect_uri'      => TRUE,
+                'client_id'         => TRUE,
+                'client_secret'     => TRUE,
+                'scope'             => FALSE,
+                'state'             => FALSE
+            ),
+            // Parameters should be required for grant_type endpoint
             'authorization_code'    => array(
                 'code'              => TRUE,
                 'redirect_uri'      => TRUE,
                 'client_id'         => TRUE,
                 'client_secret'     => TRUE,
             ),
-            'password'     => array(
+            'password'              => array(
                 'username'          => TRUE,
                 'password'          => TRUE,
                 'client_id'         => TRUE,
@@ -73,20 +74,13 @@ return array(
                 'client_id'         => TRUE,
                 'client_secret'     => TRUE,
             ),
-            'signature'             => FALSE
-        ),
-
-        /**
-         * Parameters should be required when access protected resource
-         * cryptographic token or bear token
-         */
-        'access_params'     => array(
-            'oauth_token'   => TRUE,
-            'timestamp'     => TRUE,
-            'scope'         => FALSE,
-            'nonce'         => FALSE,
-            'algorithm'     => FALSE,
-            'signature'     => FALSE
+            // TODO
+            'assertion' => array(
+                'assertion_type'    => TRUE,
+                'assertion'         => TRUE,
+                'client_id'         => TRUE,
+                'client_secret'     => TRUE
+            )
         ),
 
         'scopes'    => array(
@@ -194,18 +188,6 @@ return array(
                 'error_description' => 'The requested scope is invalid, unknown, malformed, or
                     exceeds the previously granted scope.',
                 'error_uri'         => '',
-            )
-        ),
-        // extensions
-        'extensions' => array(
-            'grant_type' => array(),
-            'token_type' => array(
-                'assertion' => array(
-                    'assertion_type'    => TRUE,
-                    'assertion'         => TRUE,
-                    'client_id'         => TRUE,
-                    'client_secret'     => TRUE
-                )
             )
         )
     )

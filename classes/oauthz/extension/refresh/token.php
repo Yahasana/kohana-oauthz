@@ -1,5 +1,7 @@
 <?php
 /**
+ * Grant type is refresh_token
+ *
  * Oauth parameter handler for client credentials flow
  *
  * @author      sumh <oalite@gmail.com>
@@ -7,10 +9,10 @@
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
  * @link        http://oalite.com
- * @see         Oauthz_Type
+ * @see         Oauthz_Extension
  * *
  */
-class Oauthz_Type_Client_Credentials extends Oauthz_Type {
+class Oauthz_Extension_Refresh_Token extends Oauthz_Extension {
 
     /**
      * client_id
@@ -108,15 +110,24 @@ class Oauthz_Type_Client_Credentials extends Oauthz_Type {
     }
 
     /**
-     * Populate the access token thu the request info and client info stored in the server
+     * TODO Refresh token
      *
      * @access	public
      * @param	array	$client
      * @return	Oauthz_Token
      * @throw   Oauthz_Exception_Authorize    Error Codes: invalid_request, invalid_scope
      */
-    public function access_token($client)
+    public function execute()
     {
+        if($client = Oauthz_Model::factory('Server')->lookup($this->client_id))
+        {
+            // Verify the user information send by client
+        }
+        else
+        {
+            throw new Oauthz_Exception_Token('invalid_client');
+        }
+
         $response = new Oauthz_Token;
 
         isset($this->_params['state']) AND $response->state = $this->state;
@@ -143,50 +154,4 @@ class Oauthz_Type_Client_Credentials extends Oauthz_Type {
         return $response;
     }
 
-    /**
-     * TODO Refresh token
-     *
-     * @access	public
-     * @param	array	$client
-     * @return	Oauthz_Token
-     */
-    public function refresh_token($client)
-    {
-        $response = new Oauthz_Token;
-
-        if(property_exists($this, 'state'))
-        {
-            $response->state = $this->state;
-        }
-
-        if(property_exists($this, 'format'))
-        {
-            $response->format = $this->format;
-        }
-
-        if($client['client_secret'] !== sha1($this->client_secret))
-        {
-            $response->error = 'unauthorized_client';
-            return $response;
-        }
-
-        if($client['refresh_token'] !== $this->refresh_token)
-        {
-            $response->error = 'unauthorized_client';
-            return $response;
-        }
-
-        if($client['timestamp'] + 300 < $_SERVER['REQUEST_TIME'])
-        {
-            $response->error = 'invalid_grant';
-            return $response;
-        }
-
-        // Grants Authorization
-        $response->expires_in = 3000;
-        $response->access_token = $client['access_token'];
-
-        return $response;
-    }
-
-} // END Oauthz_Type_Client_Credentials
+} // END Oauthz_Extension_Client_Credentials

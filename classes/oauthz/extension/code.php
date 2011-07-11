@@ -1,5 +1,7 @@
 <?php
 /**
+ * Response type is code
+ *
  * Oauth parameter handler for authenticate code request
  *
  * @author      sumh <oalite@gmail.com>
@@ -7,10 +9,10 @@
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
  * @link        http://oalite.com
- * @see         Oauthz_Type
+ * @see         Oauthz_Extension
  * *
  */
-class Oauthz_Type_Code extends Oauthz_Type {
+class Oauthz_Extension_Code extends Oauthz_Extension {
 
     /**
      * REQUIRED.  The client identifier as described in Section 2.1.
@@ -66,15 +68,15 @@ class Oauthz_Type_Code extends Oauthz_Type {
                 }
                 else
                 {
-                    $e = new Oauthz_Exception_Authorize('invalid_request');
+                    $exception = new Oauthz_Exception_Authorize('invalid_request');
 
-                    $e->redirect_uri = isset($params['redirect_uri'])
+                    $exception->redirect_uri = isset($params['redirect_uri'])
                         ? $params['redirect_uri']
                         : Oauthz::urldecode($_GET['redirect_uri']);
 
-                    $e->state = $this->state;
+                    $exception->state = $this->state;
 
-                    throw $e;
+                    throw $exception;
                 }
             }
         }
@@ -96,15 +98,32 @@ class Oauthz_Type_Code extends Oauthz_Type {
      * @return	Oauthz_Token
      * @throw   Oauthz_Exception_Authorize    Error Codes: invalid_scope, redirect_uri_mismatch
      */
-    public function oauth_token($client)
+    public function execute()
     {
+        // Verify the client and generate a code if successes
+        if($client = Oauthz_Model::factory('Token')->code($this->client_id))
+        {
+            $client['expires_in'] = $this->_configs['durations']['code'];
+        }
+        else
+        {
+            // Invalid client_id
+            $exception = new Oauthz_Exception_Authorize('invalid_client');
+
+            $exception->redirect_uri = $this->redirect_uri;
+
+            $exception->state = $this->state;
+
+            throw $exception;
+        }
+
         $response = new Oauthz_Token;
 
         if($client['redirect_uri'] !== $this->redirect_uri)
         {
             $e = new Oauthz_Exception_Authorize('redirect_uri_mismatch');
 
-            $e->redirect_uri = $this->redirect_uri;
+            $e->redirect_uri = $client['redirect_uri'];
 
             $e->state = $this->state;
 
@@ -130,7 +149,7 @@ class Oauthz_Type_Code extends Oauthz_Type {
         // Grants Authorization
         $response->code = $client['code'];
 
-        return $response;
+        return $this->redirect_uri.'?'.$response->as_query();
     }
 
-} // END Oauthz_Type_Code
+} // END Oauthz_Extension_Code

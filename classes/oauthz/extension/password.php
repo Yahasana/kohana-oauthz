@@ -1,5 +1,7 @@
 <?php
 /**
+ * Grant type is password
+ *
  * Oauth parameter handler for password credentials flow
  *
  * @author      sumh <oalite@gmail.com>
@@ -7,10 +9,10 @@
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
  * @link        http://oalite.com
- * @see         Oauthz_Type
+ * @see         Oauthz_Extension
  * *
  */
-class Oauthz_Type_Password extends Oauthz_Type {
+class Oauthz_Extension_Password extends Oauthz_Extension {
 
     /**
      * client_id
@@ -130,8 +132,17 @@ class Oauthz_Type_Password extends Oauthz_Type {
      * @return	Oauthz_Token
      * @throw   Oauthz_Exception_Authorize    Error Codes: invalid_request, invalid_scope
      */
-    public function access_token($client)
+    public function execute()
     {
+        if($client = Oauthz_Model::factory('Server')->lookup($this->client_id))
+        {
+            //
+        }
+        else
+        {
+            throw new Oauthz_Exception_Token('invalid_client');
+        }
+
         $response = new Oauthz_Token;
 
         isset($this->_params['state']) AND $response->state = $this->state;
@@ -160,4 +171,4 @@ class Oauthz_Type_Password extends Oauthz_Type {
         return $response;
     }
 
-} // END Oauthz_Type_Password
+} // END Oauthz_Extension_Password

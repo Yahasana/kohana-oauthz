@@ -1,5 +1,7 @@
 <?php
 /**
+ * Grant type is authorization_code
+ *
  * Oauth parameter handler for webserver flow
  *
  * @author      sumh <oalite@gmail.com>
@@ -7,10 +9,10 @@
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
  * @link        http://oalite.com
- * @see         Oauthz_Type
+ * @see         Oauthz_Extension
  * *
  */
-class Oauthz_Type_Authorization_Code extends Oauthz_Type {
+class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
 
     /**
      * REQUIRED.  The client identifier as described in Section 2.1.
@@ -83,8 +85,20 @@ class Oauthz_Type_Authorization_Code extends Oauthz_Type {
      * @return	Oauthz_Token
      * @throw   Oauthz_Exception_Authorize    Error Codes: invalid_request, invalid_scope
      */
-    public function access_token($client)
+    public function execute()
     {
+        if($client = Oauthz_Model::factory('Token')->oauth_token($this->client_id, $this->code))
+        {
+            //$audit = new Model_Oauthz_Audit;
+            //$audit->audit_token($response);
+
+            // Verify the oauth token send by client
+        }
+        else
+        {
+            throw new Oauthz_Exception_Token('invalid_client');
+        }
+
         $response = new Oauthz_Token;
 
         if($client['redirect_uri'] !== $this->_params['redirect_uri'])
@@ -106,4 +120,4 @@ class Oauthz_Type_Authorization_Code extends Oauthz_Type {
         return $response;
     }
 
-} // END Oauthz_Type_Authorization_Code
+} // END Oauthz_Extension_Authorization_Code

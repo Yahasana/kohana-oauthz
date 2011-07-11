@@ -6,7 +6,7 @@
 
  1) Create the oauth data tabe by execute `oauth.sql` in doc directory
 
- 2) Configurate the server parameters in `config/oauthy-server.php`
+ 2) Configurate the server parameters in `config/Oauthz-server.php`
 
 ### Modify interface show to users ###
 
@@ -14,37 +14,37 @@
 
  2) Resource owners personal information management.
 
-    class Controller_Oauth extends Oauthy_Server {}
+    class Controller_Oauth extends Oauthz_Server {}
 
- See [more](/Yahasana/kohana-oauthy/blob/master/guide/server.md)
+ See [more](/Yahasana/kohana-Oauthz/blob/master/guide/server.md)
 
 ### Develop grant type or response type handler extensions ###
 
- 1) Simpler way
+ 1) Simpler way `myextension.php`
 
-    class Oauthy_MyController extends Oauthy_Controller {
+    class Oauthz_Extension_MyExtension extends Oauthz_Extension {
 
-        protected function new_grant_type()
+        public function execute()
         {
             // todo
         }
     }
 
-    class Controller_Oauth extends Oauthy_MyController {}
+  then drop this file into the right place
 
- 2) Complex one, e.g. [assersion](/Yahasana/kohana-oauthy/blob/master/classes/extension/assersion.php)
+ 2) Complex one, e.g. [assersion](/Yahasana/kohana-Oauthz/blob/master/classes/extension/assersion.php)
 
 ### Develop web service API protected by OAuth2 ###
 
-    class Controller_Api extends Oauthy_Api {}
+    class Controller_Api extends Oauthz_Api {}
 
- See [more](/Yahasana/kohana-oauthy/blob/master/guide/api.md)
+ See [more](/Yahasana/kohana-Oauthz/blob/master/guide/api.md)
 
 ### Overlay standard grant type or response type handler ###
 
  Not recommend but you can, here is
 
-    class Oauthy_MyController extends Oauthy_Controller {
+    class Oauthz_MyController extends Oauthz_Controller {
         protected function code()
         {
             // todo
@@ -55,17 +55,17 @@
 
 ### Install and configuration ###
 
- 1) Configurate the client parameters in `config/oauthy-client.php`
+ 1) Configurate the client parameters in `config/Oauthz-client.php`
 
 ### Develop resources request handler ###
 
-    class Controller_Client extends Oauthy_Client {}
+    class Controller_Client extends Oauthz_Client {}
 
- See [more](/Yahasana/kohana-oauthy/blob/master/guide/client.md)
+ See [more](/Yahasana/kohana-Oauthz/blob/master/guide/client.md)
 
 ### Demo explaination ###
 
-[Demo guide](/Yahasana/kohana-oauthy/blob/master/guide/demo.md)
+[Demo guide](/Yahasana/kohana-Oauthz/blob/master/guide/demo.md)
 
 ## ISC License (ISCL) ##
 
@@ -73,7 +73,7 @@ http://www.opensource.org/licenses/isc-license.txt
 
 ## Want to donate ? ##
 
-If you want to donate, via [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=42424861@qq.com&item_name=Support Oauthz further development). Thanks!
+To support this project, via [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=42424861@qq.com&item_name=Support Oauthz further development). Thanks!
 
 ## Want to be helped and buy me some coffee ? ##
 

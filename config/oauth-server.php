@@ -126,6 +126,15 @@ return array(
             'invalid_scope'         => array(
                 'error_description' => 'The requested scope is invalid, unknown, or malformed.',
                 'error_uri'         => '',
+            ),
+            'server_error'         => array(
+                'error_description' => 'The authorization server encountered an unexpected condition which prevented it from fulfilling the request.',
+                'error_uri'         => '',
+            ),
+            'temporarily_unavailable'=> array(
+                'error_description' => 'The authorization server is currently unable to handle the
+                                        request due to a temporary overloading or maintenance of the server.',
+                'error_uri'         => '',
             )
         ),
         // section-4.2.2.1.  Error Response
@@ -149,6 +158,15 @@ return array(
             ),
             'invalid_scope'         => array(
                 'error_description' => 'The requested scope is invalid, unknown, or malformed.',
+                'error_uri'         => '',
+            ),
+            'server_error'         => array(
+                'error_description' => 'The authorization server encountered an unexpected condition which prevented it from fulfilling the request.',
+                'error_uri'         => '',
+            ),
+            'temporarily_unavailable'=> array(
+                'error_description' => 'The authorization server is currently unable to handle the
+                                        request due to a temporary overloading or maintenance of the server.',
                 'error_uri'         => '',
             )
         ),

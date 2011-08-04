@@ -12,7 +12,7 @@
  */
 class Oauthz_Server extends Kohana_Controller {
 
-    protected $template = 'oauth-template';
+    protected $template = 'oauthz-template';
 
     public function before()
     {
@@ -44,7 +44,7 @@ class Oauthz_Server extends Kohana_Controller {
             }
         }
 
-        $this->template->content = new View('oauthz-register', $data);
+        $this->template->content = new View('oauthz-server-register', $data);
 
         $this->request->response = $this->template->render();
     }

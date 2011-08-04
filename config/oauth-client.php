@@ -19,7 +19,7 @@ return array(
             'token_type'   => 'BEARER', // BEARER, HMAC-SHA1, RSA-SHA1, MD5
             'scope'         => '',
             'state'         => '',
-            'redirect-uri'  => 'http://docs/client/do'
+            'redirect_uri'  => 'http://docs/client/do'
         ),
         // Parameters for Implicit Grant Flow
         'token' => array(
@@ -28,7 +28,7 @@ return array(
             'token_type'    => 'BEARER', // BEARER, HMAC-SHA1, RSA-SHA1, MD5
             'scope'         => '',
             'state'         => '',
-            'redirect-uri'  => 'http://docs/client/do'
+            'redirect_uri'  => 'http://docs/client/do'
         ),
         // Parameters for Resource Owner Password Credentials Flow
         'password' => array(

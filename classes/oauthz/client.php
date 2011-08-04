@@ -59,7 +59,7 @@ class Oauthz_Client extends Kohana_Controller {
             }
         }
 
-        empty($uri) OR $uri = $this->_configs['oauth-uri'];
+        empty($uri) AND $uri = $this->_configs['oauth-uri'];
 
         // Load the paramtes and remove all empty ones
         $params = array_filter($this->_configs['code']);

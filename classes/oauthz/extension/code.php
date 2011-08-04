@@ -38,6 +38,8 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
      */
     public $state;
 
+    public $expires_in;
+
     /**
      * Load oauth parameters from GET or POST
      *
@@ -48,8 +50,6 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
      */
     public function __construct(array $args)
     {
-        $params = array();
-
         // Parse the "state" paramter
         if(isset($_GET['state']) AND $state = Oauthz::urldecode($_GET['state']))
         {
@@ -64,15 +64,20 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
             {
                 if(isset($_GET[$key]) AND $value = Oauthz::urldecode($_GET[$key]))
                 {
-                    $params[$key] = $value;
+                    $this->$key = $value;
                 }
                 else
                 {
                     $exception = new Oauthz_Exception_Authorize('invalid_request');
 
-                    $exception->redirect_uri = isset($params['redirect_uri'])
-                        ? $params['redirect_uri']
-                        : Oauthz::urldecode($_GET['redirect_uri']);
+                    if(isset($this->redirect_uri))
+                    {
+                        $exception->redirect_uri = $this->redirect_uri;
+                    }
+                    elseif (isset($_GET['redirect_uri']) AND $value = Oauthz::urldecode($_GET['redirect_uri']))
+                    {
+                        $exception->redirect_uri = $value;
+                    }
 
                     $exception->state = $this->state;
 
@@ -80,14 +85,6 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
                 }
             }
         }
-
-        $this->client_id    = $params['client_id'];
-        $this->redirect_uri = $params['redirect_uri'];
-
-        // Remove all required parameters
-        unset($params['client_id'], $params['redirect_uri']);
-
-        $this->_params = $params;
     }
 
     /**
@@ -103,7 +100,7 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
         // Verify the client and generate a code if successes
         if($client = Oauthz_Model::factory('Token')->code($this->client_id))
         {
-            $client['expires_in'] = $this->_configs['durations']['code'];
+            //
         }
         else
         {
@@ -130,9 +127,9 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
             throw $e;
         }
 
-        if( ! empty($this->_params['scope']) AND ! empty($client['scope']))
+        if( ! empty($this->scope) AND ! empty($client['scope']))
         {
-            if( ! in_array($this->_params['scope'], explode(' ', $client['scope'])))
+            if( ! in_array($this->scope, explode(' ', $client['scope'])))
             {
                 $e = new Oauthz_Exception_Authorize('invalid_scope');
 
@@ -144,7 +141,7 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
             }
         }
 
-        $response->expires_in = $client['expires_in'];
+        $response->expires_in = $this->expires_in;
 
         // Grants Authorization
         $response->code = $client['code'];

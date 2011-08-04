@@ -38,8 +38,6 @@ abstract class Oauthz_Controller extends Kohana_Controller {
         Oauthz_Exception::$errors[$this->_type]['access_errors']    = $this->_configs['access_errors'];
     }
 
-    #region authorization_code, oauth_token and access_token request handler
-
     /**
      * The end-user authenticates directly with the authorization server, and grants client access to its protected resources
      *
@@ -59,6 +57,7 @@ abstract class Oauthz_Controller extends Kohana_Controller {
 
                 if($extension = Oauthz_Extension::factory($response_type, $arguments))
                 {
+                    $extension->expires_in = $this->_configs['durations']['code'];
                     $response = $extension->execute();
                 }
             }
@@ -100,8 +99,9 @@ abstract class Oauthz_Controller extends Kohana_Controller {
             {
                 $arguments = Arr::get($this->_configs['params'], $grant_type, array());
 
-                if($extension = Oauthz_Extension::factory($response_type, $arguments))
+                if($extension = Oauthz_Extension::factory($grant_type, $arguments))
                 {
+                    $extension->expires_in = $this->_configs['durations']['oauth_token'];
                     $response = $extension->execute();
                 }
             }

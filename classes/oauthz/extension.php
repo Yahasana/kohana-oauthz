@@ -9,7 +9,7 @@
  * @link        http://oalite.com
  * *
  */
-class Oauthz_Extension {
+abstract class Oauthz_Extension {
 
     public static function factory($type, array $args)
     {

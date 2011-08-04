@@ -11,6 +11,11 @@
  */
 abstract class Oauthz_Authorization {
 
+    public function __construct()
+    {
+        //
+    }
+
     abstract public function parse($digest);
 
     abstract public function authenticate($client_id, $client_secret);

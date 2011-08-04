@@ -71,9 +71,13 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
                 {
                     if($val === TRUE)
                     {
-                        if( ! empty($params[$key]))
+                        if(empty($params[$key]))
                         {
                             throw new Oauthz_Exception_Token('invalid_request');
+                        }
+                        else
+                        {
+                            $this->$key = $params[$key];
                         }
                     }
                 }
@@ -114,7 +118,7 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
                     {
                         if(isset($_POST[$key]) AND $value = Oauthz::urldecode($_POST[$key]))
                         {
-                            $params[$key] = $value;
+                            $this->$key = $value;
                         }
                         else
                         {
@@ -146,7 +150,7 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
                     {
                         if(isset($_GET[$key]) AND $value = Oauthz::urldecode($_GET[$key]))
                         {
-                            $params[$key] = $value;
+                            $this->$key = $value;
                         }
                         else
                         {
@@ -165,10 +169,6 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
         }
 
         $this->oauth_token = $params['oauth_token'];
-
-        unset($params['oauth_token']);
-
-        $this->_params = $params;
     }
 
     /**
@@ -181,10 +181,12 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
      */
     public function execute()
     {
+        $response = new Oauthz_Token;
+        
         // Verify the client and the code, load the access token if successes
         if($client = Oauthz_Model::factory('Token')->oauth_token($this->client_id, $this->code))
         {
-            $client['expires_in'] = $this->_configs['durations']['oauth_token'];
+            $response->token_type = $client['token_type'];
         }
         else
         {
@@ -198,19 +200,62 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
             throw $exception;
         }
 
-        $response = new Oauthz_Token;
-
-        if(isset($this->_params['token_secret']) AND $client['token_secret'] !== sha1($this->_params['token_secret']))
+        if(isset($this->token_secret) AND $client['token_secret'] !== sha1($this->token_secret))
         {
             throw new Oauthz_Exception_Token('invalid_request');
         }
 
-        if(isset($this->_params['timestamp']) AND $client['timestamp'] < $this->_params['timestamp'])
+        if(isset($this->timestamp) AND $client['timestamp'] < $this->timestamp)
         {
             throw new Oauthz_Exception_Token('unauthorized_client');
         }
 
+        $response->expires_in = $this->expires_in;
+
         return $this->redirect_uri.'#'.$response->as_query();
+    }
+
+    /**
+     * MUST verify that the verification code, client identity, client secret,
+     * and redirection URI are all valid and match its stored association.
+     *
+     * @access  public
+     * @param	array	$client
+     * @return  Oauthz_Token
+     * @throw   Oauthz_Exception_Token  Error codes: invalid_request, unauthorized_client
+     * @todo    impletement timestamp, nonce, signature checking
+     */
+    public function access_token($client)
+    {
+        $response = new Oauthz_Token;
+
+        if(isset($this->format))
+        {
+            $response->format = $this->format;
+        }
+
+        if($client['access_token'] !== $this->oauth_token)
+        {
+            throw new Oauthz_Exception_Token('unauthorized_client');
+        }
+
+        if($client['token_type'] !== $this->token_type)
+        {
+            throw new Oauthz_Exception_Token('unauthorized_client');
+        }
+
+        if(isset($this->scope) AND ! empty($client['scope']))
+        {
+            if( ! in_array($this->scope, explode(' ', $client['scope'])))
+                throw new Oauthz_Exception_Token('invalid_scope');
+        }
+        
+        //switch($response->token_type)
+        //{
+            
+        //}
+
+        return $response;
     }
 
 } // END Oauthz_Extension_Token

@@ -77,7 +77,7 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
      */
     public function execute()
     {
-        if($client = Oauthz_Model::factory('Token')->oauth_token($this->client_id, $this->code))
+        if($client = Model_Oauthz::factory('Token')->oauth_token($this->client_id, $this->code))
         {
             //$audit = new Model_Oauthz_Audit;
             //$audit->audit_token($response);

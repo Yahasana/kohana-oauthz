@@ -100,13 +100,6 @@ class Oauthz_Client extends Kohana_Controller {
 
         $type = $this->_configs['protocol-flow'];
 
-        //~ build base string
-        // $identifier = Oauthz::normalize('POST', $uri, $this->_configs);
-
-        //~ build signature string
-        // $this->_configs['client_secret']    =
-            // Oauthz::signature($this->_configs['secret_type'], $identifier)
-            // ->build(new Oauthz_Client($this->_configs['client_id'], NULL), NULL);
         if(isset($this->_configs[$type]))
         {
             $params = $this->_configs[$type];
@@ -138,7 +131,6 @@ class Oauthz_Client extends Kohana_Controller {
                 CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=utf-8'),
                 CURLOPT_POSTFIELDS  => Oauthz::build_query($params)
             ));
-            die($token);
 
             $token = json_decode($token);
             if(isset($token->error))

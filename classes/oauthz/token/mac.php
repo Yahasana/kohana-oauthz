@@ -12,7 +12,7 @@
  */
 abstract class Oauthz_Token_Mac extends Oauthz_Authorization {
 
-    public function authenticate($client_id, $client_secret)
+    public function authenticate($client)
     {
         // TODO
     }

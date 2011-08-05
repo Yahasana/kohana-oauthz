@@ -7,7 +7,7 @@ return array(
     'default' => array(
         'oauth-uri'     => 'http://docs/oauth/code',
         'token-uri'     => 'http://docs/oauth/token',
-        'resource-uri'  => 'http://docs/api',
+        'resource-uri'  => 'http://docs/api/get',
 
         // Must be code, token, password, client_credentials
         'protocol-flow' => 'code',

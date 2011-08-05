@@ -10,9 +10,9 @@
  * @see         Oauthz_Authorization
  * *
  */
-class Oauthz_Token_Bearer implements Oauthz_Authorization {
+class Oauthz_Token_Bearer extends Oauthz_Authorization {
 
-    public function authenticate($client_id, $client_secret)
+    public function authenticate($client)
     {
         if($data = Oauthz_Token_Bearer::parse())
         {

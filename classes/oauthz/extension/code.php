@@ -102,7 +102,7 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
             'token_type' => 'bearer'
         );
         // Verify the client and generate a code if successes
-        if($client = Oauthz_Model::factory('Token')->code($this->client_id, $token))
+        if($client = Model_Oauthz::factory('Token')->code($this->client_id, $token))
         {
             //
         }

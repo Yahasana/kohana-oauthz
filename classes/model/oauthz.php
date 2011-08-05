@@ -22,4 +22,4 @@ class Model_Oauthz extends Kohana_Model {
 		return new $class($db);
 	}
 
-} // END Oauthz_Model
+} // END Model_Oauthz

@@ -10,13 +10,13 @@
  * @see         Oauthz_Authorization
  * *
  */
-class Oauthz_Token_Basic implements Oauthz_Authorization {
+class Oauthz_Token_Basic extends Oauthz_Authorization {
 
-    public function authenticate($client_id, $client_secret)
+    public function authenticate($client)
     {
         if($data = Oauthz_Token_Basic::parse())
         {
-            $data = $data['client_id'] === $client_id AND $data['client_secret'] === $client_secret;
+            $data = $data['client_id'] === $client['client_id'] AND $data['client_secret'] === $client['client_secret'];
         }
 
         return $data;

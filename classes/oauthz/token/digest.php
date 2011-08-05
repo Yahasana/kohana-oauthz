@@ -10,14 +10,14 @@
  * @see         Oauthz_Authorization
  * *
  */
-class Oauthz_Token_Digest implements Oauthz_Authorization {
+class Oauthz_Token_Digest extends Oauthz_Authorization {
 
-    public function authenticate($client_id, $client_secret)
+    public function authenticate($client)
     {
-        if($data = Oauthz_Token_Digest::parse() AND $data['username'] === $client_id)
+        if($data = Oauthz_Token_Digest::parse() AND $data['username'] === $client['client_id'])
         {
             // generate the valid response
-            $realm = md5("$client_id:$data['realm']:$client_secret");
+            $realm = md5("$client['client_id']:$data['realm']:$client['client_secret']");
             $method = md5("$_SERVER['REQUEST_METHOD']:$data['uri']");
 
             $data = $data['response'] === md5("$realm:$data['nonce']:$data['nc']:$data['cnonce']:$data['qop']:$method");

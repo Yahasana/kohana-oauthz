@@ -108,7 +108,7 @@ class Oauthz_Extension_Client_Credentials extends Oauthz_Extension {
      */
     public function execute()
     {
-        if($client = Oauthz_Model::factory('Server')->lookup($this->client_id))
+        if($client = Model_Oauthz::factory('Server')->lookup($this->client_id))
         {
             // Verify the user information send by client
         }

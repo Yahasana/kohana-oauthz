@@ -184,7 +184,7 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
         $response = new Oauthz_Token;
         
         // Verify the client and the code, load the access token if successes
-        if($client = Oauthz_Model::factory('Token')->oauth_token($this->client_id, $this->code))
+        if($client = Model_Oauthz::factory('Token')->oauth_token($this->client_id, $this->code))
         {
             $response->token_type = $client['token_type'];
         }

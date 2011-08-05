@@ -75,20 +75,20 @@ abstract class Oauthz_Api extends Kohana_Controller {
                 }
 
                 // Process the access token from the request header or body
-                $authorization = new Oauthz_Authorization($this->_configs['token']);
+                $authorization = Oauthz_Authorization::initialize($this->_configs['token']);
 
                 $token = new Model_Oauthz_Token;
 
                 // Load the token information from database
-                if( ! $access_token = $token->access_token($authorization->client_id, $authorization->oauth_token))
+                if( ! $client = $token->access_token($authorization->client_id(), $authorization->token()))
                 {
                     throw new Oauthz_Exception_Token('unauthorized_client');
                 }
 
-                $access_token['timestamp'] += $this->_configs['durations']['oauth_token'];
+                $client['timestamp'] += $this->_configs['durations']['oauth_token'];
 
                 // Verify the access token
-                $authorization->authenticate($access_token);
+                $authorization->authenticate($client);
             }
             catch (Oauthz_Exception $e)
             {
@@ -114,8 +114,10 @@ abstract class Oauthz_Api extends Kohana_Controller {
     {
         $error['error'] = $this->error;
 
+        $config = Kohana::config('oauth-server.'.$this->_type);
+
         // Get the error description from config settings
-        $error += $this->_configs['access_errors'][$error['error']];
+        $error += $config['access_errors'][$error['error']];
 
         if($error['error'] === 'invalid_client')
         {

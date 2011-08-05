@@ -9,8 +9,47 @@
  * @link        http://oalite.com
  * *
  */
-interface Oauthz_Authorization {
+abstract class Oauthz_Authorization {
 
-    public function authenticate($client_id, $client_secret);
+    protected $_client_id;
+    
+    protected $_token;
+
+    public static function initialize(array $params)
+    {
+        switch(Request::$method)
+        {
+            case 'POST':
+                $token_type = Arr::get($_POST, 'token_type');
+                break;
+            case 'GET':
+                $token_type = Arr::get($_GET, 'token_type');
+                break;
+        }
+
+        if(isset($token_type))
+        {
+            $token_type = 'Oauthz_Token_'.$token_type;
+
+            if(class_exists($token_type))
+            {
+                return new $token_type($params);
+            }
+        }
+
+        throw new Oauthz_Exception_Token('invalid_token');
+    }
+    
+    public function client_id()
+    {
+        return $this->_client_id;
+    }
+    
+    public function token()
+    {
+        return $this->_token;
+    }
+
+    abstract public function authenticate($client);
 
 } // END Oauthz_Authorization

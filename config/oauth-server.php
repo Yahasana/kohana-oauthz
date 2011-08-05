@@ -18,18 +18,6 @@ return array(
         'http_accept'=> FALSE,
 
         /**
-         * Parameters should be required when access protected resource
-         * cryptographic token or bear token
-         */
-        'token'    => array(
-            'access_token'  => '',
-            'token_type'    => '',
-            'expires_in'    => '',
-            'refresh_token' => '',
-            'scope'         => '',
-        ),
-
-        /**
          *  TODO: Authentication methods for each flows
          */
         'methods'   => array(

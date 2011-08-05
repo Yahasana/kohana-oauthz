@@ -138,6 +138,7 @@ class Oauthz_Client extends Kohana_Controller {
                 CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=utf-8'),
                 CURLOPT_POSTFIELDS  => Oauthz::build_query($params)
             ));
+            die($token);
 
             $token = json_decode($token);
             if(isset($token->error))
@@ -151,8 +152,8 @@ class Oauthz_Client extends Kohana_Controller {
 
             return $token;
         }
-
-        $this->request->response = 'Unsupported protocal flow, please check your oauth-client.php config.';
+        
+        throw new Oauthz_Exception('Unsupported protocal flow, please check your oauth-client.php config.');
     }
 
     /* Accessing Protected Resources */

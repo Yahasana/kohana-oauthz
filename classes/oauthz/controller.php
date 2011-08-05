@@ -128,6 +128,7 @@ abstract class Oauthz_Controller extends Kohana_Controller {
         {
             $response = $e->getMessage();
         }
+
         $this->request->headers['Expires']          = 'Sat, 26 Jul 1997 05:00:00 GMT';
         $this->request->headers['Cache-Control']    = 'no-store, must-revalidate';
         $this->request->response = $response;

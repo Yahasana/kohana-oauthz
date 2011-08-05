@@ -87,7 +87,7 @@ class Oauthz_Extension_Refresh_Token extends Oauthz_Extension {
                 {
                     if(isset($_POST[$key]) AND $value = Oauthz::urldecode($_POST[$key]))
                     {
-                        $params[$key] = $value;
+                        $this->$key = $value;
                     }
                     else
                     {
@@ -96,17 +96,6 @@ class Oauthz_Extension_Refresh_Token extends Oauthz_Extension {
                 }
             }
         }
-
-        if(empty($params))
-        {
-            throw new Oauthz_Exception_Token('invalid_request');
-        }
-
-        $this->client_id = $params['client_id'];
-        $this->client_secret = $params['client_secret'];
-        $this->redirect_uri = $params['redirect_uri'];
-
-        $this->_params = $params;
     }
 
     /**
@@ -130,7 +119,7 @@ class Oauthz_Extension_Refresh_Token extends Oauthz_Extension {
 
         $response = new Oauthz_Token;
 
-        isset($this->_params['state']) AND $response->state = $this->state;
+        isset($this->state) AND $response->state = $this->state;
 
         if($client['client_secret'] !== sha1($this->client_secret)
             OR $client['redirect_uri'] !== $this->redirect_uri)
@@ -138,18 +127,16 @@ class Oauthz_Extension_Refresh_Token extends Oauthz_Extension {
             throw new Oauthz_Exception_Token('invalid_request');
         }
 
-        if(isset($this->_params['scope']) AND ! empty($client['scope']))
+        if(isset($this->scope) AND ! empty($client['scope']))
         {
-            if( ! in_array($this->_params['scope'], explode(' ', $client['scope'])))
+            if( ! in_array($this->scope, explode(' ', $client['scope'])))
                 throw new Oauthz_Exception_Token('invalid_scope');
         }
 
-        // Grants Authorization
-        $response->expires_in = 3600;
         // TODO configurable token type
-        $response->token_type = 'BEARER';
-        $response->access_token = $client['access_token'];
-        $response->refresh_token = $client['refresh_token'];
+        $response->token_type       = 'BEARER';
+        $response->access_token     = $client['access_token'];
+        $response->refresh_token    = $client['refresh_token'];
 
         return $response;
     }

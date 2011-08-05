@@ -141,7 +141,7 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
             }
         }
 
-        $response->expires_in = $this->expires_in;
+        $response->expires_in = $client['expires_in'];
 
         // Grants Authorization
         $response->code = $client['code'];

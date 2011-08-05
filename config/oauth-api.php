@@ -26,6 +26,17 @@ return array(
             'DELETE'    => TRUE
         ),
 
+        /**
+         * Parameters should be required when access protected resource
+         * cryptographic token or bear token
+         */
+        'token'    => array(
+            'access_token'  => '',
+            'token_type'    => '',
+            'refresh_token' => '',
+            'scope'         => '',
+        ),
+
         'max_requests'  => array(
             500,        // common client
             1000,       // first class client

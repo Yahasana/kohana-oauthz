@@ -99,7 +99,6 @@ class Oauthz_Extension_Assertion extends Oauthz_Extension {
 
         // Grants Authorization
         // The authorization server SHOULD NOT issue a refresh token.
-        $response->expires_in = 3000;
         $response->access_token = $client['access_token'];
 
         return $response;

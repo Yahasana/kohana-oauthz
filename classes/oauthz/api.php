@@ -64,12 +64,12 @@ abstract class Oauthz_Api extends Kohana_Controller {
         // Exclude actions do NOT need to protect
         if( ! in_array($request->action, $this->_exclude))
         {
-            $this->_configs = Kohana::config('oauth-server.'.$this->_type);
+            $this->_configs = Kohana::config('oauth-api.'.$this->_type);
 
             try
             {
                 // Verify the request method supported in the config settings
-                if(empty($this->_configs['request_methods'][Request::$method]))
+                if(empty($this->_configs['methods'][Request::$method]))
                 {
                     throw new Oauthz_Exception_Token('invalid_request');
                 }

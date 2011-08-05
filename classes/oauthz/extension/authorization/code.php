@@ -39,8 +39,6 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
      */
     public function __construct(array $args)
     {
-        $params = array();
-
         // Load oauth_token from form-encoded body
         isset($_SERVER['CONTENT_TYPE']) OR $_SERVER['CONTENT_TYPE'] = getenv('CONTENT_TYPE');
 
@@ -58,7 +56,7 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
                 {
                     if(isset($_POST[$key]) AND $value = Oauthz::urldecode($_POST[$key]))
                     {
-                        $params[$key] = $value;
+                        $this->$key = $value;
                     }
                     else
                     {
@@ -67,14 +65,6 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
                 }
             }
         }
-
-        $this->code = $params['code'];
-
-        $this->client_id = $params['client_id'];
-
-        unset($params['code'], $params['client_id']);
-
-        $this->_params = $params;
     }
 
     /**
@@ -101,21 +91,22 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
 
         $response = new Oauthz_Token;
 
-        if($client['redirect_uri'] !== $this->_params['redirect_uri'])
+        if($client['redirect_uri'] !== $this->redirect_uri)
         {
             $exception = new Oauthz_Exception_Token('invalid_request');
 
             throw $exception;
         }
 
-        if($client['client_secret'] !== sha1($this->_params['client_secret']))
+        if($client['client_secret'] !== sha1($this->client_secret))
         {
             throw new Oauthz_Exception_Token('invalid_client');
         }
 
-        $response->expires_in       = 3000;
+        $response->token_type       = $client['token_type'];
         $response->access_token     = $client['access_token'];
         $response->refresh_token    = $client['refresh_token'];
+        $response->expires_in       = (int) $client['expires_in'];
 
         return $response;
     }

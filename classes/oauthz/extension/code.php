@@ -97,8 +97,12 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
      */
     public function execute()
     {
+        $token = array(
+            'expires_in' => 3600, 
+            'token_type' => 'bearer'
+        );
         // Verify the client and generate a code if successes
-        if($client = Oauthz_Model::factory('Token')->code($this->client_id))
+        if($client = Oauthz_Model::factory('Token')->code($this->client_id, $token))
         {
             //
         }

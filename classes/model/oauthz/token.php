@@ -7,10 +7,10 @@
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
  * @link        http://oalite.com
- * @see         Oauthz_Model
+ * @see         Model_Oauthz
  * *
  */
-class Model_Oauthz_Token extends Oauthz_Model {
+class Model_Oauthz_Token extends Model_Oauthz {
 
     public function get($token_id)
     {
@@ -32,7 +32,7 @@ class Model_Oauthz_Token extends Oauthz_Model {
 	 *
      * @return	array     token
      */
-    public function code($client_id, $expires_in = 3600)
+    public function code($client_id, $token)
     {
         if($client_id AND $client = DB::select('client_secret','server_id','redirect_uri','user_id')
             ->from('t_oauth_servers')
@@ -45,8 +45,28 @@ class Model_Oauthz_Token extends Oauthz_Model {
             $access_token   = sha1(md5($_SERVER['REQUEST_TIME']));
             $refresh_token  = sha1(sha1(mt_rand()));
 
-            DB::insert('t_oauth_tokens', array('client_id','code','user_id','access_token','timestamp','expires_in','refresh_token'))
-                ->values(array($client_id, $client['code'], $client['user_id'], $access_token, $_SERVER['REQUEST_TIME'], $expires_in, $refresh_token))
+            DB::insert('t_oauth_tokens', array(
+                    'client_id',
+                    'code',
+                    'user_id',
+                    'access_token',
+                    'timestamp',
+                    'refresh_token',
+                    'expires_in',
+                    'token_type', 
+                    'option'
+                ))
+                ->values(array(
+                    $client_id, 
+                    $client['code'], 
+                    $client['user_id'], 
+                    $access_token, 
+                    $_SERVER['REQUEST_TIME'], 
+                    $refresh_token, 
+                    $token['expires_in'], 
+                    $token['token_type'], 
+                    isset($token['option']) ? $token['option'] : NULL
+                ))
                 ->execute($this->_db);
 
             return $client;

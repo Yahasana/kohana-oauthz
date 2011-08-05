@@ -7,13 +7,14 @@
  * @copyright   (c) 2011 OALite
  * @license     ISC License (ISCL)
  * @link        http://oalite.com
+ * @see         Oauthz_Authorization
  * *
  */
-abstract class Oauthz_Authorization_Basic extends Oauthz_Authorization {
+class Oauthz_Token_Basic implements Oauthz_Authorization {
 
     public function authenticate($client_id, $client_secret)
     {
-        if($data = Oauthz_Authorization_Basic::parse())
+        if($data = Oauthz_Token_Basic::parse())
         {
             $data = $data['client_id'] === $client_id AND $data['client_secret'] === $client_secret;
         }
@@ -40,4 +41,4 @@ abstract class Oauthz_Authorization_Basic extends Oauthz_Authorization {
         return empty($data) ? FALSE : $data;
     }
 
-} // END Oauthz_Authorization_Basic
+} // END Oauthz_Token_Basic

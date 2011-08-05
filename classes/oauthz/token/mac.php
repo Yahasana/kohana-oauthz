@@ -7,9 +7,10 @@
  * @copyright   (c) 2011 OALite
  * @license     ISC License (ISCL)
  * @link        http://oalite.com
+ * @see         Oauthz_Authorization
  * *
  */
-abstract class Oauthz_Authorization_Mac extends Oauthz_Authorization {
+abstract class Oauthz_Token_Mac extends Oauthz_Authorization {
 
     public function authenticate($client_id, $client_secret)
     {
@@ -55,4 +56,4 @@ abstract class Oauthz_Authorization_Mac extends Oauthz_Authorization {
         // TODO
     }
 
-} // END Oauthz_Authorization_Mac
+} // END Oauthz_Token_Mac

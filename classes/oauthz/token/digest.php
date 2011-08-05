@@ -7,13 +7,14 @@
  * @copyright   (c) 2011 OALite
  * @license     ISC License (ISCL)
  * @link        http://oalite.com
+ * @see         Oauthz_Authorization
  * *
  */
-abstract class Oauthz_Authorization_Digest extends Oauthz_Authorization {
+class Oauthz_Token_Digest implements Oauthz_Authorization {
 
     public function authenticate($client_id, $client_secret)
     {
-        if($data = Oauthz_Authorization_Digest::parse() AND $data['username'] === $client_id)
+        if($data = Oauthz_Token_Digest::parse() AND $data['username'] === $client_id)
         {
             // generate the valid response
             $realm = md5("$client_id:$data['realm']:$client_secret");
@@ -65,4 +66,4 @@ abstract class Oauthz_Authorization_Digest extends Oauthz_Authorization {
         return $info;
     }
 
-} // END Oauthz_Authorization_Digest
+} // END Oauthz_Token_Digest

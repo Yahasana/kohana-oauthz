@@ -10,7 +10,7 @@
  * @see         Kohana_Model
  * *
  */
-class Oauthz_Model extends Kohana_Model {
+class Model_Oauthz extends Kohana_Model {
 
     protected $_db = 'default';
 

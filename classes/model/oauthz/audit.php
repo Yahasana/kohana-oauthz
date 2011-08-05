@@ -7,10 +7,10 @@
  * @copyright   (c) 2010 OALite
  * @license     ISC License (ISCL)
  * @link        http://oalite.com
- * @see         Oauthz_Model
+ * @see         Model_Oauthz
  * *
  */
-class Model_Oauthz_Audit extends Oauthz_Model {
+class Model_Oauthz_Audit extends Model_Oauthz {
 
     public function get($access_token)
     {

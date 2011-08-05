@@ -7,13 +7,14 @@
  * @copyright   (c) 2011 OALite
  * @license     ISC License (ISCL)
  * @link        http://oalite.com
+ * @see         Oauthz_Authorization
  * *
  */
-abstract class Oauthz_Authorization_Bearer extends Oauthz_Authorization {
+class Oauthz_Token_Bearer implements Oauthz_Authorization {
 
     public function authenticate($client_id, $client_secret)
     {
-        if($data = Oauthz_Authorization_Bearer::parse())
+        if($data = Oauthz_Token_Bearer::parse())
         {
             // TODO
         }
@@ -34,4 +35,4 @@ abstract class Oauthz_Authorization_Bearer extends Oauthz_Authorization {
         return empty($data) ? FALSE : $data;
     }
 
-} // END Oauthz_Authorization_Bearer
+} // END Oauthz_Token_Bearer

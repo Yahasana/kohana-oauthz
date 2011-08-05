@@ -9,15 +9,8 @@
  * @link        http://oalite.com
  * *
  */
-abstract class Oauthz_Authorization {
+interface Oauthz_Authorization {
 
-    public function __construct()
-    {
-        //
-    }
-
-    abstract public function parse($digest);
-
-    abstract public function authenticate($client_id, $client_secret);
+    public function authenticate($client_id, $client_secret);
 
 } // END Oauthz_Authorization

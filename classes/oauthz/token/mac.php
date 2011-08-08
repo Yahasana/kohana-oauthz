@@ -10,7 +10,7 @@
  * @see         Oauthz_Authorization
  * *
  */
-abstract class Oauthz_Token_Mac extends Oauthz_Authorization {
+class Oauthz_Token_Mac extends Oauthz_Authorization {
 
     public function authenticate($client)
     {

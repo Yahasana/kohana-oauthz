@@ -16,7 +16,7 @@
 
     class Controller_Oauth extends Oauthz_Server {}
 
- See [more](/Yahasana/kohana-Oauthz/blob/master/guide/server.md)
+ See [more](/Yahasana/kohana-Oauthy/blob/master/guide/server.md)
 
 ### Develop grant type or response type handler extensions ###
 
@@ -32,13 +32,13 @@
 
   then drop this file into the right place
 
- 2) Complex one, e.g. [assersion](/Yahasana/kohana-Oauthz/blob/master/classes/extension/assersion.php)
+ 2) Complex one, e.g. [assersion](/Yahasana/kohana-Oauthy/blob/master/classes/extension/assersion.php)
 
 ### Develop web service API protected by OAuth2 ###
 
     class Controller_Api extends Oauthz_Api {}
 
- See [more](/Yahasana/kohana-Oauthz/blob/master/guide/api.md)
+ See [more](/Yahasana/kohana-Oauthy/blob/master/guide/api.md)
 
 ### Overlay standard grant type or response type handler ###
 
@@ -61,11 +61,11 @@
 
     class Controller_Client extends Oauthz_Client {}
 
- See [more](/Yahasana/kohana-Oauthz/blob/master/guide/client.md)
+ See [more](/Yahasana/kohana-Oauthy/blob/master/guide/client.md)
 
 ### Demo explaination ###
 
-[Demo guide](/Yahasana/kohana-Oauthz/blob/master/guide/demo.md)
+[Demo guide](/Yahasana/kohana-Oauthy/blob/master/guide/demo.md)
 
 ## ISC License (ISCL) ##
 

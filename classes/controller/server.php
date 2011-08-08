@@ -24,7 +24,7 @@ class Controller_Server extends Oauthz_Server {
 
     public function action_index()
     {
-        $server = new Model_Oauthz_Server;
+        $server = new Model_Oauthz_Client;
 
         $data = $server->lists(array('user_id' => $_SESSION['user']['uid']));
 

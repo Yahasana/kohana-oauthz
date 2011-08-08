@@ -61,6 +61,8 @@ class Oauthz_Exception extends Exception {
             self::$errors[self::$type]['access_errors'] = $config['access_errors'];
         }
 
+        $this->error = $message;
+
 		// Pass the message to the parent
 		parent::__construct($message, $code);
 	}

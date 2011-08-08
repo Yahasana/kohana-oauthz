@@ -15,7 +15,7 @@ class Model_Oauthz_Client extends Model_Oauthz {
     public function get($server_id, $user_id)
     {
         return DB::select('server_id','client_id','client_secret','redirect_uri','scope','secret_type','ssh_key','app_name','app_desc','app_profile','app_purpose','user_id','user_level','enabled','created','modified')
-                ->from('t_oauth_servers')
+                ->from('t_oauth_clients')
                 ->where('server_id', '=', $server_id)
                 ->where('user_id','=', $user_id)
                 ->execute($this->_db)
@@ -25,7 +25,7 @@ class Model_Oauthz_Client extends Model_Oauthz {
     public function lookup($client_id)
     {
         return DB::select('*')
-            ->from('t_oauth_servers')
+            ->from('t_oauth_clients')
             ->where('client_id', '=', $client_id)
             ->execute($this->_db)
             ->current();
@@ -101,7 +101,7 @@ class Model_Oauthz_Client extends Model_Oauthz {
             $valid['created']       = $_SERVER['REQUEST_TIME'];
             $valid['client_secret'] = sha1($params['client_secret']);
 
-            $query = DB::insert('t_oauth_servers', array_keys($valid))
+            $query = DB::insert('t_oauth_clients', array_keys($valid))
                 ->values(array_values($valid))
                 ->execute($this->_db);
 
@@ -181,7 +181,7 @@ class Model_Oauthz_Client extends Model_Oauthz {
             }
 
             $valid['modified']      = $_SERVER['REQUEST_TIME'];
-            $valid['affected_rows'] = DB::update('t_oauth_servers')
+            $valid['affected_rows'] = DB::update('t_oauth_clients')
                 ->set($valid)
                 ->where('server_id', '=', $server_id)
                 ->where('user_id', '=', $params['user_id'])
@@ -197,7 +197,7 @@ class Model_Oauthz_Client extends Model_Oauthz {
     public function delete($server_id, $user_id)
     {
         return ctype_digit($server_id)
-            ? DB::delete('t_oauth_servers')
+            ? DB::delete('t_oauth_clients')
                 ->where('server_id', '=', $server_id)
                 ->where('user_id','=', $user_id)
                 ->execute($this->_db)
@@ -217,7 +217,7 @@ class Model_Oauthz_Client extends Model_Oauthz {
     {
         $pagination instanceOf Pagination OR $pagination = new Pagination;
 
-        $sql = 'FROM `t_oauth_servers` ';
+        $sql = 'FROM `t_oauth_clients` ';
 
         // Customize where from params
         $sql .= 'WHERE user_id='.$this->_db->quote($params['user_id']);
@@ -272,7 +272,7 @@ class Model_Oauthz_Client extends Model_Oauthz {
     {
         // Check if the username already exists in the database
         return DB::select(array(DB::expr('COUNT(1)'), 'total'))
-            ->from('t_oauth_servers')
+            ->from('t_oauth_clients')
             ->where('redirect_uri', '=', $redirect_uri)
             ->where('user_id', '=', $user_id)
             ->execute($this->_db)

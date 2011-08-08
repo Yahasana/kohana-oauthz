@@ -65,18 +65,12 @@ abstract class Oauthz_Controller extends Kohana_Controller {
             // This response type is unsupported
             if( ! isset($response))
             {
-                $exception = new Oauthz_Exception_Authorize('unsupported_response_type');
-
-                $exception->state = Arr::get($params, 'state');
-
-                $exception->redirect_uri = Arr::get($params, 'redirect_uri');
-
-                throw $exception;
+                $response = '/oauth/error/unsupported_response_type?state='.Arr::get($params, 'state');
             }
         }
         catch (Oauthz_Exception $e)
         {
-            $response = $e->getMessage();
+            $response = (string) $e;
         }
 
         $this->request->status = 302; #HTTP/1.1 302 Found

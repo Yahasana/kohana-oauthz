@@ -73,7 +73,20 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
                     {
                         if(empty($params[$key]))
                         {
-                            throw new Oauthz_Exception_Token('invalid_request');
+                            $exception = new Oauthz_Exception_Authorize('invalid_request');
+
+                            $exception->redirect_uri = '/oauth/error/invalid_request';
+
+                            if(isset($this->state))
+                            {
+                                $exception->state = $this->state;
+                            }
+                            elseif (isset($params['state']))
+                            {
+                                $exception->state = $value;
+                            }
+
+                            throw $exception;
                         }
                         else
                         {
@@ -122,7 +135,20 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
                         }
                         else
                         {
-                            throw new Oauthz_Exception_Token('invalid_request');
+                            $exception = new Oauthz_Exception_Authorize('invalid_request');
+
+                            $exception->redirect_uri = '/oauth/error/invalid_request';
+
+                            if(isset($this->state))
+                            {
+                                $exception->state = $this->state;
+                            }
+                            elseif (isset($_POST['state']) AND $value = Oauthz::urldecode($_POST['state']))
+                            {
+                                $exception->state = $value;
+                            }
+
+                            throw $exception;
                         }
                     }
                 }
@@ -154,7 +180,20 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
                         }
                         else
                         {
-                            throw new Oauthz_Exception_Token('invalid_request');
+                            $exception = new Oauthz_Exception_Authorize('invalid_request');
+
+                            $exception->redirect_uri = '/oauth/error/invalid_request';
+
+                            if(isset($this->state))
+                            {
+                                $exception->state = $this->state;
+                            }
+                            elseif (isset($_GET['state']) AND $value = Oauthz::urldecode($_GET['state']))
+                            {
+                                $exception->state = $value;
+                            }
+
+                            throw $exception;
                         }
                     }
                 }
@@ -182,7 +221,7 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
     public function execute()
     {
         $response = new Oauthz_Token;
-        
+
         // Verify the client and the code, load the access token if successes
         if($client = Model_Oauthz::factory('Token')->oauth_token($this->client_id, $this->code))
         {
@@ -249,10 +288,10 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
             if( ! in_array($this->scope, explode(' ', $client['scope'])))
                 throw new Oauthz_Exception_Token('invalid_scope');
         }
-        
+
         //switch($response->token_type)
         //{
-            
+
         //}
 
         return $response;

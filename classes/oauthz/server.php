@@ -22,7 +22,7 @@ class Oauthz_Server extends Kohana_Controller {
     public function action_register($client_id = NULL)
     {
         $data = array();
-        $server = new Model_Oauthz_Server;
+        $server = new Model_Oauthz_Client;
         if($client_id)
         {
             $data = (array) $server->get($client_id, $_SESSION['user']['uid']);
@@ -51,7 +51,7 @@ class Oauthz_Server extends Kohana_Controller {
 
     public function action_client()
     {
-        $server = new Model_Oauthz_Server;
+        $server = new Model_Oauthz_Client;
 
         $data = $server->lists();
 

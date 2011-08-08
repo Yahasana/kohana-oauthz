@@ -70,16 +70,16 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
                 {
                     $exception = new Oauthz_Exception_Authorize('invalid_request');
 
-                    if(isset($this->redirect_uri))
-                    {
-                        $exception->redirect_uri = $this->redirect_uri;
-                    }
-                    elseif (isset($_GET['redirect_uri']) AND $value = Oauthz::urldecode($_GET['redirect_uri']))
-                    {
-                        $exception->redirect_uri = $value;
-                    }
+                    $exception->redirect_uri = '/oauth/error/invalid_request';
 
-                    $exception->state = $this->state;
+                    if(isset($this->state))
+                    {
+                        $exception->state = $this->state;
+                    }
+                    elseif (isset($_GET['state']) AND $value = Oauthz::urldecode($_GET['state']))
+                    {
+                        $exception->state = $value;
+                    }
 
                     throw $exception;
                 }
@@ -93,12 +93,12 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
      * @access	public
      * @param	array	$client
      * @return	Oauthz_Token
-     * @throw   Oauthz_Exception_Authorize    Error Codes: invalid_scope, redirect_uri_mismatch
+     * @throw   Oauthz_Exception_Authorize    Error Codes: invalid_scope, unauthorized_client
      */
     public function execute()
     {
         $token = array(
-            'expires_in' => 3600, 
+            'expires_in' => 3600,
             'token_type' => 'bearer'
         );
         // Verify the client and generate a code if successes
@@ -109,9 +109,9 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
         else
         {
             // Invalid client_id
-            $exception = new Oauthz_Exception_Authorize('invalid_client');
+            $exception = new Oauthz_Exception_Authorize('unauthorized_client');
 
-            $exception->redirect_uri = $this->redirect_uri;
+            $exception->redirect_uri = '/oauth/error/unauthorized_client';
 
             $exception->state = $this->state;
 
@@ -122,26 +122,26 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
 
         if($client['redirect_uri'] !== $this->redirect_uri)
         {
-            $e = new Oauthz_Exception_Authorize('redirect_uri_mismatch');
+            $exception = new Oauthz_Exception_Authorize('unauthorized_client');
 
-            $e->redirect_uri = $client['redirect_uri'];
+            $exception->redirect_uri = '/oauth/error/unauthorized_client';
 
-            $e->state = $this->state;
+            $exception->state = $this->state;
 
-            throw $e;
+            throw $exception;
         }
 
         if( ! empty($this->scope) AND ! empty($client['scope']))
         {
             if( ! in_array($this->scope, explode(' ', $client['scope'])))
             {
-                $e = new Oauthz_Exception_Authorize('invalid_scope');
+                $exception = new Oauthz_Exception_Authorize('invalid_scope');
 
-                $e->redirect_uri = $this->redirect_uri;
+                $exception->redirect_uri = $this->redirect_uri;
 
-                $e->state = $this->state;
+                $exception->state = $this->state;
 
-                throw $e;
+                throw $exception;
             }
         }
 

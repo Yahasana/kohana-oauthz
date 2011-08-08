@@ -28,14 +28,14 @@ class Oauthz_Exception_Authorize extends Oauthz_Exception {
 
         $params['error'] = $this->error;
 
-		// Set the error uri from config settings if it's not set. e.g. redirect_uri mismatch
+        // Set the error uri from config settings if it's not set. e.g. redirect_uri mismatch
         $params['error_uri'] = empty($this->error_uri) ? $desc['error_uri'] : $this->error_uri;
 
         $params['error_description'] = empty($this->error_description) ? $desc['error_description'] : $this->error_description;
 
         empty($this->state) OR $params['state'] = $this->state;
 
-		return $this->redirect_uri.'?'.http_build_query($params);
+        return $this->redirect_uri.'?'.http_build_query($params);
 	}
 
 } // END Oauthz_Exception_Authorize

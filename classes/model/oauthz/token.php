@@ -35,7 +35,7 @@ class Model_Oauthz_Token extends Model_Oauthz {
     public function code($client_id, $token)
     {
         if($client_id AND $client = DB::select('client_secret','server_id','redirect_uri','user_id')
-            ->from('t_oauth_servers')
+            ->from('t_oauth_clients')
             ->where('client_id' , '=', $client_id)
             ->where('enabled' , '=', 1)
             ->execute($this->_db)
@@ -53,21 +53,23 @@ class Model_Oauthz_Token extends Model_Oauthz {
                     'timestamp',
                     'refresh_token',
                     'expires_in',
-                    'token_type', 
+                    'token_type',
                     'option'
                 ))
                 ->values(array(
-                    $client_id, 
-                    $client['code'], 
-                    $client['user_id'], 
-                    $access_token, 
-                    $_SERVER['REQUEST_TIME'], 
-                    $refresh_token, 
-                    $token['expires_in'], 
-                    $token['token_type'], 
+                    $client_id,
+                    $client['code'],
+                    $client['user_id'],
+                    $access_token,
+                    $_SERVER['REQUEST_TIME'],
+                    $refresh_token,
+                    $token['expires_in'],
+                    $token['token_type'],
                     isset($token['option']) ? $token['option'] : NULL
                 ))
                 ->execute($this->_db);
+
+            $client['expires_in']   = $token['expires_in'];
 
             return $client;
         }
@@ -76,9 +78,9 @@ class Model_Oauthz_Token extends Model_Oauthz {
     }
 
     public function oauth_token($client_id, $code, $expires_in = 3600)
-    {        
+    {
         if($client = DB::select('server_id','client_secret','redirect_uri','user_id')
-            ->from('t_oauth_servers')
+            ->from('t_oauth_clients')
             ->where('client_id' , '=', $client_id)
             ->execute($this->_db)
             ->current())

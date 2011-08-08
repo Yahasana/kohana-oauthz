@@ -23,14 +23,6 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
     public $oauth_token;
 
     /**
-     * Parameters parsed from Form-Encoded Body
-     *
-     * @access	protected
-     * @var		string	$_params
-     */
-    protected $_params;
-
-    /**
      * Load request parameters from Authorization header, URI-Query parameters, Form-Encoded Body
      *
      * @access	public
@@ -74,8 +66,6 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
                         if(empty($params[$key]))
                         {
                             $exception = new Oauthz_Exception_Authorize('invalid_request');
-
-                            $exception->redirect_uri = '/oauth/error/invalid_request';
 
                             if(isset($this->state))
                             {
@@ -137,8 +127,6 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
                         {
                             $exception = new Oauthz_Exception_Authorize('invalid_request');
 
-                            $exception->redirect_uri = '/oauth/error/invalid_request';
-
                             if(isset($this->state))
                             {
                                 $exception->state = $this->state;
@@ -181,8 +169,6 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
                         else
                         {
                             $exception = new Oauthz_Exception_Authorize('invalid_request');
-
-                            $exception->redirect_uri = '/oauth/error/invalid_request';
 
                             if(isset($this->state))
                             {

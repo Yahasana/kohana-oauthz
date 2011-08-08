@@ -63,6 +63,8 @@ class Oauthz_Exception extends Exception {
 
         $this->error = $message;
 
+        $this->redirect_uri = '/oauth/error/'.$message;
+
 		// Pass the message to the parent
 		parent::__construct($message, $code);
 	}

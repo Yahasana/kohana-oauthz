@@ -54,7 +54,7 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
         if(isset($_GET['state']) AND $state = Oauthz::urldecode($_GET['state']))
         {
             $this->state = $state;
-            unset($_GET['state']);
+            unset($_GET['state'], $args['state']);
         }
 
         // Check all required parameters should not be empty
@@ -70,15 +70,9 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
                 {
                     $exception = new Oauthz_Exception_Authorize('invalid_request');
 
-                    $exception->redirect_uri = '/oauth/error/invalid_request';
-
                     if(isset($this->state))
                     {
                         $exception->state = $this->state;
-                    }
-                    elseif (isset($_GET['state']) AND $value = Oauthz::urldecode($_GET['state']))
-                    {
-                        $exception->state = $value;
                     }
 
                     throw $exception;
@@ -104,14 +98,12 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
         // Verify the client and generate a code if successes
         if($client = Model_Oauthz::factory('Token')->code($this->client_id, $token))
         {
-            //
+            // audit
         }
         else
         {
             // Invalid client_id
             $exception = new Oauthz_Exception_Authorize('unauthorized_client');
-
-            $exception->redirect_uri = '/oauth/error/unauthorized_client';
 
             $exception->state = $this->state;
 
@@ -123,8 +115,6 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
         if($client['redirect_uri'] !== $this->redirect_uri)
         {
             $exception = new Oauthz_Exception_Authorize('unauthorized_client');
-
-            $exception->redirect_uri = '/oauth/error/unauthorized_client';
 
             $exception->state = $this->state;
 

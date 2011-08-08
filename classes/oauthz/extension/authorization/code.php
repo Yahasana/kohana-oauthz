@@ -39,31 +39,42 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
      */
     public function __construct(array $args)
     {
-        // Load oauth_token from form-encoded body
-        isset($_SERVER['CONTENT_TYPE']) OR $_SERVER['CONTENT_TYPE'] = getenv('CONTENT_TYPE');
-
-        // oauth_token already send in authorization header or the encrypt Content-Type is not single-part
-        if(stripos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') === FALSE)
+        // Parse the "state" paramter
+        if(isset($_POST['state']) AND $state = Oauthz::urldecode($_POST['state']))
         {
-            throw new Oauthz_Exception_Token('invalid_request');
+            $this->state = $state;
+            unset($_POST['state'], $args['state']);
         }
-        else
+
+        // Check all required parameters should NOT be empty
+        foreach($args as $key => $val)
         {
-            // Check all required parameters should NOT be empty
-            foreach($args as $key => $val)
+            if($val === TRUE)
             {
-                if($val === TRUE)
+                if(isset($_POST[$key]) AND $value = Oauthz::urldecode($_POST[$key]))
                 {
-                    if(isset($_POST[$key]) AND $value = Oauthz::urldecode($_POST[$key]))
-                    {
-                        $this->$key = $value;
-                    }
-                    else
-                    {
-                        throw new Oauthz_Exception_Token('invalid_request');
-                    }
+                    $this->$key = $value;
+                }
+                else
+                {
+                    $invalid_request = TRUE;
+                    break;
                 }
             }
+        }
+        
+        if(isset($invalid_request))
+        {
+            $exception = new Oauthz_Exception_Authorize('invalid_request');
+
+            $exception->redirect_uri = '/oauth/error/invalid_request';
+
+            if(isset($this->state))
+            {
+                $exception->state = $this->state;
+            }
+
+            throw $exception;
         }
     }
 
@@ -86,27 +97,66 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
         }
         else
         {
-            throw new Oauthz_Exception_Token('invalid_client');
-        }
+            $exception = new Oauthz_Exception_Token('invalid_client');
 
-        $response = new Oauthz_Token;
+            $exception->redirect_uri = '/oauth/error/invalid_client';
 
-        if($client['redirect_uri'] !== $this->redirect_uri)
-        {
-            $exception = new Oauthz_Exception_Token('invalid_request');
+            $exception->state = $this->state;
 
             throw $exception;
         }
 
+        $response = new Oauthz_Token;
+
         if($client['client_secret'] !== sha1($this->client_secret))
         {
-            throw new Oauthz_Exception_Token('invalid_client');
+            $exception = new Oauthz_Exception_Token('unauthorized_client');
+
+            $exception->redirect_uri = '/oauth/error/unauthorized_client';
+
+            $exception->state = $this->state;
+
+            throw $exception;
+        }
+
+        if($client['redirect_uri'] !== $this->redirect_uri)
+        {
+            $exception = new Oauthz_Exception_Token('unauthorized_client');
+
+            $exception->redirect_uri = '/oauth/error/unauthorized_client';
+
+            $exception->state = $this->state;
+
+            throw $exception;
+        }
+
+        if( ! empty($this->scope) AND ! empty($client['scope']))
+        {
+            if( ! in_array($this->scope, explode(' ', $client['scope'])))
+            {
+                $exception = new Oauthz_Exception_Authorize('invalid_scope');
+
+                $exception->redirect_uri = $this->redirect_uri;
+
+                $exception->state = $this->state;
+
+                throw $exception;
+            }
         }
 
         $response->token_type       = $client['token_type'];
         $response->access_token     = $client['access_token'];
         $response->refresh_token    = $client['refresh_token'];
         $response->expires_in       = (int) $client['expires_in'];
+        
+        // merge other token properties, e.g. {"mac_key":"adijq39jdlaska9asud","mac_algorithm":"hmac-sha-256"}
+        if($client['option'] AND $option = json_decode($client['option'], TRUE))
+        {
+            foreach($option as $key => $val)
+            {
+                $response->$key = $val;
+            }
+        }
 
         return $response;
     }

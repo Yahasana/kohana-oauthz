@@ -121,7 +121,7 @@ class Oauthz_Extension_Password extends Oauthz_Extension {
      */
     public function execute()
     {
-        if($client = Model_Oauthz::factory('Server')->lookup($this->client_id))
+        if($client = Model_Oauthz::factory('Client')->lookup($this->client_id))
         {
             //
         }

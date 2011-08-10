@@ -21,6 +21,30 @@ abstract class Oauthz_Api extends Kohana_Controller {
     protected $_type = 'default';
 
     /**
+     * Data store handler
+     *
+     * @access  protected
+     * @var     string    $oauth
+     */
+    protected $oauth;
+
+    /**
+     * Request token for OAuth
+     *
+     * @access  protected
+     * @var     mix    $token
+     */
+    protected $token;
+
+    /**
+     * Server settings for OAuth
+     *
+     * @access  protected
+     * @var     mix    $_configs
+     */
+    protected $_configs;
+
+    /**
      * methods exclude from OAuth protection
      *
      * @access  protected
@@ -40,18 +64,18 @@ abstract class Oauthz_Api extends Kohana_Controller {
         // Exclude actions do NOT need to protect
         if( ! in_array($request->action, $this->_exclude))
         {
-            $config = Kohana::config('oauth-api.'.$this->_type);
+            $this->_configs = Kohana::config('oauth-api.'.$this->_type);
 
             try
             {
                 // Verify the request method supported in the config settings
-                if(empty($config['methods'][Request::$method]))
+                if(empty($this->_configs['methods'][Request::$method]))
                 {
                     throw new Oauthz_Exception_Token('invalid_request');
                 }
 
                 // Process the access token from the request header or body
-                $authorization = Oauthz_Authorization::initialize($config['token']);
+                $authorization = Oauthz_Authorization::initialize($this->_configs['token']);
 
                 $token = new Model_Oauthz_Token;
 
@@ -61,7 +85,7 @@ abstract class Oauthz_Api extends Kohana_Controller {
                     throw new Oauthz_Exception_Token('unauthorized_client');
                 }
 
-                $client['timestamp'] += $config['durations']['oauth_token'];
+                $client['timestamp'] += $this->_configs['durations']['oauth_token'];
 
                 // Verify the access token
                 $authorization->authenticate($client);

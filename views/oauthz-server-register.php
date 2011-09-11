@@ -11,7 +11,7 @@
 <label for="confirm">Password confirm *:</label><input type="text" name="confirm" id="confirm" value="" /><?php
     if(isset($errors['confirm'])) echo $errors['confirm']; ?><br />
 
-<label for="redirect_uri">Redirect URI *:</label><input type="text" name="redirect_uri" id="redirect_uri" value="<?php if(isset($redirect_uri)) echo $redirect_uri; ?>" /><?php
+<label for="redirect_uri">Redirect URI *:</label><input type="text" name="redirect_uri" id="redirect_uri" value="<?php if(isset($redirect_uri)) echo $redirect_uri; ?>" /><sup>&#9786;&#9786;</sup><?php
     if(isset($errors['redirect_uri'])) echo $errors['redirect_uri']; ?><br />
 
 <label for="appname">Application Name *:</label><input id="appname" name="app_name" value="<?php if(isset($app_name)) echo $app_name; ?>" type="text">
@@ -45,4 +45,5 @@
 <label for="Submit"></label><input type="submit" value="Submit" />
 </form>
 
-Note: <i>&#9786;, This should be generated from system and updated regularly in some days</i>
+Note: <p><i>&#9786;, This should be generated from system and updated regularly in some days</i>
+<br /><i>&#9786;&#9786;, MAY include an application/x-www-form-urlencoded formatted query component, but fragment component is not allowed</i></p>

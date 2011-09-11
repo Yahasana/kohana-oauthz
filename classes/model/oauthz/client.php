@@ -82,7 +82,12 @@ class Model_Oauthz_Client extends Model_Oauthz {
         foreach($rules as $field => $rule)
             foreach($rule as $r => $p)
                 $valid->rule($field, $r, $p);
-
+                
+        // TODO: redirect_uri MUST NOT include a fragment component.
+        // The client MUST NOT include any untrusted third-party scripts in the redirection endpoint
+        // response (e.g. third-party analytics, social plug-ins, ad networks) 
+        // The client SHOULD NOT include any third-party scripts in the redirection endpoint response.
+        
         if($valid->check())
         {
             $valid = $valid->as_array();

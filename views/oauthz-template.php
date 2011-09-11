@@ -125,7 +125,7 @@ h1{text-align:right}
   </nav>
   <address id="about" class="vcard body">
     <span class="primary">
-        <a href="#" class="fn url">OALite Inc.</a>
+        <a href="http://oalite.com" class="fn url">OALite Inc.</a>
     </span><!-- /.primary -->
     <span class="bio">Open Application Lite is a web platform that offers online software serivce to personal and medium and small-sized enterprises.</span>
   </address><!-- /#about -->

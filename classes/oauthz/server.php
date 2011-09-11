@@ -22,16 +22,16 @@ class Oauthz_Server extends Kohana_Controller {
     public function action_register($client_id = NULL)
     {
         $data = array();
-        $server = new Model_Oauthz_Client;
+        $client = new Model_Oauthz_Client;
         if($client_id)
         {
-            $data = (array) $server->get($client_id, $_SESSION['user']['uid']);
+            $data = (array) $client->get($client_id, $_SESSION['user']['uid']);
         }
         elseif(isset($_POST['__v_state__']))
         {
             $_POST['user_id'] = $_SESSION['user']['uid'];
 
-            $valid = empty($_POST['server_id']) ? $server->append($_POST) : $server->update($_POST['server_id'], $_POST);
+            $valid = empty($_POST['server_id']) ? $client->append($_POST) : $client->update($_POST['server_id'], $_POST);
 
             if($valid instanceOf Validate)
             {
@@ -51,9 +51,9 @@ class Oauthz_Server extends Kohana_Controller {
 
     public function action_client()
     {
-        $server = new Model_Oauthz_Client;
+        $client = new Model_Oauthz_Client;
 
-        $data = $server->lists();
+        $data = $client->lists();
 
         $this->template->content = new View('oauthz-server-client', $data);
 

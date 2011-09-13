@@ -67,7 +67,9 @@
 
 ### Demo explaination ###
 
-[Demo guide](/Yahasana/kohana-Oauthy/blob/master/guide/demo.md)
+[Demo at oalite.com](http://oalite.com/oauth)
+
+[User guide](/Yahasana/kohana-Oauthy/blob/master/guide/demo.md)
 
 ## ISC License (ISCL) ##
 

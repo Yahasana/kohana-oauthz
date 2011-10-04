@@ -31,7 +31,7 @@ abstract class Oauthz_Controller extends Kohana_Controller {
 
     public function before()
     {
-        $this->_configs = Kohana::config('oauth-server.'.$this->_type);
+        $this->_configs = Kohana::$config->load('oauth-server.'.$this->_type);
         // TODO refactor this stupid code
         Oauthz_Exception::$errors[$this->_type]['code_errors']      = $this->_configs['code_errors'];
         Oauthz_Exception::$errors[$this->_type]['token_errors']     = $this->_configs['token_errors'];

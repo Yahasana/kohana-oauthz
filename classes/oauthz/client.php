@@ -38,7 +38,7 @@ class Oauthz_Client extends Kohana_Controller {
 
     public function before()
     {
-        $this->_configs  = Kohana::config('oauth-client.'.$this->_type);
+        $this->_configs  = Kohana::$config->load('oauth-client.'.$this->_type);
     }
 
     /* Obtain an an Authorization Code, ONLY for Authorization Code flow */

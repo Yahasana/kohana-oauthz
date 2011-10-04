@@ -40,7 +40,7 @@ abstract class Oauthz_Api extends Kohana_Controller {
         // Exclude actions do NOT need to protect
         if( ! in_array($request->action, $this->_exclude))
         {
-            $config = Kohana::config('oauth-api.'.$this->_type);
+            $config = Kohana::$config->load('oauth-api.'.$this->_type);
 
             try
             {
@@ -90,7 +90,7 @@ abstract class Oauthz_Api extends Kohana_Controller {
     {
         $error['error'] = $this->error;
 
-        $config = Kohana::config('oauth-server.'.$this->_type);
+        $config = Kohana::$config->load('oauth-server.'.$this->_type);
 
         // Get the error description from config settings
         $error += $config['access_errors'][$error['error']];

@@ -21,14 +21,6 @@ class Oauthz_Client extends Kohana_Controller {
     protected $_type = 'default';
 
     /**
-     * Client's access token
-     *
-     * @access  protected
-     * @var     string    $token
-     */
-    protected $token;
-
-    /**
      * Request settings for OAuth
      *
      * @access  protected
@@ -38,7 +30,7 @@ class Oauthz_Client extends Kohana_Controller {
 
     public function before()
     {
-        $this->_configs  = Kohana::config('oauth-client.'.$this->_type);
+        $this->_configs = Kohana::config('oauth-client')->get($this->_type);
     }
 
     /* Obtain an an Authorization Code, ONLY for Authorization Code flow */
@@ -74,8 +66,13 @@ class Oauthz_Client extends Kohana_Controller {
         try
         {
             $access_token = $this->token($uri);
-
-            $this->request->response = $this->access($access_token);
+            
+            // Resource in json format
+            $this->request->response = Remote::get($this->_configs['resource-uri'], array(
+                CURLOPT_POST        => TRUE,
+                CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=utf-8'),
+                CURLOPT_POSTFIELDS  => Oauthz::build_query($access_token)
+            ));
         }
         catch(Exception $e)
         {
@@ -111,8 +108,8 @@ class Oauthz_Client extends Kohana_Controller {
                     {
                         throw new Oauthz_Exception(isset($query['error']) ? $query['error'] : 'Unknow error');
                     }
-                    $params['code'] = $query['code'];
-                    $params['grant_type'] = 'authorization_code';
+                    $params['code']         = $query['code'];
+                    $params['grant_type']   = 'authorization_code';
                     break;
                 case 'token':
                     $params['response_type'] = 'token';
@@ -132,43 +129,25 @@ class Oauthz_Client extends Kohana_Controller {
                 CURLOPT_POSTFIELDS  => Oauthz::build_query($params)
             ));
 
-            $token = json_decode($token);
-            if(isset($token->error))
+            $token = json_decode($token, TRUE);
+
+            if(isset($token['error']))
             {
-                throw new Oauthz_Exception($token->error);
+                throw new Oauthz_Exception($token['error']);
             }
-            
+
             // Store the client info into the token
-            $token->client_id = $params['client_id'];
-            $token->client_secret = $params['client_secret'];
+            $token['client_id']       = $params['client_id'];
+            $token['client_secret']   = $params['client_secret'];
 
             return $token;
         }
-        
+
         throw new Oauthz_Exception('Unsupported protocal flow, please check your oauth-client.php config.');
     }
 
-    /* Accessing Protected Resources */
-    protected function access($token)
-    {
-        // Resource in json format
-        return Remote::get($this->_configs['resource-uri'], array(
-            CURLOPT_POST        => TRUE,
-            CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=utf-8'),
-            CURLOPT_POSTFIELDS  => Oauthz::build_query(array(
-                'oauth_token'   => $token->access_token,
-                //'timestamp'     => $_SERVER['REQUEST_TIME'],
-                'token_type'    => $token->token_type,
-                'refresh_token' => $token->refresh_token,
-                'expires_in'    => $token->expires_in,
-                'client_id'     => $token->client_id,
-                'client_secret' => $token->client_secret
-            ))
-        ));
-    }
-
     /* Refreshing an Access Token */
-    protected function refresh_token($token)
+    protected function refresh_token(array $token)
     {
         // TODo
     }

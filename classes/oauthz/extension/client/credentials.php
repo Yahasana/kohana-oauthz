@@ -114,7 +114,12 @@ class Oauthz_Extension_Client_Credentials extends Oauthz_Extension {
         }
         else
         {
-            throw new Oauthz_Exception_Token('invalid_client');
+            // Invalid client_id
+            $exception = new Oauthz_Exception_Token('invalid_client');
+
+            $exception->state = $this->state;
+
+            throw $exception;
         }
 
         $response = new Oauthz_Token;

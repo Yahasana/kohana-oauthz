@@ -40,18 +40,17 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
         if (isset($_SERVER['HTTP_AUTHORIZATION']) OR $_SERVER['HTTP_AUTHORIZATION'] = getenv('HTTP_AUTHORIZATION'))
         {
             $offset = 0;
-            $pattern = '/(([-_a-z]*)=("([^"]*)"|([^,]*)),?)/';
-            while(preg_match($pattern, $_SERVER['HTTP_AUTHORIZATION'], $matches, PREG_OFFSET_CAPTURE, $offset) > 0)
+            $pattern = '/([-_a-z]*)=(?:"([^"]+)"|([^\s,]+)|\'([^\']+)\')/';
+            if(preg_match_all($pattern, $_SERVER['HTTP_AUTHORIZATION'], $matches, PREG_SET_ORDER))
             {
-                $match  = $matches[0];
-                $name   = $matches[2][0];
-                $offset = $match[1] + strlen($match[0]);
-                if($value = Oauthz::urldecode(isset($matches[5]) ? $matches[5][0] : $matches[4][0]))
+                foreach($matches as $match)
                 {
-                    $params[$name]  = $value;
+                    if($value = Oauthz::urldecode($match[2] ?: $match[3]))
+                    {
+                        $params[$match[1]]  = $value;
+                    }
                 }
             }
-
             // Replace the name of token to oauth_token
             if(isset($params['token']))
             {
@@ -206,19 +205,16 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
      */
     public function execute()
     {
-        $response = new Oauthz_Token;
-
         // Verify the client and the code, load the access token if successes
         if($client = Model_Oauthz::factory('Token')->oauth_token($this->client_id, $this->code))
         {
+            $response = new Oauthz_Token;
             $response->token_type = $client['token_type'];
         }
         else
         {
             // Invalid client_id
             $exception = new Oauthz_Exception_Token('invalid_client');
-
-            $exception->redirect_uri = $this->redirect_uri;
 
             $exception->state = $this->state;
 
@@ -252,27 +248,27 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
      */
     public function access_token($client)
     {
-        $response = new Oauthz_Token;
-
-        if(isset($this->format))
-        {
-            $response->format = $this->format;
-        }
-
         if($client['access_token'] !== $this->oauth_token)
         {
-            throw new Oauthz_Exception_Token('unauthorized_client');
+            throw new Oauthz_Exception_Access('unauthorized_client');
         }
 
         if($client['token_type'] !== $this->token_type)
         {
-            throw new Oauthz_Exception_Token('unauthorized_client');
+            throw new Oauthz_Exception_Access('unauthorized_client');
         }
 
         if(isset($this->scope) AND ! empty($client['scope']))
         {
             if( ! in_array($this->scope, explode(' ', $client['scope'])))
-                throw new Oauthz_Exception_Token('invalid_scope');
+                throw new Oauthz_Exception_Access('invalid_scope');
+        }
+
+        $response = new Oauthz_Token;
+
+        if(isset($this->format))
+        {
+            $response->format = $this->format;
         }
 
         //switch($response->token_type)

@@ -14,7 +14,7 @@ class Model_Oauthz_Authorize extends Model_Oauthz {
 
     public function get($user_id)
     {
-        return ctype_digit($user_id)
+        return ctype_digit((string) $user_id)
             ? DB::select('user_id','client_id','redirect_uri','confirm_type','client_level','modified','created','scope','expired_date','remark','client_desc')
                 ->from('t_oauth_authorizes')
                 ->where('user_id', '=', $user_id)
@@ -70,6 +70,7 @@ class Model_Oauthz_Authorize extends Model_Oauthz {
             }
 
             $valid['created'] = $_SERVER['REQUEST_TIME'];
+
             return DB::insert('t_oauth_authorizes', array_keys($valid))
                 ->values(array_values($valid))
                 ->execute($this->_db);
@@ -126,6 +127,7 @@ class Model_Oauthz_Authorize extends Model_Oauthz {
             }
 
             $valid['modifed'] = $_SERVER['REQUEST_TIME'];
+
             return DB::update('t_oauth_authorizes')
                 ->set($valid)
                 ->where('user_id', '=', $user_id)
@@ -140,7 +142,7 @@ class Model_Oauthz_Authorize extends Model_Oauthz {
 
     public function delete($client_id, $user_id)
     {
-        return ctype_digit($user_id)
+        return ctype_digit((string) $user_id)
             ? DB::delete('t_oauth_authorizes')
                 ->where('client_id', '=', $client_id)
                 ->where('user_id', '=', $user_id)

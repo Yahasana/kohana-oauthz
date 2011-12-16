@@ -11,6 +11,7 @@ Note: before runing these steps, you have to setup the OAuth server. see README
 ### Setting client connection settings ###
 
  1. Request URIs options,
+ 
         'oauth_uri'     => 'http://example.com/oauth/code',       // the uri for requesting authorization_code
         'token_uri'     => 'http://example.com/oauth/token',      // the uri for requesting access_token
         'access_uri'    => 'http://example.com/api',              // the uri for requesting protected resource

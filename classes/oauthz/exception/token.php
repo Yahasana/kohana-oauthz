@@ -25,7 +25,7 @@ class Oauthz_Exception_Token extends Oauthz_Exception {
         $params['error'] = $this->error;
 
 		// Set the error uri from config settings if it's not set. e.g. redirect_uri mismatch
-        $params['error_uri'] = empty($this->error_uri) ? $desc['error_uri'] : $this->error_uri;
+        $params['error_uri'] = url::site(empty($this->error_uri) ? $desc['error_uri'] : $this->error_uri, TRUE);
 
         $params['error_description'] = empty($this->error_description) ? $desc['error_description'] : $this->error_description;
 

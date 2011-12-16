@@ -117,35 +117,49 @@ class Oauthz_Extension_Password extends Oauthz_Extension {
      * @access	public
      * @param	array	$client
      * @return	Oauthz_Token
-     * @throw   Oauthz_Exception_Authorize    Error Codes: invalid_request, invalid_scope
+     * @throw   Oauthz_Exception_Token    Error Codes: invalid_client, invalid_request, invalid_scope
      */
     public function execute()
     {
         if($client = Model_Oauthz::factory('Client')->lookup($this->client_id))
         {
-            //
+            // Audit
         }
         else
         {
-            throw new Oauthz_Exception_Token('invalid_client');
+            // Invalid client_id
+            $exception = new Oauthz_Exception_Token('invalid_client');
+
+            isset($this->state) AND $exception->state = $this->state;
+
+            throw $exception;
         }
 
         $response = new Oauthz_Token;
 
         isset($this->state) AND $response->state = $this->state;
 
+        // TODO password should be hashed with much more stronger method
         if($client['client_secret'] !== sha1($this->client_secret)
             OR $client['username'] !== $this->username
             OR $client['password'] !== sha1($this->password)
             OR $client['redirect_uri'] !== $this->redirect_uri)
         {
-            throw new Oauthz_Exception_Token('invalid_request');
+            $exception = new Oauthz_Exception_Token('invalid_request');
+
+            isset($this->state) AND $exception->state = $this->state;
+
+            throw $exception;
         }
 
-        if(isset($this->scope) AND ! empty($client['scope']))
+        if(isset($this->scope) AND ! empty($client['scope']) 
+            AND ! in_array($this->scope, explode(' ', $client['scope'])))
         {
-            if( ! in_array($this->scope, explode(' ', $client['scope'])))
-                throw new Oauthz_Exception_Token('invalid_scope');
+            $exception = new Oauthz_Exception_Token('invalid_scope');
+
+            isset($this->state) AND $exception->state = $this->state;
+
+            throw $exception;
         }
 
         // TODO configurable token type

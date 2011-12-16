@@ -9,13 +9,13 @@ return array(
     'default' => array(
 
         'formats'   => array(
-            'json'      => FALSE,   # 'application/json'
-            'xml'       => FALSE,   # 'application/xml'
-            'form'      => FALSE,   # 'text/plain'
-            'html'      => FALSE,   # 'text/html'
-            'csv'       => FALSE,   # 'application/csv'
-            'php'       => FALSE,   # 'text/plain'
-            'serialize' => FALSE    # 'application/vnd.php.serialized'
+            'json'      => FALSE,   // 'application/json'
+            'xml'       => FALSE,   // 'application/xml'
+            'form'      => FALSE,   // 'text/plain'
+            'html'      => FALSE,   // 'text/html'
+            'csv'       => FALSE,   // 'application/csv'
+            'php'       => FALSE,   // 'text/plain'
+            'serialize' => FALSE    // 'application/vnd.php.serialized'
         ),
 
         'methods'   => array(

@@ -55,15 +55,13 @@ class Oauthz_Exception extends Exception {
 	{
         if( ! isset(self::$errors[self::$type]))
         {
-            $config = Kohana::config('oauth-server.'.self::$type);
+            $config = Kohana::config('oauth-server')->get(self::$type);
             self::$errors[self::$type]['code_errors'] = $config['code_errors'];
             self::$errors[self::$type]['token_errors'] = $config['token_errors'];
             self::$errors[self::$type]['access_errors'] = $config['access_errors'];
         }
 
         $this->error = $message;
-
-        $this->redirect_uri = '/oauth/error/'.$message;
 
 		// Pass the message to the parent
 		parent::__construct($message, $code);

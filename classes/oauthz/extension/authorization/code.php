@@ -57,24 +57,16 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
                 }
                 else
                 {
-                    $invalid_request = TRUE;
-                    break;
+                    $exception = new Oauthz_Exception_Authorize('invalid_request');
+
+                    if(isset($this->state))
+                    {
+                        $exception->state = $this->state;
+                    }
+
+                    throw $exception;
                 }
             }
-        }
-        
-        if(isset($invalid_request))
-        {
-            $exception = new Oauthz_Exception_Authorize('invalid_request');
-
-            $exception->redirect_uri = '/oauth/error/invalid_request';
-
-            if(isset($this->state))
-            {
-                $exception->state = $this->state;
-            }
-
-            throw $exception;
         }
     }
 
@@ -99,21 +91,6 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
         {
             $exception = new Oauthz_Exception_Token('invalid_client');
 
-            $exception->redirect_uri = '/oauth/error/invalid_client';
-
-            $exception->state = $this->state;
-
-            throw $exception;
-        }
-
-        $response = new Oauthz_Token;
-
-        if($client['client_secret'] !== sha1($this->client_secret))
-        {
-            $exception = new Oauthz_Exception_Token('unauthorized_client');
-
-            $exception->redirect_uri = '/oauth/error/unauthorized_client';
-
             $exception->state = $this->state;
 
             throw $exception;
@@ -123,7 +100,16 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
         {
             $exception = new Oauthz_Exception_Token('unauthorized_client');
 
-            $exception->redirect_uri = '/oauth/error/unauthorized_client';
+            $exception->state = $this->state;
+
+            throw $exception;
+        }
+
+        if($client['client_secret'] !== sha1($this->client_secret))
+        {
+            $exception = new Oauthz_Exception_Token('unauthorized_client');
+
+            $exception->error_uri = $this->redirect_uri;
 
             $exception->state = $this->state;
 
@@ -136,7 +122,7 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
             {
                 $exception = new Oauthz_Exception_Authorize('invalid_scope');
 
-                $exception->redirect_uri = $this->redirect_uri;
+                $exception->error_uri = $this->redirect_uri;
 
                 $exception->state = $this->state;
 
@@ -144,11 +130,14 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
             }
         }
 
+        // Everything is ok, then return the token
+        $response = new Oauthz_Token;
+
         $response->token_type       = $client['token_type'];
         $response->access_token     = $client['access_token'];
         $response->refresh_token    = $client['refresh_token'];
         $response->expires_in       = (int) $client['expires_in'];
-        
+
         // merge other token properties, e.g. {"mac_key":"adijq39jdlaska9asud","mac_algorithm":"hmac-sha-256"}
         if($client['option'] AND $option = json_decode($client['option'], TRUE))
         {

@@ -28,7 +28,7 @@ class Controller_Api extends Oauthz_Api {
             if(substr($method, 0, 7) === 'action_')
             {
                 $method = ltrim($method, 'action_');
-                $methods[$method] = '/api/'.$method;
+                $methods[$method] = url::site('/api/'.$method, TRUE);
             }
         }
         $this->request->response = json_encode($methods);

@@ -53,7 +53,7 @@ class Model_Oauthz_Client extends Model_Oauthz {
 	 *
      * @return	mix     array(insert_id, affect_rows) or validate object
      */
-    public function append(array $params, $prefix = 'OAL_')
+    public function append(array $params, $prefix = 'OAL@')
     {
         $params['client_id'] = $prefix.strtoupper(uniqid());
 
@@ -201,7 +201,7 @@ class Model_Oauthz_Client extends Model_Oauthz {
 
     public function delete($server_id, $user_id)
     {
-        return ctype_digit($server_id)
+        return ctype_digit((string) $server_id)
             ? DB::delete('t_oauth_clients')
                 ->where('server_id', '=', $server_id)
                 ->where('user_id','=', $user_id)

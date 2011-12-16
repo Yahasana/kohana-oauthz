@@ -79,12 +79,6 @@ return array(
             'delete'    => TRUE
         ),
 
-        'max_requests'  => array(
-            500,        // common client
-            1000,       // first class client
-            1500,       // vip client
-        ),
-
         'durations'     => array(
             'code'          => 120,     // authorization code expires time, default is 2 minutes
             'oauth_token'   => 3600,    // token expires time, default is 1 hour
@@ -96,34 +90,34 @@ return array(
             'invalid_request'       => array(
                 'error_description' => 'The request is missing a required parameter, includes an
                     unsupported parameter or parameter value, or is otherwise malformed.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/invalid_request',
             ),
             'unauthorized_client'   => array(
                 'error_description' => 'The client is not authorized to request an authorization
                     code using this method.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/unauthorized_client',
             ),
             'access_denied'         => array(
                 'error_description' => 'The resource owner or authorization server denied the request.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/access_denied',
             ),
             'unsupported_response_type' => array(
                 'error_description' => 'The authorization server does not support obtaining an
                     authorization code using this method.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/unsupported_response_type',
             ),
             'invalid_scope'         => array(
                 'error_description' => 'The requested scope is invalid, unknown, or malformed.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/invalid_scope',
             ),
             'server_error'         => array(
                 'error_description' => 'The authorization server encountered an unexpected condition which prevented it from fulfilling the request.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/server_error',
             ),
             'temporarily_unavailable'=> array(
                 'error_description' => 'The authorization server is currently unable to handle the
                                         request due to a temporary overloading or maintenance of the server.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/temporarily_unavailable',
             )
         ),
         // section-4.2.2.1.  Error Response
@@ -131,32 +125,32 @@ return array(
             'invalid_request'       => array(
                 'error_description' => 'The request is missing a required parameter, includes an
                     unsupported parameter or parameter value, or is otherwise malformed.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/invalid_request',
             ),
             'unauthorized_client'   => array(
                 'error_description' => 'The client is not authorized to request an access token using this method.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/unauthorized_client',
             ),
             'access_denied'         => array(
                 'error_description' => 'The resource owner or authorization server denied the request.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/access_denied',
             ),
             'unsupported_response_type' => array(
                 'error_description' => 'The authorization server does not support obtaining an access token using this method.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/unsupported_response_type',
             ),
             'invalid_scope'         => array(
                 'error_description' => 'The requested scope is invalid, unknown, or malformed.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/invalid_scope',
             ),
             'server_error'         => array(
                 'error_description' => 'The authorization server encountered an unexpected condition which prevented it from fulfilling the request.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/server_error',
             ),
             'temporarily_unavailable'=> array(
                 'error_description' => 'The authorization server is currently unable to handle the
                                         request due to a temporary overloading or maintenance of the server.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/temporarily_unavailable',
             )
         ),
         // section-5.2.  Error Response
@@ -167,34 +161,34 @@ return array(
                     parameter, includes multiple credentials, utilizes more
                     than one mechanism for authenticating the client, or is
                     otherwise malformed.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/invalid_request',
             ),
             'invalid_client'        => array(
                 'error_description' => 'Client authentication failed (e.g. unknown client, no
                     client credentials included, multiple client credentials
                     included, or unsupported credentials type).',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/invalid_client',
             ),
             'invalid_grant'        => array(
                 'error_description' => 'The provided authorization grant is invalid, expired,
                     revoked, or does not match the redirection URI used in
                     the authorization request.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/invalid_grant',
             ),
             'unauthorized_client'   => array(
                 'error_description' => 'The authenticated client is not authorized to use this
                     authorization grant type.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/unauthorized_client',
             ),
             'unsupported_grant_type'=> array(
                 'error_description' => 'The authorization grant type is not supported by the
                     authorization server.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/unsupported_grant_type',
             ),
             'invalid_scope'    => array(
                 'error_description' => 'The requested scope is invalid, unknown, malformed, or
                     exceeds the previously granted scope.',
-                'error_uri'         => '',
+                'error_uri'         => '/oauth/error/invalid_scope',
             )
         )
     )

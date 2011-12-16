@@ -11,8 +11,6 @@
  */
 class Oauthz_Exception_Authorize extends Oauthz_Exception {
 
-    public $redirect_uri;
-
     public $state;
 
 	/**
@@ -24,18 +22,18 @@ class Oauthz_Exception_Authorize extends Oauthz_Exception {
 	 */
 	public function __toString()
 	{
-        $desc = parent::$errors[parent::$type]['token_errors'][$this->error];
+        $desc = parent::$errors[parent::$type]['code_errors'][$this->error];
 
         $params['error'] = $this->error;
-
-        // Set the error uri from config settings if it's not set. e.g. redirect_uri mismatch
-        $params['error_uri'] = empty($this->error_uri) ? $desc['error_uri'] : $this->error_uri;
 
         $params['error_description'] = empty($this->error_description) ? $desc['error_description'] : $this->error_description;
 
         empty($this->state) OR $params['state'] = $this->state;
 
-        return $this->redirect_uri.'?'.http_build_query($params);
+        // Set the error uri from config settings if it's not set. e.g. redirect_uri mismatch
+        $error_uri = url::site(empty($this->error_uri) ? $desc['error_uri'] : $this->error_uri, TRUE);
+
+        return $error_uri.'?'.http_build_query($params);
 	}
 
 } // END Oauthz_Exception_Authorize

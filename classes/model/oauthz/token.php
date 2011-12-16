@@ -14,7 +14,7 @@ class Model_Oauthz_Token extends Model_Oauthz {
 
     public function get($token_id)
     {
-        return ctype_digit($token_id)
+        return ctype_digit((string) $token_id)
             ? DB::select('token_id','client_id','code','access_token','refresh_token','expires_in','timestamp','nonce','user_id')
                 ->from('t_oauth_tokens')
                 ->where('token_id', '=', $token_id)
@@ -69,7 +69,7 @@ class Model_Oauthz_Token extends Model_Oauthz {
                 ))
                 ->execute($this->_db);
 
-            $client['expires_in']   = $token['expires_in'];
+            $client['expires_in'] = $token['expires_in'];
 
             return $client;
         }
@@ -89,7 +89,6 @@ class Model_Oauthz_Token extends Model_Oauthz {
                 ->from('t_oauth_tokens')
                 ->where('client_id' , '=', $client_id)
                 ->where('code' , '=', $code)
-                //->where('timestamp' , '>=', $_SERVER['REQUEST_TIME'] - $expires_in)
                 ->execute($this->_db)
                 ->current();
         }
@@ -102,7 +101,6 @@ class Model_Oauthz_Token extends Model_Oauthz {
             ->from('t_oauth_tokens')
             ->where('client_id' , '=', $client_id)
             ->where('code' , '=', $code)
-            //->where('timestamp' , '>=', $_SERVER['REQUEST_TIME'] - $expires_in)
             ->execute($this->_db)
             ->current();
     }
@@ -172,7 +170,7 @@ class Model_Oauthz_Token extends Model_Oauthz {
 
     public function delete($token_id, $client_id)
     {
-        return ctype_digit($token_id)
+        return ctype_digit((string) $token_id)
             ? DB::delete('t_oauth_tokens')
                 ->where('token_id', '=', $token_id)
                 ->where('client_id', '=', $client_id)

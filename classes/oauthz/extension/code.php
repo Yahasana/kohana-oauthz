@@ -91,10 +91,6 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
      */
     public function execute()
     {
-        $token = array(
-            'expires_in' => 3600,
-            'token_type' => 'bearer'
-        );
         // Verify the client and generate a code if successes
         if($client = Model_Oauthz::factory('Token')->code($this->client_id, $token))
         {
@@ -105,16 +101,18 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
             // Invalid client_id
             $exception = new Oauthz_Exception_Authorize('unauthorized_client');
 
+            // If redirect_uri is empty, it'll redirect to error uri in server
             $exception->state = $this->state;
 
             throw $exception;
         }
 
-        $response = new Oauthz_Token;
-
         if($client['redirect_uri'] !== $this->redirect_uri)
         {
             $exception = new Oauthz_Exception_Authorize('unauthorized_client');
+            
+            // Redirect to client uri
+            $exception->error_uri = $this->redirect_uri;
 
             $exception->state = $this->state;
 
@@ -127,7 +125,8 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
             {
                 $exception = new Oauthz_Exception_Authorize('invalid_scope');
 
-                $exception->redirect_uri = $this->redirect_uri;
+                // Redirect to client uri
+                $exception->error_uri = $this->redirect_uri;
 
                 $exception->state = $this->state;
 
@@ -135,10 +134,12 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
             }
         }
 
-        $response->expires_in = $client['expires_in'];
-
         // Grants Authorization
-        $response->code = $client['code'];
+        $response = new Oauthz_Token;
+
+        $response->code         = $client['code'];
+        $response->token_type   = $client['token_type'];
+        $response->expires_in   = $client['expires_in'];
 
         return $this->redirect_uri.'?'.$response->as_query();
     }

@@ -3,7 +3,7 @@
  *
  * @author      sumh <42424861@qq.com>
  * @package     Oauth
- * @copyright   (c) 2010 OALite
+ * @copyright   (c) 2011 OALite
  * @license     ISC License (ISCL)
  * @link        http://oalite.com
  */
@@ -16,28 +16,28 @@ CREATE TABLE t_oauth_authorizes
 	user_id BIGINT NULL,
 	client_id VARCHAR(127) NOT NULL,
 	redirect_uri VARCHAR(511) NOT NULL,
-	confirm_type TINYINT NOT NULL DEFAULT 0,
-	client_level TINYINT NOT NULL DEFAULT 0,
-	modified INTEGER NULL,
-	created INTEGER NOT NULL,
+	confirm_type TINYINT DEFAULT 0 NOT NULL,
+	client_level TINYINT DEFAULT 0 NOT NULL,
+	client_desc TEXT NULL,
+	expires_in INTEGER NULL,
 	scope VARCHAR(511) NULL,
-	expired_date INTEGER NULL,
-	remark TEXT NULL,
-	client_desc TEXT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+	created INTEGER NOT NULL,
+	modified INTEGER NULL,
+	remark TEXT NULL
+) DEFAULT CHARSET=utf8;
 
 /* Table Items: t_oauth_authorizes */
 ALTER TABLE t_oauth_authorizes ADD CONSTRAINT pkt_oauth_authorizes
 	PRIMARY KEY (user_id);
 
 /* Set Comments */
-EXEC sp_addextendedproperty 'MS_Description', 'Request confirm, 0: every time; 1: only once; 2: with expired period; 3: once and banned',
+EXEC sp_addextendedproperty 'MS_Description', 'Request confirm, 0: every time; 1: only once; 2: with expired period; 3: once and banned', 'schema', 'Server',
 	'table', 't_oauth_authorizes', 'column', 'confirm_type';
-EXEC sp_addextendedproperty 'MS_Description', 'diferent client levels have different max request times',
+EXEC sp_addextendedproperty 'MS_Description', 'diferent client levels have different max request times', 'schema', 'Server',
 	'table', 't_oauth_authorizes', 'column', 'client_level';
-EXEC sp_addextendedproperty 'MS_Description', 'date time',
-	'table', 't_oauth_authorizes', 'column', 'expired_date';
-EXEC sp_addextendedproperty 'MS_Description', 'Store audit information from resource owner for the resource requester',
+EXEC sp_addextendedproperty 'MS_Description', 'date time', 'schema', 'Server',
+	'table', 't_oauth_authorizes', 'column', 'expires_in';
+EXEC sp_addextendedproperty 'MS_Description', 'Store audit information from resource owner for the resource requester', 'schema', 'Server',
 	'table', t_oauth_authorizes, null, null;
 
 /******************** Add Table: t_oauth_clients ************************/
@@ -45,58 +45,58 @@ EXEC sp_addextendedproperty 'MS_Description', 'Store audit information from reso
 /* Build Table Structure */
 CREATE TABLE t_oauth_clients
 (
-	server_id BIGINT NOT NULL IDENTITY (1, 1),
+	server_id BIGINT IDENTITY (1, 1) NOT NULL,
 	client_id VARCHAR(127) NOT NULL,
 	client_secret VARCHAR(127) NOT NULL,
 	redirect_uri VARCHAR(511) NOT NULL,
 	scope VARCHAR(255) NULL,
-	secret_type ENUM('plaintext','md5','rsa-sha1','hmac-sha1') NOT NULL DEFAULT 'plaintext',
+	secret_type ENUM('plaintext','md5','rsa-sha1','hmac-sha1') DEFAULT 'plaintext' NOT NULL,
 	ssh_key VARCHAR(511) NULL,
 	app_name VARCHAR(127) NOT NULL,
 	app_desc TEXT NULL,
-	app_profile ENUM('webserver','native','useragent','autonomous') NOT NULL DEFAULT 'webserver',
+	app_profile ENUM('webserver','native','useragent','autonomous') DEFAULT 'webserver' NOT NULL,
 	app_purpose VARCHAR(511) NULL,
 	user_id BIGINT NULL,
-	user_level TINYINT NOT NULL DEFAULT 0,
-	enabled TINYINT NOT NULL DEFAULT 1,
+	user_level TINYINT DEFAULT 0 NOT NULL,
+	enabled TINYINT DEFAULT 1 NOT NULL,
 	created INTEGER NOT NULL,
 	modified INTEGER NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) DEFAULT CHARSET=utf8;
 
 /* Table Items: t_oauth_clients */
 ALTER TABLE t_oauth_clients ADD CONSTRAINT pkt_oauth_clients
 	PRIMARY KEY (server_id);
 
 /* Set Comments */
-EXEC sp_addextendedproperty 'MS_Description', 'AKA. API key',
+EXEC sp_addextendedproperty 'MS_Description', 'AKA. API key', 'schema', 'Server',
 	'table', 't_oauth_clients', 'column', 'client_id';
-EXEC sp_addextendedproperty 'MS_Description', 'AKA. API secret',
+EXEC sp_addextendedproperty 'MS_Description', 'AKA. API secret', 'schema', 'Server',
 	'table', 't_oauth_clients', 'column', 'client_secret';
-EXEC sp_addextendedproperty 'MS_Description', 'AKA. Callback URI',
+EXEC sp_addextendedproperty 'MS_Description', 'AKA. Callback URI', 'schema', 'Server',
 	'table', 't_oauth_clients', 'column', 'redirect_uri';
-EXEC sp_addextendedproperty 'MS_Description', 'May be create, read, update or delete. so on so for',
+EXEC sp_addextendedproperty 'MS_Description', 'May be create, read, update or delete. so on so for', 'schema', 'Server',
 	'table', 't_oauth_clients', 'column', 'scope';
-EXEC sp_addextendedproperty 'MS_Description', 'Secret signature encrypt type. e.g',
+EXEC sp_addextendedproperty 'MS_Description', 'Secret signature encrypt type. e.g', 'schema', 'Server',
 	'table', 't_oauth_clients', 'column', 'secret_type';
-EXEC sp_addextendedproperty 'MS_Description', 'SSH public keys',
+EXEC sp_addextendedproperty 'MS_Description', 'SSH public keys', 'schema', 'Server',
 	'table', 't_oauth_clients', 'column', 'ssh_key';
-EXEC sp_addextendedproperty 'MS_Description', 'Application Name',
+EXEC sp_addextendedproperty 'MS_Description', 'Application Name', 'schema', 'Server',
 	'table', 't_oauth_clients', 'column', 'app_name';
-EXEC sp_addextendedproperty 'MS_Description', 'Application Description, When users authenticate via your app, this is what they''ll see.',
+EXEC sp_addextendedproperty 'MS_Description', 'Application Description, When users authenticate via your app, this is what they''ll see.', 'schema', 'Server',
 	'table', 't_oauth_clients', 'column', 'app_desc';
-EXEC sp_addextendedproperty 'MS_Description', 'Application Profile: Web Server Application, Native Application, Browser Application, Autonomous clients',
+EXEC sp_addextendedproperty 'MS_Description', 'Application Profile: Web Server Application, Native Application, Browser Application, Autonomous clients', 'schema', 'Server',
 	'table', 't_oauth_clients', 'column', 'app_profile';
-EXEC sp_addextendedproperty 'MS_Description', 'Ref# from users table',
+EXEC sp_addextendedproperty 'MS_Description', 'Ref# from users table', 'schema', 'Server',
 	'table', 't_oauth_clients', 'column', 'user_id';
-EXEC sp_addextendedproperty 'MS_Description', 'diferent client levels have different max request times',
+EXEC sp_addextendedproperty 'MS_Description', 'diferent client levels have different max request times', 'schema', 'Server',
 	'table', 't_oauth_clients', 'column', 'user_level';
-EXEC sp_addextendedproperty 'MS_Description', '0: waiting for system administrator audit; 1: acceptable; 2: ban',
+EXEC sp_addextendedproperty 'MS_Description', '0: waiting for system administrator audit; 1: acceptable; 2: ban', 'schema', 'Server',
 	'table', 't_oauth_clients', 'column', 'enabled';
-EXEC sp_addextendedproperty 'MS_Description', 'create datetime',
+EXEC sp_addextendedproperty 'MS_Description', 'create datetime', 'schema', 'Server',
 	'table', 't_oauth_clients', 'column', 'created';
-EXEC sp_addextendedproperty 'MS_Description', 'modified datetime',
+EXEC sp_addextendedproperty 'MS_Description', 'modified datetime', 'schema', 'Server',
 	'table', 't_oauth_clients', 'column', 'modified';
-EXEC sp_addextendedproperty 'MS_Description', 'Used for verification of incoming requests. ',
+EXEC sp_addextendedproperty 'MS_Description', 'Used for verification of incoming requests. ', 'schema', 'Server',
 	'table', t_oauth_clients, null, null;
 
 /* Add Indexes for: t_oauth_clients */
@@ -107,7 +107,7 @@ CREATE UNIQUE NONCLUSTERED INDEX idx_t_oauth_clients_client_id ON t_oauth_client
 /* Build Table Structure */
 CREATE TABLE t_oauth_logs
 (
-	log_id BIGINT NOT NULL IDENTITY (1, 1),
+	log_id BIGINT IDENTITY (1, 1) NOT NULL,
 	client_id VARCHAR(127) NULL,
 	token VARCHAR(63) NULL,
 	user_id BIGINT NULL,
@@ -124,7 +124,7 @@ ALTER TABLE t_oauth_logs ADD CONSTRAINT pkt_oauth_logs
 	PRIMARY KEY (log_id);
 
 /* Set Comments */
-EXEC sp_addextendedproperty 'MS_Description', 'Log table to hold all OAuth request when you enabled logging ',
+EXEC sp_addextendedproperty 'MS_Description', 'Log table to hold all OAuth request when you enabled logging ', 'schema', 'Server',
 	'table', t_oauth_logs, null, null;
 
 /* Add Indexes for: t_oauth_logs */
@@ -135,35 +135,44 @@ CREATE NONCLUSTERED INDEX idx_t_oauth_logs_client_id_log_id ON t_oauth_logs (cli
 /* Build Table Structure */
 CREATE TABLE t_oauth_tokens
 (
-	token_id BIGINT NOT NULL IDENTITY (1, 1),
+	token_id BIGINT IDENTITY (1, 1) NOT NULL,
 	client_id VARCHAR(127) NOT NULL,
+	user_id BIGINT NOT NULL,
 	code VARCHAR(127) NOT NULL,
 	access_token VARCHAR(63) NOT NULL,
 	refresh_token VARCHAR(63) NULL,
-	expires_in INTEGER NOT NULL DEFAULT 300,
+	expire_code INTEGER DEFAULT 300 NOT NULL,
+	expire_token INTEGER DEFAULT 0 NOT NULL,
+	expire_refresh INTEGER DEFAULT 0 NOT NULL,
 	[timestamp] INTEGER NOT NULL,
 	token_type VARCHAR(31) NOT NULL,
-	user_id BIGINT NOT NULL,
 	option TEXT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) DEFAULT CHARSET=utf8;
 
 /* Table Items: t_oauth_tokens */
 ALTER TABLE t_oauth_tokens ADD CONSTRAINT pkt_oauth_tokens
 	PRIMARY KEY (token_id);
 
 /* Set Comments */
-EXEC sp_addextendedproperty 'MS_Description', 'bearer',
-	'table', 't_oauth_tokens', 'column', 'token_type';
-EXEC sp_addextendedproperty 'MS_Description', 'Ref# from users table',
+EXEC sp_addextendedproperty 'MS_Description', 'Ref# from users table', 'schema', 'Server',
 	'table', 't_oauth_tokens', 'column', 'user_id';
-EXEC sp_addextendedproperty 'MS_Description', 'parameters for different token type extension in json format',
+EXEC sp_addextendedproperty 'MS_Description', 'authorization code expires in this timestamp', 'schema', 'Server',
+	'table', 't_oauth_tokens', 'column', 'expire_code';
+EXEC sp_addextendedproperty 'MS_Description', 'access token expires in this timestamp', 'schema', 'Server',
+	'table', 't_oauth_tokens', 'column', 'expire_token';
+EXEC sp_addextendedproperty 'MS_Description', 'refresh token expires in this timestamp', 'schema', 'Server',
+	'table', 't_oauth_tokens', 'column', 'expire_refresh';
+EXEC sp_addextendedproperty 'MS_Description', 'authorization code request timestamp', 'schema', 'Server',
+	'table', 't_oauth_tokens', 'column', 'timestamp';
+EXEC sp_addextendedproperty 'MS_Description', 'bearer, mac, etc.', 'schema', 'Server',
+	'table', 't_oauth_tokens', 'column', 'token_type';
+EXEC sp_addextendedproperty 'MS_Description', 'parameters for different token type extension in json format', 'schema', 'Server',
 	'table', 't_oauth_tokens', 'column', 'option';
-EXEC sp_addextendedproperty 'MS_Description', 'Table used to verify signed requests sent to a server by the consumer.When the verification is succesful then the associated user id is returned. ',
+EXEC sp_addextendedproperty 'MS_Description', 'Table used to verify signed requests sent to a server by the consumer.When the verification is succesful then the associated user id is returned. ', 'schema', 'Server',
 	'table', t_oauth_tokens, null, null;
 
 /* Add Indexes for: t_oauth_tokens */
 CREATE NONCLUSTERED INDEX idx_t_oauth_tokens_client_id ON t_oauth_tokens (client_id);
-
 
 /************ Add Foreign Keys to Database ***************/
 

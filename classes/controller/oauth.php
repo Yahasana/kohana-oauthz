@@ -30,34 +30,31 @@ class Controller_Oauth extends Oauthz_Controller {
 
     public function action_error($error_code = NULL)
     {
-        $errors = array();
+        $error = array();
 
-        $config = $this->_configs;
+        $errors['code_errors'] = I18n::get('code_errors');
+        $errors['token_errors'] = I18n::get('code_errors');
+        $errors['access_errors'] = I18n::get('code_errors');
 
-        if(isset($config['code_errors'][$error_code]))
+        if(isset($errors['code_errors'][$error_code]))
         {
-            $errors['code_errors'][$error_code] = $config['code_errors'][$error_code];
+            $error['code_errors'][$error_code] = $errors['code_errors'][$error_code];
         }
 
-        if(isset($config['token_errors'][$error_code]))
+        if(isset($errors['token_errors'][$error_code]))
         {
-            $errors['token_errors'][$error_code] = $config['code_errors'][$error_code];
+            $error['token_errors'][$error_code] = $errors['code_errors'][$error_code];
         }
 
-        if(isset($config['access_errors'][$error_code]))
+        if(isset($errors['access_errors'][$error_code]))
         {
-            $errors['access_errors'][$error_code] = $config['code_errors'][$error_code];
+            $error['access_errors'][$error_code] = $errors['code_errors'][$error_code];
         }
 
-        if($errors)
+        if($error)
         {
-            $errors['error_code'] = $error_code;
-        }
-        else
-        {
-            $errors['code_errors'] = $config['code_errors'];
-            $errors['token_errors'] = $config['code_errors'];
-            $errors['access_errors'] = $config['code_errors'];
+            $error['error_code'] = $error_code;
+            $errors = $error;
         }
 
         $template = new View('oauthz-template');

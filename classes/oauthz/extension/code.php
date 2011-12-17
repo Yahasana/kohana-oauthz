@@ -30,14 +30,6 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
      */
     public $redirect_uri;
 
-    /**
-     * REQUIRED if the "state" parameter was present in the client authorization request.
-     *
-     * @access	public
-     * @var		string	$state
-     */
-    public $state;
-
     public $expires_in;
 
     /**
@@ -51,10 +43,12 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
     public function __construct(array $args)
     {
         // Parse the "state" paramter
-        if(isset($_GET['state']) AND $state = Oauthz::urldecode($_GET['state']))
+        if(isset($_GET['state']))
         {
-            $this->state = $state;
-            unset($_GET['state'], $args['state']);
+            if($state = Oauthz::urldecode($_GET['state']))
+                $this->state['state'] = $state;
+
+            unset($args['state']);
         }
 
         // Check all required parameters should not be empty
@@ -68,15 +62,12 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
                 }
                 else
                 {
-                    $exception = new Oauthz_Exception_Authorize('invalid_request');
-
-                    if(isset($this->state))
-                    {
-                        $exception->state = $this->state;
-                    }
-
-                    throw $exception;
+                    throw new Oauthz_Exception_Authorize('invalid_request', $this->state);
                 }
+            }
+            elseif($val !== FALSE)
+            {
+                $this->$key = $val;
             }
         }
     }
@@ -92,56 +83,45 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
     public function execute()
     {
         // Verify the client and generate a code if successes
-        if($client = Model_Oauthz::factory('Token')->code($this->client_id, $token))
+        if($client = Model_Oauthz::factory('Token')
+            ->code($this->client_id, $this->token_type, $this->expires_in))
         {
             // audit
         }
         else
         {
             // Invalid client_id
-            $exception = new Oauthz_Exception_Authorize('unauthorized_client');
-
-            // If redirect_uri is empty, it'll redirect to error uri in server
-            $exception->state = $this->state;
-
-            throw $exception;
+            throw new Oauthz_Exception_Authorize('unauthorized_client', $this->state);
         }
 
         if($client['redirect_uri'] !== $this->redirect_uri)
         {
-            $exception = new Oauthz_Exception_Authorize('unauthorized_client');
-            
-            // Redirect to client uri
-            $exception->error_uri = $this->redirect_uri;
-
-            $exception->state = $this->state;
-
-            throw $exception;
+            throw new Oauthz_Exception_Authorize('unauthorized_client', $this->state);
         }
 
         if( ! empty($this->scope) AND ! empty($client['scope']))
         {
             if( ! in_array($this->scope, explode(' ', $client['scope'])))
             {
-                $exception = new Oauthz_Exception_Authorize('invalid_scope');
-
                 // Redirect to client uri
-                $exception->error_uri = $this->redirect_uri;
+                $params = array('error_uri' => $this->redirect_uri);
 
-                $exception->state = $this->state;
+                isset($this->state) AND $params['state'] = $this->state['state'];
 
-                throw $exception;
+                throw new Oauthz_Exception_Authorize('invalid_scope', $params);
             }
         }
 
         // Grants Authorization
-        $response = new Oauthz_Token;
+        $token = new Oauthz_Token;
 
-        $response->code         = $client['code'];
-        $response->token_type   = $client['token_type'];
-        $response->expires_in   = $client['expires_in'];
+        $token->code         = $client['code'];
+        $token->token_type   = $client['token_type'];
+        $token->expires_in   = $client['expires_in'];
 
-        return $this->redirect_uri.'?'.$response->as_query();
+        isset($this->state) AND $token->state = $this->state['state'];
+
+        return $this->redirect_uri.'?'.$token->as_query();
     }
 
 } // END Oauthz_Extension_Code

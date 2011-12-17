@@ -32,7 +32,7 @@ class Model_Oauthz_Token extends Model_Oauthz {
 	 *
      * @return	array     token
      */
-    public function code($client_id, $token)
+    public function code($client_id, $token_type, $expires_in = 120, array $option = NULL)
     {
         if($client_id AND $client = DB::select('client_secret','server_id','redirect_uri','user_id')
             ->from('t_oauth_clients')
@@ -44,6 +44,9 @@ class Model_Oauthz_Token extends Model_Oauthz {
             $client['code'] = uniqid();
             $access_token   = sha1(md5($_SERVER['REQUEST_TIME']));
             $refresh_token  = sha1(sha1(mt_rand()));
+            $expires_in     = $_SERVER['REQUEST_TIME'] + $expires_in;
+
+            isset($option) AND $option = json_encode($option);
 
             DB::insert('t_oauth_tokens', array(
                     'client_id',
@@ -52,24 +55,24 @@ class Model_Oauthz_Token extends Model_Oauthz {
                     'access_token',
                     'timestamp',
                     'refresh_token',
-                    'expires_in',
+                    'expire_code',
                     'token_type',
                     'option'
                 ))
                 ->values(array(
                     $client_id,
                     $client['code'],
-                    $client['user_id'],
+                    0,                     // TODO the user_id should be the resource owner
                     $access_token,
                     $_SERVER['REQUEST_TIME'],
                     $refresh_token,
-                    $token['expires_in'],
-                    $token['token_type'],
-                    isset($token['option']) ? $token['option'] : NULL
+                    $expires_in,
+                    $token_type,
+                    $option
                 ))
                 ->execute($this->_db);
 
-            $client['expires_in'] = $token['expires_in'];
+            $client['expires_in'] = $expires_in;
 
             return $client;
         }
@@ -77,7 +80,7 @@ class Model_Oauthz_Token extends Model_Oauthz {
         return NULL;
     }
 
-    public function oauth_token($client_id, $code, $expires_in = 3600)
+    public function token($client_id, $code, $expires_in = 3600)
     {
         if($client = DB::select('server_id','client_secret','redirect_uri','user_id')
             ->from('t_oauth_clients')
@@ -85,87 +88,59 @@ class Model_Oauthz_Token extends Model_Oauthz {
             ->execute($this->_db)
             ->current())
         {
-            $client += (array) DB::select('*')
-                ->from('t_oauth_tokens')
-                ->where('client_id' , '=', $client_id)
-                ->where('code' , '=', $code)
-                ->execute($this->_db)
-                ->current();
+            if(DB::update('t_oauth_tokens')
+                ->set(array('expire_token' => $_SERVER['REQUEST_TIME'] + $expires_in))
+                ->where('code' => $code)
+                ->execute($this->_db))
+            {
+                $client += (array) DB::select('access_token','token_type','refresh_token'
+                        ,array('expire_token', 'expires_in'),'option')
+                    ->from('t_oauth_tokens')
+                    ->where('client_id' , '=', $client_id)
+                    ->where('code' , '=', $code)
+                    ->execute($this->_db)
+                    ->current();
+            }
         }
         return $client;
     }
 
     public function access_token($client_id, $code, $expires_in = 3600)
     {
-        return DB::select('*')
+        if($token = DB::select('access_token','token_type','refresh_token'
+                ,array('expire_token', 'expires_in'),'option')
             ->from('t_oauth_tokens')
             ->where('client_id' , '=', $client_id)
             ->where('code' , '=', $code)
             ->execute($this->_db)
-            ->current();
+            ->current())
+        {
+            //
+        }
+
+        return $token;
     }
 
     // TODO
-    public function refresh_token(Oauthz_Token $token)
+    public function refresh_token($client_id, $token)
     {
-        DB::delete('t_oauth_tokens')
-            ->where('token', '=', $token->key)
-            ->execute($this->_db);
+        if($token = DB::select('access_token','token_type','refresh_token'
+                ,array('expire_token', 'expires_in'),'option')
+            ->from('t_oauth_tokens')
+            ->where('client_id' , '=', $client_id)
+            ->where('token' , '=', $token)
+            ->execute($this->_db)
+            ->current())
+        {
+            //
+        }
+
+        return $token;
     }
 
     public function assertion($client_id)
     {
         // TODO
-    }
-
-    /**
-     * Update token
-     *
-     * @access	public
-     * @param	int	    $token_id
-     * @param	array	$params
-	 *      user_id: Ref# from users table
-	 *
-     * @return	mix     update rows affect or validate object
-     */
-    public function update($token_id, array $params)
-    {
-        $valid = Validate::factory($params);
-
-        $rules = array_intersect_key(array (
-            'client_id'     => array ('not_empty'   => NULL, 'max_length' => array (128)),
-            'code'          => array ('not_empty'   => NULL, 'max_length' => array (128)),
-            'access_token'  => array ('not_empty'   => NULL, 'max_length' => array (64)),
-            'refresh_token' => array ('max_length'  => array (64)),
-            'expires_in'    => array ('range'       => array (0,4294967295)),
-            'timestamp'     => array ('not_empty'   => NULL, 'range' => array (0,4294967295)),
-            'nonce'         => array ('max_length'  => array (64)),
-            'user_id'       => array ('not_empty'   => NULL,),
-        ), $params);
-
-        foreach($rules as $field => $rule)
-            foreach($rule as $r => $p)
-                $valid->rule($field, $r, $p);
-
-        if($valid->check())
-        {
-            $valid = $valid->as_array();
-
-            foreach($valid as $key => $val)
-            {
-                if($val === '') $valid[$key] = NULL;
-            }
-
-            return DB::update('t_oauth_tokens')
-                ->set($valid)
-                ->where('token_id', '=', $token_id)
-                ->execute($this->_db);
-        }
-        else
-        {
-            // Validation failed, collect the errors
-            return $valid;
-        }
     }
 
     public function delete($token_id, $client_id)

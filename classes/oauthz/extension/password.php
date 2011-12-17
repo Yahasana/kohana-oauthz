@@ -75,6 +75,15 @@ class Oauthz_Extension_Password extends Oauthz_Extension {
     {
         isset($_SERVER['CONTENT_TYPE']) OR $_SERVER['CONTENT_TYPE'] = getenv('CONTENT_TYPE');
 
+        // Parse the "state" paramter
+        if(isset($_POST['state']))
+        {
+            if($state = Oauthz::urldecode($_POST['state']))
+                $this->state['state'] = $state;
+
+            unset($args['state']);
+        }
+
         // oauth_token already send in authorization header or the encrypt Content-Type is not single-part
         if(empty($_POST) OR stripos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') === FALSE)
         {
@@ -104,7 +113,7 @@ class Oauthz_Extension_Password extends Oauthz_Extension {
                     }
                     else
                     {
-                        throw new Oauthz_Exception_Token('invalid_request');
+                        throw new Oauthz_Exception_Token('invalid_request', $this->state);
                     }
                 }
             }
@@ -117,7 +126,7 @@ class Oauthz_Extension_Password extends Oauthz_Extension {
      * @access	public
      * @param	array	$client
      * @return	Oauthz_Token
-     * @throw   Oauthz_Exception_Token    Error Codes: invalid_client, invalid_request, invalid_scope
+     * @throw   Oauthz_Exception_Token    Error Codes: unauthorized_client, invalid_request, invalid_scope
      */
     public function execute()
     {
@@ -128,16 +137,8 @@ class Oauthz_Extension_Password extends Oauthz_Extension {
         else
         {
             // Invalid client_id
-            $exception = new Oauthz_Exception_Token('invalid_client');
-
-            isset($this->state) AND $exception->state = $this->state;
-
-            throw $exception;
+            throw new Oauthz_Exception_Token('unauthorized_client', $this->state);
         }
-
-        $response = new Oauthz_Token;
-
-        isset($this->state) AND $response->state = $this->state;
 
         // TODO password should be hashed with much more stronger method
         if($client['client_secret'] !== sha1($this->client_secret)
@@ -145,29 +146,24 @@ class Oauthz_Extension_Password extends Oauthz_Extension {
             OR $client['password'] !== sha1($this->password)
             OR $client['redirect_uri'] !== $this->redirect_uri)
         {
-            $exception = new Oauthz_Exception_Token('invalid_request');
-
-            isset($this->state) AND $exception->state = $this->state;
-
-            throw $exception;
+            throw new Oauthz_Exception_Token('unauthorized_client', $this->state);
         }
 
-        if(isset($this->scope) AND ! empty($client['scope']) 
+        if(isset($this->scope) AND ! empty($client['scope'])
             AND ! in_array($this->scope, explode(' ', $client['scope'])))
         {
-            $exception = new Oauthz_Exception_Token('invalid_scope');
-
-            isset($this->state) AND $exception->state = $this->state;
-
-            throw $exception;
+            throw new Oauthz_Exception_Token('invalid_scope', $this->state);
         }
 
-        // TODO configurable token type
-        $response->token_type       = 'BEARER';
-        $response->access_token     = $client['access_token'];
-        $response->refresh_token    = $client['refresh_token'];
+        $token = new Oauthz_Token;
 
-        return $response;
+        $token->token_type       = $client['token_type'];
+        $token->access_token     = $client['access_token'];
+        $token->refresh_token    = $client['refresh_token'];
+
+        isset($this->state) AND $token->state = $this->state['state'];
+
+        return $token;
     }
 
 } // END Oauthz_Extension_Password

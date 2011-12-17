@@ -53,22 +53,19 @@ abstract class Oauthz_Api extends Kohana_Controller {
                 // Process the access token from the request header or body
                 $authorization = Oauthz_Authorization::initialize($config['token']);
 
-                $token = new Model_Oauthz_Token;
-
                 // Load the token information from database
-                if( ! $client = $token->access_token($authorization->client_id(), $authorization->token()))
+                if( ! $client = Model_Oauthz::factory('Token')
+                    ->access_token($authorization->client_id(), $authorization->token()))
                 {
                     throw new Oauthz_Exception_Access('unauthorized_client');
                 }
-
-                $client['timestamp'] += $config['durations']['oauth_token'];
 
                 // Verify the access token
                 $authorization->authenticate($client);
             }
             catch (Oauthz_Exception $e)
             {
-                $this->error = $e->getMessage();
+                $this->exception = $e;
 
                 // Redirect the action to unauthenticated
                 $request->action = 'unauthenticated';
@@ -88,14 +85,7 @@ abstract class Oauthz_Api extends Kohana_Controller {
      */
     public function action_unauthenticated()
     {
-        $error['error'] = $this->error;
-
-        $config = Kohana::config('oauth-server')->get($this->_type);
-
-        // Get the error description from config settings
-        $error += $config['access_errors'][$error['error']];
-
-        if($error['error'] === 'invalid_client')
+        if($this->exception->error === 'invalid_client')
         {
             // HTTP/1.1 401 Unauthorized
             $this->request->status = 401;
@@ -112,7 +102,7 @@ abstract class Oauthz_Api extends Kohana_Controller {
         $this->request->headers['Content-Type']     = 'application/json';
         $this->request->headers['Expires']          = 'Sat, 26 Jul 1997 05:00:00 GMT';
         $this->request->headers['Cache-Control']    = 'no-store, must-revalidate';
-        $this->request->response = json_encode($error);
+        $this->request->response                    = $this->exception->as_json();
     }
 
     /**

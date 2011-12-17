@@ -3,7 +3,7 @@
  *
  * @author      sumh <42424861@qq.com>
  * @package     Oauth
- * @copyright   (c) 2010 OALite
+ * @copyright   (c) 2011 OALite
  * @license     ISC License (ISCL)
  * @link        http://oalite.com
  */
@@ -16,17 +16,17 @@ CREATE TABLE t_oauth_authorizes
 	user_id BIGINT UNSIGNED NULL,
 	client_id VARCHAR(127) NOT NULL,
 	redirect_uri VARCHAR(511) NOT NULL,
-	confirm_type TINYINT UNSIGNED NOT NULL DEFAULT 0
-		COMMENT 'Request confirm, 0: every time; 1: only once; 2: with expired period; 3: once and banned',
-	client_level TINYINT UNSIGNED NOT NULL DEFAULT 0
-		COMMENT 'diferent client levels have different max request times',
-	modified INTEGER UNSIGNED NULL,
-	created INTEGER UNSIGNED NOT NULL,
+	confirm_type TINYINT UNSIGNED DEFAULT 0
+		COMMENT 'Request confirm, 0: every time; 1: only once; 2: with expired period; 3: once and banned' NOT NULL,
+	client_level TINYINT UNSIGNED DEFAULT 0
+		COMMENT 'diferent client levels have different max request times' NOT NULL,
+	client_desc TEXT NULL,
+	expires_in INTEGER UNSIGNED 
+		COMMENT 'date time' NULL,
 	scope VARCHAR(511) NULL,
-	expired_date INTEGER UNSIGNED NULL 
-		COMMENT 'date time',
-	remark TEXT NULL,
-	client_desc TEXT NULL
+	created INTEGER UNSIGNED NOT NULL,
+	modified INTEGER UNSIGNED NULL,
+	remark TEXT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /* Table Items: t_oauth_authorizes */
@@ -41,36 +41,36 @@ ALTER TABLE t_oauth_authorizes COMMENT = 'Store audit information from resource 
 /* Build Table Structure */
 CREATE TABLE t_oauth_clients
 (
-	server_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	client_id VARCHAR(127) NOT NULL 
-		COMMENT 'AKA. API key',
-	client_secret VARCHAR(127) NOT NULL 
-		COMMENT 'AKA. API secret',
-	redirect_uri VARCHAR(511) NOT NULL 
-		COMMENT 'AKA. Callback URI',
-	scope VARCHAR(255) NULL 
-		COMMENT 'May be create, read, update or delete. so on so for',
-	secret_type ENUM('plaintext','md5','rsa-sha1','hmac-sha1') NOT NULL DEFAULT 'plaintext'
-		COMMENT 'Secret signature encrypt type. e.g',
-	ssh_key VARCHAR(511) NULL 
-		COMMENT 'SSH public keys',
-	app_name VARCHAR(127) NOT NULL 
-		COMMENT 'Application Name',
-	app_desc TEXT NULL 
-		COMMENT 'Application Description, When users authenticate via your app, this is what they\'ll see.',
-	app_profile ENUM('webserver','native','useragent','autonomous') NOT NULL DEFAULT 'webserver'
-		COMMENT 'Application Profile: Web Server Application, Native Application, Browser Application, Autonomous clients',
+	server_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+	client_id VARCHAR(127) 
+		COMMENT 'AKA. API key' NOT NULL,
+	client_secret VARCHAR(127) 
+		COMMENT 'AKA. API secret' NOT NULL,
+	redirect_uri VARCHAR(511) 
+		COMMENT 'AKA. Callback URI' NOT NULL,
+	scope VARCHAR(255) 
+		COMMENT 'May be create, read, update or delete. so on so for' NULL,
+	secret_type ENUM('plaintext','md5','rsa-sha1','hmac-sha1') DEFAULT 'plaintext'
+		COMMENT 'Secret signature encrypt type. e.g' NOT NULL,
+	ssh_key VARCHAR(511) 
+		COMMENT 'SSH public keys' NULL,
+	app_name VARCHAR(127) 
+		COMMENT 'Application Name' NOT NULL,
+	app_desc TEXT 
+		COMMENT 'Application Description, When users authenticate via your app, this is what they\'ll see.' NULL,
+	app_profile ENUM('webserver','native','useragent','autonomous') DEFAULT 'webserver'
+		COMMENT 'Application Profile: Web Server Application, Native Application, Browser Application, Autonomous clients' NOT NULL,
 	app_purpose VARCHAR(511) NULL,
-	user_id BIGINT UNSIGNED NULL 
-		COMMENT 'Ref# from users table',
-	user_level TINYINT UNSIGNED NOT NULL DEFAULT 0
-		COMMENT 'diferent client levels have different max request times',
-	enabled TINYINT UNSIGNED NOT NULL DEFAULT 1
-		COMMENT '0: waiting for system administrator audit; 1: acceptable; 2: ban',
-	created INTEGER UNSIGNED NOT NULL 
-		COMMENT 'create datetime',
-	modified INTEGER UNSIGNED NULL 
-		COMMENT 'modified datetime'
+	user_id BIGINT UNSIGNED 
+		COMMENT 'Ref# from users table' NULL,
+	user_level TINYINT UNSIGNED DEFAULT 0
+		COMMENT 'diferent client levels have different max request times' NOT NULL,
+	enabled TINYINT UNSIGNED DEFAULT 1
+		COMMENT '0: waiting for system administrator audit; 1: acceptable; 2: ban' NOT NULL,
+	created INTEGER UNSIGNED 
+		COMMENT 'create datetime' NOT NULL,
+	modified INTEGER UNSIGNED 
+		COMMENT 'modified datetime' NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /* Table Items: t_oauth_clients */
@@ -86,7 +86,7 @@ CREATE UNIQUE INDEX idx_t_oauth_clients_client_id ON t_oauth_clients (client_id)
 /* Build Table Structure */
 CREATE TABLE t_oauth_logs
 (
-	log_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	log_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
 	client_id VARCHAR(127) NULL,
 	token VARCHAR(63) NULL,
 	user_id BIGINT UNSIGNED NULL,
@@ -111,19 +111,25 @@ CREATE INDEX idx_t_oauth_logs_client_id_log_id ON t_oauth_logs (client_id, log_i
 /* Build Table Structure */
 CREATE TABLE t_oauth_tokens
 (
-	token_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	token_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
 	client_id VARCHAR(127) NOT NULL,
+	user_id BIGINT UNSIGNED 
+		COMMENT 'Ref# from users table' NOT NULL,
 	code VARCHAR(127) NOT NULL,
 	access_token VARCHAR(63) NOT NULL,
 	refresh_token VARCHAR(63) NULL,
-	expires_in INTEGER UNSIGNED NOT NULL DEFAULT 300,
-	`timestamp` INTEGER UNSIGNED NOT NULL,
-	token_type VARCHAR(31) NOT NULL 
-		COMMENT 'bearer',
-	user_id BIGINT NOT NULL 
-		COMMENT 'Ref# from users table',
-	option TEXT NULL 
-		COMMENT 'parameters for different token type extension in json format'
+	expire_code INTEGER UNSIGNED DEFAULT 300
+		COMMENT 'authorization code expires in this timestamp' NOT NULL,
+	expire_token INTEGER UNSIGNED DEFAULT 0
+		COMMENT 'access token expires in this timestamp' NOT NULL,
+	expire_refresh INTEGER UNSIGNED DEFAULT 0
+		COMMENT 'refresh token expires in this timestamp' NOT NULL,
+	`timestamp` INTEGER UNSIGNED 
+		COMMENT 'authorization code request timestamp' NOT NULL,
+	token_type VARCHAR(31) 
+		COMMENT 'bearer, mac, etc.' NOT NULL,
+	option TEXT 
+		COMMENT 'parameters for different token type extension in json format' NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /* Table Items: t_oauth_tokens */

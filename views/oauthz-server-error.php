@@ -18,7 +18,7 @@
                     $count = FALSE;
                 }
             ?><td><a href="/<?php echo $uri.$error_code;
-            ?>"><?php echo $error_code; ?></a></td><td><?php echo $error_info['error_description']; ?></td><td>/<?php
+            ?>"><?php echo $error_code; ?></a></td><td><?php echo $error_info; ?></td><td>/<?php
                 echo $uri.$error_code; ?></td></tr><?php
         }
         echo '</tbody>';
@@ -36,7 +36,7 @@
                     $count = FALSE;
                 }
             ?><td><a href="/<?php echo $uri.$error_code;
-            ?>"><?php echo $error_code; ?></a></td><td><?php echo $error_info['error_description']; ?></td><td>/<?php
+            ?>"><?php echo $error_code; ?></a></td><td><?php echo $error_info; ?></td><td>/<?php
                 echo $uri.$error_code; ?></td></tr><?php
         }
         echo '</tbody>';
@@ -54,7 +54,7 @@
                     $count = FALSE;
                 }
             ?><td><a href="/<?php echo $uri.$error_code;
-            ?>"><?php echo $error_code; ?></a></td><td><?php echo $error_info['error_description']; ?></td><td>/<?php
+            ?>"><?php echo $error_code; ?></a></td><td><?php echo $error_info; ?></td><td>/<?php
                 echo $uri.$error_code; ?></td></tr><?php
         }
         echo '</tbody>';

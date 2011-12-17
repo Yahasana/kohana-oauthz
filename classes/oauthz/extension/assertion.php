@@ -73,19 +73,12 @@ class Oauthz_Extension_Assertion extends Oauthz_Extension {
 
         if( ! $client = $token->assertion($this->client_id))
         {
-            throw new Oauthz_Exception_Token('invalid_client');
+            throw new Oauthz_Exception_Token('unauthorized_client', $this->state);
         }
-        
-        $response = new Oauthz_Token;
 
         if($client['assertion_type'] !== $this->assertion_type)
         {
-            $response->error = 'unknown-format';
-            return $response;
-        }
-        else
-        {
-            $response->assertion_type = $this->assertion_type;
+            throw new Oauthz_Exception_Token('unknown-format', $this->state);
         }
 
         if($client['assertion'] !== $this->assertion
@@ -93,15 +86,17 @@ class Oauthz_Extension_Assertion extends Oauthz_Extension {
             OR (property_exists($this, 'client_secret') AND $client['client_secret'] !== sha1($this->client_secret))
             OR (property_exists($this, 'scope') AND ! isset($client['scope'][$this->scope]))
         {
-            $response->error = 'invalid_request';
-            return $response;
+            throw new Oauthz_Exception_Token('invalid_request', $this->state);
         }
+
+        $token = new Oauthz_Token;
 
         // Grants Authorization
         // The authorization server SHOULD NOT issue a refresh token.
-        $response->access_token = $client['access_token'];
+        $token->access_token = $client['access_token'];
+        $token->assertion_type = $this->assertion_type;
 
-        return $response;
+        return $token;
     }
 
 } // END Oauthz_Extension_Assertion

@@ -31,11 +31,7 @@ abstract class Oauthz_Controller extends Kohana_Controller {
 
     public function before()
     {
-        $this->_configs = Kohana::config('oauth-server.'.$this->_type);
-        // TODO refactor this stupid code
-        Oauthz_Exception::$errors[$this->_type]['code_errors']      = $this->_configs['code_errors'];
-        Oauthz_Exception::$errors[$this->_type]['token_errors']     = $this->_configs['token_errors'];
-        Oauthz_Exception::$errors[$this->_type]['access_errors']    = $this->_configs['access_errors'];
+        $this->_configs = Kohana::config('oauth-server')->get($this->_type);
     }
 
     /**
@@ -57,7 +53,6 @@ abstract class Oauthz_Controller extends Kohana_Controller {
 
                 if($extension = Oauthz_Extension::factory($response_type, $arguments))
                 {
-                    $extension->expires_in = $this->_configs['durations']['code'];
                     $response = $extension->execute();
                 }
             }
@@ -65,15 +60,18 @@ abstract class Oauthz_Controller extends Kohana_Controller {
             // This response type is unsupported
             if( ! isset($response))
             {
-                $response = '/oauth/error/unsupported_response_type?state='.Arr::get($params, 'state');
+                $params = isset($params['state']) ? array('state' => $params['state']) : NULL;
+
+                throw new Oauthz_Exception_Authorize('unsupported_response_type', $params);
             }
         }
         catch (Oauthz_Exception $e)
         {
-            $response = (string) $e;
+            $response = $e->as_query();
         }
 
-        $this->request->status = 302; #HTTP/1.1 302 Found
+        // HTTP/1.1 302 Found
+        $this->request->status = 302;
         $this->request->headers['Content-Type'] = 'application/x-www-form-urlencoded';
         $this->request->redirect($response);
     }
@@ -95,7 +93,6 @@ abstract class Oauthz_Controller extends Kohana_Controller {
 
                 if($extension = Oauthz_Extension::factory($grant_type, $arguments))
                 {
-                    $extension->expires_in = $this->_configs['durations']['oauth_token'];
                     $response = $extension->execute();
                 }
             }
@@ -113,14 +110,17 @@ abstract class Oauthz_Controller extends Kohana_Controller {
                  * HTTP/1.1 400 Bad Request for other authentication scheme
                  */
                 $this->request->status = 400;
-                $this->request->headers['Content-Type'] = 'application/json';
 
-                throw new Oauthz_Exception_Token('unsupported_grant_type');
+                $params = Oauthz::get('state') ? array('state' => Oauthz::get('state')) : NULL;
+
+                throw new Oauthz_Exception_Token('unsupported_grant_type', $params);
             }
         }
         catch (Oauthz_Exception $e)
         {
-            $response = $e->getMessage();
+            $this->request->headers['Content-Type'] = 'application/json';
+
+            $response = $e->as_json();
         }
 
         $this->request->headers['Expires']          = 'Sat, 26 Jul 1997 05:00:00 GMT';

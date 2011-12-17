@@ -11,10 +11,6 @@
  */
 class Oauthz_Exception extends Exception {
 
-	public static $type = 'default';
-
-    public static $errors = array();
-
 	/**
 	 * REQUIRED.  A single error code
 	 *
@@ -47,24 +43,69 @@ class Oauthz_Exception extends Exception {
 	 *
 	 * @access	public
 	 * @param	string	$message
-	 * @param	string	$group	default [ 'default' ]
+	 * @param	string	$state	extras parameters
 	 * @param	string	$code	default [ 0 ]
 	 * @return	void
 	 */
-	public function __construct($message, $code = 0)
+	public function __construct($message, array $state = NULL, $code = 0)
 	{
-        if( ! isset(self::$errors[self::$type]))
-        {
-            $config = Kohana::config('oauth-server')->get(self::$type);
-            self::$errors[self::$type]['code_errors'] = $config['code_errors'];
-            self::$errors[self::$type]['token_errors'] = $config['token_errors'];
-            self::$errors[self::$type]['access_errors'] = $config['access_errors'];
-        }
-
         $this->error = $message;
 
 		// Pass the message to the parent
 		parent::__construct($message, $code);
+	}
+
+	public function as_json()
+	{
+        $params = array('error' => $this->error) + (array) $this->state;
+
+        if(isset($params['error_uri']))
+        {
+            $params['error_uri'] = url::site($params['error_uri'], TRUE);
+        }
+        else
+        {
+            $params['error_uri'] = url::site($this->error_uri, TRUE);
+        }
+
+        if(isset($params['error_description']))
+        {
+            $params['error_description'] = __($params['error_description']);
+        }
+        else
+        {
+            $params['error_description'] = __($this->error_description);
+        }
+
+        return json_encode(array_filter($params));
+	}
+
+	public function as_query()
+	{
+        $params = array('error' => $this->error) + (array) $this->state;
+
+        if(isset($params['error_uri']))
+        {
+            $error_uri = $params['error_uri'];
+
+            // don't append error_uri to querystring
+            unset($params['error_uri']);
+        }
+        else
+        {
+            $error_uri = $this->error_uri;
+        }
+
+        if(isset($params['error_description']))
+        {
+            $params['error_description'] = __($params['error_description']);
+        }
+        else
+        {
+            $params['error_description'] = __($this->error_description);
+        }
+
+        return url::site($error_uri, TRUE).'?'.http_build_query(array_filter($params), '', '&');
 	}
 
 } // END OAuth_Exception

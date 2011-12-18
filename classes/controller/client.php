@@ -28,12 +28,12 @@ class Controller_Client extends Oauthz_Client {
             $resource = Remote::get('http://docs/api/get/1',array(
                 CURLOPT_POST        => TRUE,
                 CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=UTF-8'),
-                CURLOPT_POSTFIELDS  => Oauthz::build_query(array(
+                CURLOPT_POSTFIELDS  => http_build_query(array(
                      'client_id'         => 'OA_4bfbc43769917',
                      //'oauth_token'       => $token->access_token,
                      //'refresh_token'     => $token->refresh_token,
                      //'expires_in'        => $token->expires_in
-                ))
+                ), '', '&')
             ));
         }
         catch (Exception $e)

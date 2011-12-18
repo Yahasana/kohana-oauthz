@@ -30,11 +30,30 @@ return array(
          * Parameters should be required when access protected resource
          * cryptographic token or bear token
          */
-        'token'    => array(
-            'access_token'  => '',
-            'token_type'    => '',
-            'refresh_token' => '',
-            'scope'         => '',
+        'bearer'    => array(
+            'access_token'  => TRUE,
+            'scope'         => FALSE,
+        ),
+
+        'md5'    => array(
+            'access_token'  => TRUE,
+            'token_type'    => TRUE,
+            'refresh_token' => TRUE,
+            'scope'         => FALSE,
+        ),
+
+        'hmac-sha1'    => array(
+            'access_token'  => TRUE,
+            'token_type'    => TRUE,
+            'refresh_token' => TRUE,
+            'scope'         => FALSE,
+        ),
+
+        'rsa-sha1'    => array(
+            'access_token'  => TRUE,
+            'token_type'    => TRUE,
+            'refresh_token' => TRUE,
+            'scope'         => FALSE,
         ),
 
         'max_requests'  => array(

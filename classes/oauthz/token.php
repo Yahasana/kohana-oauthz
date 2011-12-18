@@ -95,7 +95,7 @@ class Oauthz_Token {
 
             isset($this->error_description) AND $form['error_description'] = $this->error_description;
         }
-        return Oauthz::build_query($form);
+        return http_build_query($form, '', '&');
     }
 
     public function as_html()

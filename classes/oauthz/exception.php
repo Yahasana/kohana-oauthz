@@ -14,19 +14,19 @@ class Oauthz_Exception extends Exception {
 	/**
 	 * REQUIRED.  A single error code
 	 *
-	 * @access	protected
+	 * @access	public
 	 * @var		string	$error
 	 */
-    protected $error;
+    public $error;
 
 	/**
 	 * OPTIONAL.  A human-readable text providing additional information,
 	 *   used to assist in the understanding and resolution of the error occurred.
 	 *
-	 * @access	protected
+	 * @access	public
 	 * @var		string	$error_description
 	 */
-    protected $error_description;
+    public $error_description;
 
 	/**
 	 * OPTIONAL.  A URI identifying a human-readable web page with
@@ -49,8 +49,8 @@ class Oauthz_Exception extends Exception {
 	 */
 	public function __construct($message, array $state = NULL, $code = 0)
 	{
-        $this->error        = $message;
-        $this->state        = (array) $state;
+        $this->error = $message;
+        $this->state = array_filter((array) $state);
 
 		// Pass the message to the parent
 		parent::__construct($message, $code);
@@ -78,7 +78,7 @@ class Oauthz_Exception extends Exception {
             $params['error_description'] = $this->error_description;
         }
 
-        return json_encode(array_filter($params));
+        return json_encode($params);
 	}
 
 	public function as_query()
@@ -101,12 +101,14 @@ class Oauthz_Exception extends Exception {
             // don't append error_uri to querystring
             unset($params['error_uri']);
 
-            $error_uri .= '?'.http_build_query(array_filter($params), '', '&');
+            $error_uri .= '?'.http_build_query($params, '', '&');
         }
         else
         {
             // no need to expose error, error_description
             $error_uri = url::site(Oauthz::config('error_uri'), TRUE).'/'.$this->error;
+            
+            empty($this->state) OR $error_uri .= '?'.http_build_query($this->state, '', '&');
         }
 
         return $error_uri;

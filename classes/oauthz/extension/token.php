@@ -45,7 +45,7 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
             {
                 foreach($matches as $match)
                 {
-                    if($value = Oauthz::urldecode($match[2] ?: $match[3]))
+                    if($value = trim($match[2] ?: $match[3]))
                     {
                         $params[$match[1]]  = $value;
                     }
@@ -55,7 +55,7 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
             if(isset($params['token']))
             {
                 // Parse the "state" paramter
-                if(isset($params['state']) AND $state = Oauthz::urldecode($params['state']))
+                if(isset($params['state']) AND $state = trim($params['state']))
                     $this->state['state'] = $state;
 
                 $params['oauth_token'] = $params['token'];
@@ -92,6 +92,15 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
         {
             isset($_SERVER['CONTENT_TYPE']) OR $_SERVER['CONTENT_TYPE'] = getenv('CONTENT_TYPE');
 
+            // Parse the "state" paramter
+            if(isset($_POST['state']))
+            {
+                if($state = trim($_POST['state']))
+                    $this->state['state'] = $state;
+
+                unset($args['state']);
+            }
+
             // oauth_token already send in authorization header or the encrypt Content-Type is not single-part
             if(isset($params['oauth_token']) OR stripos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') === FALSE)
             {
@@ -99,15 +108,6 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
             }
             else
             {
-                // Parse the "state" paramter
-                if(isset($_POST['state']))
-                {
-                    if($state = Oauthz::urldecode($_POST['state']))
-                        $this->state['state'] = $state;
-
-                    unset($args['state']);
-                }
-
                 // TODO move this request data detect into authorization handler
                 if(isset($_SERVER['PHP_AUTH_USER']) AND isset($_SERVER['PHP_AUTH_PW']))
                 {
@@ -124,7 +124,7 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
                 {
                     if($val === TRUE)
                     {
-                        if(isset($_POST[$key]) AND $value = Oauthz::urldecode($_POST[$key]))
+                        if(isset($_POST[$key]) AND $value = trim($_POST[$key]))
                         {
                             $this->$key = $value;
                         }
@@ -148,6 +148,15 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
          */
         if(isset($_GET['oauth_token']))
         {
+            // Parse the "state" paramter
+            if(isset($_GET['state']))
+            {
+                if($state = trim($_GET['state']))
+                    $this->state['state'] = $state;
+
+                unset($args['state']);
+            }
+
             // oauth_token already send in authorization header or form-encoded body
             if(isset($params['oauth_token']))
             {
@@ -155,21 +164,12 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
             }
             else
             {
-                // Parse the "state" paramter
-                if(isset($_GET['state']))
-                {
-                    if($state = Oauthz::urldecode($_GET['state']))
-                        $this->state['state'] = $state;
-
-                    unset($args['state']);
-                }
-
                 // Check all required parameters should NOT be empty
                 foreach($args as $key => $val)
                 {
                     if($val === TRUE)
                     {
-                        if(isset($_GET[$key]) AND $value = Oauthz::urldecode($_GET[$key]))
+                        if(isset($_GET[$key]) AND $value = trim($_GET[$key]))
                         {
                             $this->$key = $value;
                         }

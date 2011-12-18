@@ -106,13 +106,12 @@ class Model_Oauthz_Token extends Model_Oauthz {
         return $client;
     }
 
-    public function access_token($client_id, $code, $expires_in = 3600)
+    public function access_token($token)
     {
         if($token = DB::select('access_token','token_type','refresh_token'
                 ,array('expire_token', 'expires_in'),'option')
             ->from('t_oauth_tokens')
-            ->where('client_id' , '=', $client_id)
-            ->where('code' , '=', $code)
+            ->where('access_token', '=', $token)
             ->execute($this->_db)
             ->current())
         {

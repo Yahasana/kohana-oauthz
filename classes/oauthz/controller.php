@@ -21,12 +21,10 @@ abstract class Oauthz_Controller extends Kohana_Controller {
      */
     public function action_authorize()
     {
-        $params = Oauthz::parse_query();
-
         try
         {
             // There is handler  for this response type
-            if($response_type = Arr::get($params, 'response_type'))
+            if($response_type = Arr::get($_GET, 'response_type'))
             {
                 $arguments = Arr::get(Oauthz::config('params'), $response_type, array());
 
@@ -39,7 +37,7 @@ abstract class Oauthz_Controller extends Kohana_Controller {
             // This response type is unsupported
             if( ! isset($response))
             {
-                $params = isset($params['state']) ? array('state' => $params['state']) : NULL;
+                $params = isset($_GET['state']) ? array('state' => $_GET['state']) : NULL;
 
                 throw new Oauthz_Exception_Authorize('unsupported_response_type', $params);
             }

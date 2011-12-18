@@ -45,8 +45,7 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
         // Parse the "state" paramter
         if(isset($_GET['state']))
         {
-            if($state = Oauthz::urldecode($_GET['state']))
-                $this->state['state'] = $state;
+            $this->state['state'] = trim($_GET['state']);
 
             unset($args['state']);
         }
@@ -56,7 +55,7 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
         {
             if($val === TRUE)
             {
-                if(isset($_GET[$key]) AND $value = Oauthz::urldecode($_GET[$key]))
+                if(isset($_GET[$key]) AND $value = trim($_GET[$key]))
                 {
                     $this->$key = $value;
                 }

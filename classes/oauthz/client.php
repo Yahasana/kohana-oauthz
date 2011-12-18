@@ -57,6 +57,9 @@ class Oauthz_Client extends Kohana_Controller {
         $params = array_filter($this->_configs['code']);
         $params['response_type'] = 'code';
 
+        // Don't expose the client_secret
+        unset($params['client_secret']);
+
         $this->request->redirect($uri.'?'.http_build_query($params, '', '&'));
     }
 
@@ -66,7 +69,7 @@ class Oauthz_Client extends Kohana_Controller {
         try
         {
             $access_token = $this->token($uri);
-            
+
             // Resource in json format
             $this->request->response = Remote::get($this->_configs['resource-uri'], array(
                 CURLOPT_POST        => TRUE,
@@ -122,10 +125,10 @@ class Oauthz_Client extends Kohana_Controller {
             }
 
             // Request access token
-            $token = Remote::get($this->_configs['token-uri'],array(
+            $token = Remote::get($this->_configs['token-uri'], array(
                 CURLOPT_POST        => TRUE,
                 CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=utf-8'),
-                CURLOPT_POSTFIELDS  => Ohttp_build_query($params, '', '&')
+                CURLOPT_POSTFIELDS  => http_build_query($params, '', '&')
             ));
 
             $token = json_decode($token, TRUE);

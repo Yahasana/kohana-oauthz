@@ -12,42 +12,60 @@
 abstract class Oauthz_Authentication {
 
     protected $_client_id;
-    
+
     protected $_token;
 
-    public static function factory(array $params)
+    public static function factory($token_type, array $config, array $params)
     {
-        switch(Request::$method)
-        {
-            case 'POST':
-                $token_type = Arr::get($_POST, 'token_type');
-                break;
-            case 'GET':
-                $token_type = Arr::get($_GET, 'token_type');
-                break;
-        }
+        $token_type = 'Oauthz_Token_'.$token_type;
 
-        if(isset($token_type))
-        {
-            $token_type = 'Oauthz_Token_'.$token_type;
+        $oauth = new $token_type;
 
-            if(class_exists($token_type))
+        foreach($config as $key => $val)
+        {
+            if($val === TRUE)
             {
-                return new $token_type($params);
+                if(isset($params[$key]) AND $value = trim($params[$key]))
+                {
+                    $oauth->$key = $value;
+                }
+                else
+                {
+                    throw new Oauthz_Exception_Token('invalid_token', self::state($params));
+                }
+            }
+            elseif($val !== FALSE)
+            {
+                $oauth->$key = $val;
             }
         }
 
-        throw new Oauthz_Exception_Token('invalid_token');
+        return $oauth;
     }
-    
+
     public function client_id()
     {
         return $this->_client_id;
     }
-    
+
     public function token()
     {
-        return $this->_token;
+        return $this->access_token;
+    }
+
+    public static function state($params)
+    {
+        // Parse the "state" paramter
+        if(isset($params['state']) AND ($state = trim($params['state'])))
+        {
+            $param = array('state' => $state);
+        }
+        else
+        {
+            $param = NULL;
+        }
+
+        return $param;
     }
 
     abstract public function authenticate($client);

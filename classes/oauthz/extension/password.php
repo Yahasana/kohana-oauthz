@@ -78,7 +78,7 @@ class Oauthz_Extension_Password extends Oauthz_Extension {
         // Parse the "state" paramter
         if(isset($_POST['state']))
         {
-            if($state = Oauthz::urldecode($_POST['state']))
+            if($state = trim($_POST['state']))
                 $this->state['state'] = $state;
 
             unset($args['state']);
@@ -107,7 +107,7 @@ class Oauthz_Extension_Password extends Oauthz_Extension {
             {
                 if($val === TRUE)
                 {
-                    if(isset($_POST[$key]) AND $value = Oauthz::urldecode($_POST[$key]))
+                    if(isset($_POST[$key]) AND $value = trim($_POST[$key]))
                     {
                         $this->$key = $value;
                     }

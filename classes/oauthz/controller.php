@@ -14,27 +14,6 @@
 abstract class Oauthz_Controller extends Kohana_Controller {
 
     /**
-     * Configuration group name
-     *
-     * @access	protected
-     * @var		string	$_type
-     */
-    protected $_type = 'default';
-
-    /**
-     * Configuration settings for OAuth
-     *
-     * @access  protected
-     * @var     mix    $_configs
-     */
-    protected $_configs = array();
-
-    public function before()
-    {
-        $this->_configs = Kohana::config('oauth-server')->get($this->_type);
-    }
-
-    /**
      * The end-user authenticates directly with the authorization server, and grants client access to its protected resources
      *
      * @access  public
@@ -49,7 +28,7 @@ abstract class Oauthz_Controller extends Kohana_Controller {
             // There is handler  for this response type
             if($response_type = Arr::get($params, 'response_type'))
             {
-                $arguments = Arr::get($this->_configs['params'], $response_type, array());
+                $arguments = Arr::get(Oauthz::config('params'), $response_type, array());
 
                 if($extension = Oauthz_Extension::factory($response_type, $arguments))
                 {
@@ -89,7 +68,7 @@ abstract class Oauthz_Controller extends Kohana_Controller {
             // There is handler for this grant type
             if($grant_type = Oauthz::get('grant_type'))
             {
-                $arguments = Arr::get($this->_configs['params'], $grant_type, array());
+                $arguments = Arr::get(Oauthz::config('params'), $grant_type, array());
 
                 if($extension = Oauthz_Extension::factory($grant_type, $arguments))
                 {

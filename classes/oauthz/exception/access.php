@@ -11,25 +11,14 @@
  */
 class Oauthz_Exception_Access extends Oauthz_Exception {
 
-	/**
-	 * Magic object-to-string method.
-	 *
-	 *     echo $exception;
-	 *
-	 * @return  string
-	 */
-	public function __toString()
+	public function __construct($message, array $state = NULL, $code = 0)
 	{
-        $desc = parent::$errors[parent::$type]['access_errors'][$this->error];
+        $error_description = I18n::get('Access Errors Response');
 
-        $params['error'] = $this->error;
+        $this->error_description = $error_description[$message];
 
-		// Set the error uri from config settings if it's not set. e.g. redirect_uri mismatch
-        $params['error_uri'] = url::site(empty($this->error_uri) ? $desc['error_uri'] : $this->error_uri, TRUE);
-
-        $params['error_description'] = empty($this->error_description) ? $desc['error_description'] : $this->error_description;
-
-		return json_encode($params);
+		// Pass the message to the parent
+		parent::__construct($message, $state, $code);
 	}
 
 } // END Oauthz_Exception_Access

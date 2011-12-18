@@ -7,10 +7,10 @@
  * @copyright   (c) 2011 OALite
  * @license     ISC License (ISCL)
  * @link        http://oalite.com
- * @see         Oauthz_Authorization
+ * @see         Oauthz_Authentication
  * *
  */
-class Oauthz_Token_Basic extends Oauthz_Authorization {
+class Oauthz_Token_Basic extends Oauthz_Authentication {
 
     public function authenticate($client)
     {

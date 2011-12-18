@@ -71,7 +71,8 @@ class Model_Oauthz_Token extends Model_Oauthz {
                     $option
                 ))
                 ->execute($this->_db);
-
+            
+            $client['token_type'] = $token_type;
             $client['expires_in'] = $expires_in;
 
             return $client;
@@ -90,10 +91,10 @@ class Model_Oauthz_Token extends Model_Oauthz {
         {
             if(DB::update('t_oauth_tokens')
                 ->set(array('expire_token' => $_SERVER['REQUEST_TIME'] + $expires_in))
-                ->where('code' => $code)
+                ->where('code', '=', $code)
                 ->execute($this->_db))
             {
-                $client += (array) DB::select('access_token','token_type','refresh_token'
+                $client += DB::select('access_token','token_type','refresh_token'
                         ,array('expire_token', 'expires_in'),'option')
                     ->from('t_oauth_tokens')
                     ->where('client_id' , '=', $client_id)

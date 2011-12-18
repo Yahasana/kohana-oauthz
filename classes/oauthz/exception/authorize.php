@@ -4,36 +4,21 @@
  *
  * @author      sumh <oalite@gmail.com>
  * @package     Oauthz
- * @copyright   (c) 2010 OALite
+ * @copyright   (c) 2011 OALite
  * @license     ISC License (ISCL)
  * @link        http://oalite.com
  * *
  */
 class Oauthz_Exception_Authorize extends Oauthz_Exception {
 
-    public $state;
-
-	/**
-	 * Magic object-to-string method.
-	 *
-	 *     echo $exception;
-	 *
-	 * @return  string
-	 */
-	public function __toString()
+	public function __construct($message, array $state = NULL, $code = 0)
 	{
-        $desc = parent::$errors[parent::$type]['code_errors'][$this->error];
+        $error_description = I18n::get('Authorization Errors Response');
 
-        $params['error'] = $this->error;
+        $this->error_description = $error_description[$message];
 
-        $params['error_description'] = empty($this->error_description) ? $desc['error_description'] : $this->error_description;
-
-        empty($this->state) OR $params['state'] = $this->state;
-
-        // Set the error uri from config settings if it's not set. e.g. redirect_uri mismatch
-        $error_uri = url::site(empty($this->error_uri) ? $desc['error_uri'] : $this->error_uri, TRUE);
-
-        return $error_uri.'?'.http_build_query($params);
+		// Pass the message to the parent
+		parent::__construct($message, $state, $code);
 	}
 
 } // END Oauthz_Exception_Authorize

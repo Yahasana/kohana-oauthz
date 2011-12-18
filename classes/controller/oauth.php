@@ -32,9 +32,9 @@ class Controller_Oauth extends Oauthz_Controller {
     {
         $error = array();
 
-        $errors['code_errors'] = I18n::get('code_errors');
-        $errors['token_errors'] = I18n::get('code_errors');
-        $errors['access_errors'] = I18n::get('code_errors');
+        $errors['code_errors'] = I18n::get('Authorization Errors Response');
+        $errors['token_errors'] = I18n::get('Token Errors Response');
+        $errors['access_errors'] = I18n::get('Access Errors Response');
 
         if(isset($errors['code_errors'][$error_code]))
         {

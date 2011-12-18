@@ -14,11 +14,11 @@ return array(
 
         // Parameters for Authorization Code flow
         'code' => array(
-            'client_id'     => 'OAL_4D2EA62621E4F',
-            'client_secret' => 'sss',
-            'token_type'   => 'BEARER', // BEARER, HMAC-SHA1, RSA-SHA1, MD5
+            'client_id'     => 'OAL@4EED687F28A72',
+            'client_secret' => '000000',
+            'token_type'    => 'bearer', // bearer, hmac-sha1, rsa-sha1, md5
             'scope'         => '',
-            'state'         => '',
+            'state'         => 'test',
             'redirect_uri'  => 'http://docs/client/do'
         ),
         // Parameters for Implicit Grant Flow

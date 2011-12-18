@@ -57,7 +57,7 @@ class Oauthz_Client extends Kohana_Controller {
         $params = array_filter($this->_configs['code']);
         $params['response_type'] = 'code';
 
-        $this->request->redirect($uri.'?'.Oauthz::build_query($params));
+        $this->request->redirect($uri.'?'.http_build_query($params, '', '&'));
     }
 
     /* Request an access token and then access the protected resource */
@@ -71,7 +71,7 @@ class Oauthz_Client extends Kohana_Controller {
             $this->request->response = Remote::get($this->_configs['resource-uri'], array(
                 CURLOPT_POST        => TRUE,
                 CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=utf-8'),
-                CURLOPT_POSTFIELDS  => Oauthz::build_query($access_token)
+                CURLOPT_POSTFIELDS  => http_build_query($access_token, '', '&')
             ));
         }
         catch(Exception $e)
@@ -103,12 +103,11 @@ class Oauthz_Client extends Kohana_Controller {
             switch($type)
             {
                 case 'code':
-                    $query = Oauthz::parse_query();
-                    if(empty($query['code']))
+                    if(empty($_GET['code']))
                     {
-                        throw new Oauthz_Exception(isset($query['error']) ? $query['error'] : 'Unknow error');
+                        throw new Oauthz_Exception(isset($_GET['error']) ? $_GET['error'] : 'Unknow error');
                     }
-                    $params['code']         = $query['code'];
+                    $params['code']         = $_GET['code'];
                     $params['grant_type']   = 'authorization_code';
                     break;
                 case 'token':
@@ -126,7 +125,7 @@ class Oauthz_Client extends Kohana_Controller {
             $token = Remote::get($this->_configs['token-uri'],array(
                 CURLOPT_POST        => TRUE,
                 CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=utf-8'),
-                CURLOPT_POSTFIELDS  => Oauthz::build_query($params)
+                CURLOPT_POSTFIELDS  => Ohttp_build_query($params, '', '&')
             ));
 
             $token = json_decode($token, TRUE);

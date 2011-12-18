@@ -47,17 +47,23 @@ abstract class Oauthz_Api extends Kohana_Controller {
                 // Verify the request method supported in the config settings
                 if(empty($config['methods'][Request::$method]))
                 {
-                    throw new Oauthz_Exception_Access('invalid_request');
+                    // get state parameter send from client
+                    $params = isset($_POST['state']) ? array('state' => $_POST['state']) : NULL;
+
+                    throw new Oauthz_Exception_Access('invalid_request', $params);
                 }
 
                 // Process the access token from the request header or body
-                $authorization = Oauthz_Authorization::initialize($config['token']);
+                $authorization = Oauthz_Authentication::factory($config['token']);
 
                 // Load the token information from database
                 if( ! $client = Model_Oauthz::factory('Token')
                     ->access_token($authorization->client_id(), $authorization->token()))
                 {
-                    throw new Oauthz_Exception_Access('unauthorized_client');
+                    // get state parameter send from client
+                    $params = isset($_POST['state']) ? array('state' => $_POST['state']) : NULL;
+
+                    throw new Oauthz_Exception_Access('unauthorized_client', $params);
                 }
 
                 // Verify the access token

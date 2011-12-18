@@ -11,7 +11,31 @@
  */
 abstract class Oauthz_Core {
 
-    public static $headers = NULL;
+    /**
+     * OAuth server configuration group name
+     *
+     * @access	protected
+     * @var		string	$_type
+     */
+    public static $type = 'default';
+
+    public static function config($key = NULL, $type = NULL)
+    {
+        static $config;
+
+        isset($type) OR $type = Oauthz::$type;
+
+        if( ! isset($config[$type]))
+        {
+            if( ! $config[$type] = Kohana::config('oauth-server')->get($type))
+            {
+                throw new Kohana_Exception('There is no ":group" in your config file oauth-server.php'
+                    , array(':group' => $type));
+            }
+        }
+
+        return isset($key) ? isset($config[$type][$key]) ? $config[$type][$key] : NULL : $config[$type];
+    }
 
     /**
      * Oauthz_Signature::factory alias

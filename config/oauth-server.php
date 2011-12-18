@@ -91,7 +91,6 @@ return array(
                 'client_secret'     => TRUE
             )
         ),
-
         'scopes'    => array(
             'get'       => TRUE,
             'create'    => TRUE,

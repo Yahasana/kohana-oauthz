@@ -9,13 +9,13 @@
  * @link        http://oalite.com
  * *
  */
-abstract class Oauthz_Authorization {
+abstract class Oauthz_Authentication {
 
     protected $_client_id;
     
     protected $_token;
 
-    public static function initialize(array $params)
+    public static function factory(array $params)
     {
         switch(Request::$method)
         {
@@ -52,4 +52,4 @@ abstract class Oauthz_Authorization {
 
     abstract public function authenticate($client);
 
-} // END Oauthz_Authorization
+} // END Oauthz_Authentication

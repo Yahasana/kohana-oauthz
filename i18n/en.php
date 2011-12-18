@@ -6,7 +6,7 @@ return array (
     'Access Protected Resource' => 'Access Protected Resource',
 
     // Error Response
-    'code_errors'   => array(
+    'Authorization Errors Response'   => array(
         'invalid_request'       => 'The request is missing a required parameter, includes an
                 unsupported parameter or parameter value, or is otherwise malformed.',
 
@@ -26,7 +26,7 @@ return array (
                                     request due to a temporary overloading or maintenance of the server.'
     ),
     // Error Response
-    'token_errors'  => array(
+    'Token Errors Response'  => array(
         'invalid_request'       => 'The request is missing a required parameter, includes an
                 unsupported parameter or parameter value, or is otherwise malformed.',
 
@@ -44,7 +44,7 @@ return array (
                                     request due to a temporary overloading or maintenance of the server.'
     ),
     // Error Response
-    'access_errors' => array(
+    'Access Errors Response' => array(
         'invalid_request'       => 'The request is missing a required parameter, includes an
                 unsupported parameter or parameter value, repeats a
                 parameter, includes multiple credentials, utilizes more

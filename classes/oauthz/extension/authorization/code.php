@@ -42,7 +42,7 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
         // Parse the "state" paramter
         if(isset($_POST['state']))
         {
-            if($state = trim($_POST['state']))
+            if($state = rawurldecode($_POST['state']))
                 $this->state['state'] = $state;
 
             unset($args['state']);
@@ -53,7 +53,7 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
         {
             if($val === TRUE)
             {
-                if(isset($_POST[$key]) AND $value = trim($_POST[$key]))
+                if(isset($_POST[$key]) AND $value = rawurldecode($_POST[$key]))
                 {
                     $this->$key = $value;
                 }
@@ -100,9 +100,8 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
         if($client['client_secret'] !== sha1($this->client_secret))
         {
             // Redirect to client uri
-            $params = array('error_uri' => $this->redirect_uri);
-
-            isset($this->state) AND $params['state'] = $this->state['state'];
+            $params              = $this->state;
+            $params['error_uri'] = $this->redirect_uri;
 
             throw new Oauthz_Exception_Token('unauthorized_client', $params);
         }
@@ -111,17 +110,25 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
         {
             if( ! in_array($this->scope, explode(' ', $client['scope'])))
             {
-                $params = array('error_uri' => $this->redirect_uri);
-
-                isset($this->state) AND $params['state'] = $this->state['state'];
+                $params              = $this->state;
+                $params['error_uri'] = $this->redirect_uri;
 
                 throw new Oauthz_Exception_Authorize('invalid_scope', $params);
             }
         }
 
+        if($client['expires_in'] < $_SERVER['REQUEST_TIME'])
+        {
+            $params              = $this->state;
+            $params['error_uri'] = $this->redirect_uri;
+
+            throw new Oauthz_Exception_Access('invalid_grant', $params);
+        }
+
         // Everything is ok, then return the token
         $token = new Oauthz_Token;
 
+        // TODO: issue "mac" OAuth Access Token Type
         $token->token_type       = $client['token_type'];
         $token->access_token     = $client['access_token'];
         $token->refresh_token    = $client['refresh_token'];
@@ -136,7 +143,7 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
             }
         }
 
-        isset($this->state) AND $token->state = $this->state['state'];
+        isset($this->state['state']) AND $token->state = $this->state['state'];
 
         return $token;
     }

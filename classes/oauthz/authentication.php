@@ -25,13 +25,13 @@ abstract class Oauthz_Authentication {
         {
             if($val === TRUE)
             {
-                if(isset($params[$key]) AND $value = trim($params[$key]))
+                if(isset($params[$key]) AND $value = rawurldecode($params[$key]))
                 {
                     $oauth->$key = $value;
                 }
                 else
                 {
-                    throw new Oauthz_Exception_Token('invalid_token', self::state($params));
+                    throw new Oauthz_Exception_Access('invalid_grant', self::state($params));
                 }
             }
             elseif($val !== FALSE)
@@ -56,7 +56,7 @@ abstract class Oauthz_Authentication {
     public static function state($params)
     {
         // Parse the "state" paramter
-        if(isset($params['state']) AND ($state = trim($params['state'])))
+        if(isset($params['state']) AND ($state = rawurldecode($params['state'])))
         {
             $param = array('state' => $state);
         }
@@ -68,6 +68,6 @@ abstract class Oauthz_Authentication {
         return $param;
     }
 
-    abstract public function authenticate($client);
+    abstract public function verify($token);
 
 } // END Oauthz_Authentication

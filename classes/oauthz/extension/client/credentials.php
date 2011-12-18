@@ -134,29 +134,46 @@ class Oauthz_Extension_Client_Credentials extends Oauthz_Extension {
 
         if($client['client_secret'] !== sha1($this->client_secret))
         {
-            throw new Oauthz_Exception_Token('invalid_request', $this->state);
+            $params              = $this->state;
+            $params['error_uri'] = $this->redirect_uri;
+
+            throw new Oauthz_Exception_Token('invalid_request', $params);
         }
 
         if(isset($this->scope) AND ! empty($client['scope']))
         {
             if( ! in_array($this->scope, explode(' ', $client['scope'])))
             {
-                $params = array('error_uri' => $this->redirect_uri);
-
-                isset($this->state) AND $params['state'] = $this->state['state'];
+                $params              = $this->state;
+                $params['error_uri'] = $this->redirect_uri;
 
                 throw new Oauthz_Exception_Token('invalid_scope', $params);
             }
         }
 
+        if($client['expires_in'] < $_SERVER['REQUEST_TIME'])
+        {
+            throw new Oauthz_Exception_Access('invalid_grant', $this->state);
+        }
+
         $token = new Oauthz_Token;
 
+        // TODO: issue "mac" OAuth Access Token Type
         $token->token_type      = $client['token_type'];
         $token->access_token    = $client['access_token'];
         $token->refresh_token   = $client['refresh_token'];
         $token->expires_in      = $client['expires_in'];
 
-        isset($this->state) AND $token->state = $this->state['state'];
+        // merge other token properties, e.g. {"mac_key":"adijq39jdlaska9asud","mac_algorithm":"hmac-sha-256"}
+        if($client['option'] AND $option = json_decode($client['option'], TRUE))
+        {
+            foreach($option as $key => $val)
+            {
+                $token->$key = $val;
+            }
+        }
+
+        isset($this->state['state']) AND $token->state = $this->state['state'];
 
         return $token;
     }

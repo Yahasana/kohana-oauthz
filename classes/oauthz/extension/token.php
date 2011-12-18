@@ -45,7 +45,7 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
             {
                 foreach($matches as $match)
                 {
-                    if($value = trim($match[2] ?: $match[3]))
+                    if($value = rawurldecode($match[2] ?: $match[3]))
                     {
                         $params[$match[1]]  = $value;
                     }
@@ -55,7 +55,7 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
             if(isset($params['token']))
             {
                 // Parse the "state" paramter
-                if(isset($params['state']) AND $state = trim($params['state']))
+                if(isset($params['state']) AND $state = rawurldecode($params['state']))
                     $this->state['state'] = $state;
 
                 $params['oauth_token'] = $params['token'];
@@ -95,7 +95,7 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
             // Parse the "state" paramter
             if(isset($_POST['state']))
             {
-                if($state = trim($_POST['state']))
+                if($state = rawurldecode($_POST['state']))
                     $this->state['state'] = $state;
 
                 unset($args['state']);
@@ -124,7 +124,7 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
                 {
                     if($val === TRUE)
                     {
-                        if(isset($_POST[$key]) AND $value = trim($_POST[$key]))
+                        if(isset($_POST[$key]) AND $value = rawurldecode($_POST[$key]))
                         {
                             $this->$key = $value;
                         }
@@ -151,7 +151,7 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
             // Parse the "state" paramter
             if(isset($_GET['state']))
             {
-                if($state = trim($_GET['state']))
+                if($state = rawurldecode($_GET['state']))
                     $this->state['state'] = $state;
 
                 unset($args['state']);
@@ -169,7 +169,7 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
                 {
                     if($val === TRUE)
                     {
-                        if(isset($_GET[$key]) AND $value = trim($_GET[$key]))
+                        if(isset($_GET[$key]) AND $value = rawurldecode($_GET[$key]))
                         {
                             $this->$key = $value;
                         }
@@ -225,17 +225,27 @@ class Oauthz_Extension_Token extends Oauthz_Extension {
 
         if($client['expires_in'] < $_SERVER['REQUEST_TIME'])
         {
-            throw new Oauthz_Exception_Token('unauthorized_client', $this->state);
+            throw new Oauthz_Exception_Access('invalid_grant', $this->state);
         }
 
         $token = new Oauthz_Token;
 
+        // TODO: issue "mac" OAuth Access Token Type
         $token->token_type      = $client['token_type'];
         $token->access_token    = $client['access_token'];
         $token->refresh_token   = $client['refresh_token'];
         $token->expires_in      = $client['expires_in'];
 
-        isset($this->state) AND $token->state = $this->state['state'];
+        // merge other token properties, e.g. {"mac_key":"adijq39jdlaska9asud","mac_algorithm":"hmac-sha-256"}
+        if($client['option'] AND $option = json_decode($client['option'], TRUE))
+        {
+            foreach($option as $key => $val)
+            {
+                $token->$key = $val;
+            }
+        }
+
+        isset($this->state['state']) AND $token->state = $this->state['state'];
 
         return $this->redirect_uri.'#'.$token->as_query();
     }

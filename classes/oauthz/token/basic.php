@@ -12,11 +12,11 @@
  */
 class Oauthz_Token_Basic extends Oauthz_Authentication {
 
-    public function authenticate($client)
+    public function verify($token)
     {
-        if($data = Oauthz_Token_Basic::parse())
+        if($data = static::parse())
         {
-            $data = $data['client_id'] === $client['client_id'] AND $data['client_secret'] === $client['client_secret'];
+            $data = $data['client_id'] === $token['client_id'] AND $data['client_secret'] === $token['client_secret'];
         }
 
         return $data;

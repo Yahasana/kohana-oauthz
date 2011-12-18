@@ -58,25 +58,35 @@ class Oauthz_Exception extends Exception {
 
 	public function as_json()
 	{
-        $params = array('error' => $this->error) + $this->state;
+        $state = $this->state;
 
-        if(isset($params['error_uri']))
+        $params = array('error' => $this->error);
+
+        if(isset($state['error_uri']))
         {
-            $params['error_uri'] = url::site($params['error_uri'], TRUE);
+            $params['error_uri'] = url::site($state['error_uri'], TRUE);
+
+            // don't append the customize error_uri to querystring
+            unset($state['error_uri']);
         }
         else
         {
             $params['error_uri'] = url::site(Oauthz::config('error_uri'), TRUE).'/'.$this->error;
         }
 
-        if(isset($params['error_description']))
+        if(isset($state['error_description']))
         {
-            $params['error_description'] = __($params['error_description']);
+            $params['error_description'] = __($state['error_description']);
+
+            // don't append the customize error_description to querystring
+            unset($state['error_description']);
         }
         else
         {
             $params['error_description'] = $this->error_description;
         }
+
+        empty($state) OR $params['error_uri'] .= '?'.http_build_query($state, '', '&');
 
         return json_encode($params);
 	}
@@ -107,7 +117,7 @@ class Oauthz_Exception extends Exception {
         {
             // no need to expose error, error_description
             $error_uri = url::site(Oauthz::config('error_uri'), TRUE).'/'.$this->error;
-            
+
             empty($this->state) OR $error_uri .= '?'.http_build_query($this->state, '', '&');
         }
 

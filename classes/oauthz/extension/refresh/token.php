@@ -66,7 +66,7 @@ class Oauthz_Extension_Refresh_Token extends Oauthz_Extension {
         // Parse the "state" paramter
         if(isset($_POST['state']))
         {
-            if($state = trim($_POST['state']))
+            if($state = rawurldecode($_POST['state']))
                 $this->state['state'] = $state;
 
             unset($args['state']);
@@ -94,7 +94,7 @@ class Oauthz_Extension_Refresh_Token extends Oauthz_Extension {
             {
                 if($val === TRUE)
                 {
-                    if(isset($_POST[$key]) AND $value = trim($_POST[$key]))
+                    if(isset($_POST[$key]) AND $value = rawurldecode($_POST[$key]))
                     {
                         $this->$key = $value;
                     }
@@ -126,19 +126,28 @@ class Oauthz_Extension_Refresh_Token extends Oauthz_Extension {
             throw new Oauthz_Exception_Token('unauthorized_client', $this->state);
         }
 
-        if($client['client_secret'] !== sha1($this->client_secret)
-            OR $client['redirect_uri'] !== $this->redirect_uri)
+        if($client['redirect_uri'] !== $this->redirect_uri)
         {
-            throw new Oauthz_Exception_Token('invalid_request', $this->state);
+            throw new Oauthz_Exception_Token('unauthorized_client', $this->state);
+        }
+
+        if($client['client_secret'] !== sha1($this->client_secret))
+        {
+            $params              = $this->state;
+            $params['error_uri'] = $this->redirect_uri;
+
+            throw new Oauthz_Exception_Token('invalid_request', $params);
         }
 
         if(isset($this->scope) AND ! empty($client['scope']))
         {
-            $params = array('error_uri' => $this->redirect_uri);
+            if( ! in_array($this->scope, explode(' ', $client['scope'])))
+            {
+                $params              = $this->state;
+                $params['error_uri'] = $this->redirect_uri;
 
-            isset($this->state) AND $params['state'] = $this->state;
-
-            throw new Oauthz_Exception_Token('invalid_scope', $params);
+                throw new Oauthz_Exception_Token('invalid_scope', $params);
+            }
         }
 
         $token = new Oauthz_Token;
@@ -147,7 +156,16 @@ class Oauthz_Extension_Refresh_Token extends Oauthz_Extension {
         $token->access_token     = $client['access_token'];
         $token->refresh_token    = $client['refresh_token'];
 
-        isset($this->state) AND $token->state = $this->state['state'];
+        // merge other token properties, e.g. {"mac_key":"adijq39jdlaska9asud","mac_algorithm":"hmac-sha-256"}
+        if($client['option'] AND $option = json_decode($client['option'], TRUE))
+        {
+            foreach($option as $key => $val)
+            {
+                $token->$key = $val;
+            }
+        }
+
+        isset($this->state['state']) AND $token->state = $this->state['state'];
 
         return $token;
     }

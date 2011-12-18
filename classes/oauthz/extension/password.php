@@ -78,7 +78,7 @@ class Oauthz_Extension_Password extends Oauthz_Extension {
         // Parse the "state" paramter
         if(isset($_POST['state']))
         {
-            if($state = trim($_POST['state']))
+            if($state = rawurldecode($_POST['state']))
                 $this->state['state'] = $state;
 
             unset($args['state']);
@@ -107,7 +107,7 @@ class Oauthz_Extension_Password extends Oauthz_Extension {
             {
                 if($val === TRUE)
                 {
-                    if(isset($_POST[$key]) AND $value = trim($_POST[$key]))
+                    if(isset($_POST[$key]) AND $value = rawurldecode($_POST[$key]))
                     {
                         $this->$key = $value;
                     }
@@ -155,13 +155,31 @@ class Oauthz_Extension_Password extends Oauthz_Extension {
             throw new Oauthz_Exception_Token('invalid_scope', $this->state);
         }
 
+        if($client['expires_in'] < $_SERVER['REQUEST_TIME'])
+        {
+            $params              = $this->state;
+            $params['error_uri'] = $this->redirect_uri;
+
+            throw new Oauthz_Exception_Access('invalid_grant', $params);
+        }
+
         $token = new Oauthz_Token;
 
+        // TODO: issue "mac" OAuth Access Token Type
         $token->token_type       = $client['token_type'];
         $token->access_token     = $client['access_token'];
         $token->refresh_token    = $client['refresh_token'];
 
-        isset($this->state) AND $token->state = $this->state['state'];
+        // merge other token properties, e.g. {"mac_key":"adijq39jdlaska9asud","mac_algorithm":"hmac-sha-256"}
+        if($client['option'] AND $option = json_decode($client['option'], TRUE))
+        {
+            foreach($option as $key => $val)
+            {
+                $token->$key = $val;
+            }
+        }
+
+        isset($this->state['state']) AND $token->state = $this->state['state'];
 
         return $token;
     }

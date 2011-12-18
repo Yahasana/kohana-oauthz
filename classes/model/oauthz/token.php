@@ -41,6 +41,7 @@ class Model_Oauthz_Token extends Model_Oauthz {
             ->execute($this->_db)
             ->current())
         {
+            // Initial code, access_token, refresh_token at the same time
             $client['code'] = uniqid();
             $access_token   = sha1(md5($_SERVER['REQUEST_TIME']));
             $refresh_token  = sha1(sha1(mt_rand()));
@@ -71,7 +72,7 @@ class Model_Oauthz_Token extends Model_Oauthz {
                     $option
                 ))
                 ->execute($this->_db);
-            
+
             $client['token_type'] = $token_type;
             $client['expires_in'] = $expires_in;
 
@@ -89,20 +90,37 @@ class Model_Oauthz_Token extends Model_Oauthz {
             ->execute($this->_db)
             ->current())
         {
-            if(DB::update('t_oauth_tokens')
-                ->set(array('expire_token' => $_SERVER['REQUEST_TIME'] + $expires_in))
-                ->where('code', '=', $code)
-                ->execute($this->_db))
+            if($token = DB::select('token_id','access_token','token_type','refresh_token'
+                    ,array('expire_token', 'expires_in'),'option','expire_code')
+                ->from('t_oauth_tokens')
+                ->where('client_id' , '=', $client_id)
+                ->where('code' , '=', $code)
+                ->execute($this->_db)
+                ->current())
             {
-                $client += DB::select('access_token','token_type','refresh_token'
-                        ,array('expire_token', 'expires_in'),'option')
-                    ->from('t_oauth_tokens')
-                    ->where('client_id' , '=', $client_id)
-                    ->where('code' , '=', $code)
-                    ->execute($this->_db)
-                    ->current();
+                if($token['expire_code'] >= $_SERVER['REQUEST_TIME'] AND $token['expires_in'] == 0)
+                {
+                    // Start access_token expire time counter
+                    $token['expires_in'] = $_SERVER['REQUEST_TIME'] + $expires_in;
+
+                    // Update the expire timestamp of access_token to newest
+                    DB::update('t_oauth_tokens')
+                        ->set(array('expire_token' => $token['expires_in']))
+                        ->where('token_id', '=', $token['token_id'])
+                        ->execute($this->_db);
+                }
+
+                // Don't expose these
+                unset($token['token_id'], $token['expire_code']);
+
+                $client += $token;
+            }
+            else
+            {
+                $client = NULL;
             }
         }
+
         return $client;
     }
 

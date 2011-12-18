@@ -45,7 +45,7 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
         // Parse the "state" paramter
         if(isset($_GET['state']))
         {
-            $this->state['state'] = trim($_GET['state']);
+            $this->state['state'] = rawurldecode($_GET['state']);
 
             unset($args['state']);
         }
@@ -55,7 +55,7 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
         {
             if($val === TRUE)
             {
-                if(isset($_GET[$key]) AND $value = trim($_GET[$key]))
+                if(isset($_GET[$key]) AND $value = rawurldecode($_GET[$key]))
                 {
                     $this->$key = $value;
                 }
@@ -103,9 +103,8 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
             if( ! in_array($this->scope, explode(' ', $client['scope'])))
             {
                 // Redirect to client uri
-                $params = array('error_uri' => $this->redirect_uri);
-
-                isset($this->state) AND $params['state'] = $this->state['state'];
+                $params              = $this->state;
+                $params['error_uri'] = $this->redirect_uri;
 
                 throw new Oauthz_Exception_Authorize('invalid_scope', $params);
             }
@@ -118,7 +117,7 @@ class Oauthz_Extension_Code extends Oauthz_Extension {
         $token->token_type   = $client['token_type'];
         $token->expires_in   = $client['expires_in'];
 
-        isset($this->state) AND $token->state = $this->state['state'];
+        isset($this->state['state']) AND $token->state = $this->state['state'];
 
         return $this->redirect_uri.'?'.$token->as_query();
     }

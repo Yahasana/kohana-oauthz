@@ -12,9 +12,9 @@
  */
 class Oauthz_Token_Bearer extends Oauthz_Authentication {
 
-    public function authenticate($client)
+    public function verify($token)
     {
-        if($data = Oauthz_Token_Bearer::parse())
+        if($data = static::parse())
         {
             // TODO
         }

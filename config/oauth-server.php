@@ -44,7 +44,7 @@ return array(
                 'scope'             => FALSE,
                 'state'             => FALSE,
                 // authorization code expires time, default is 2 minutes
-                'expires_in'        => 120,
+                'expires_in'        => 60,
 
                 // The follow Parameters are used for access token request
                 'token_type'        => 'bearer'
@@ -55,8 +55,8 @@ return array(
                 'redirect_uri'      => TRUE,
                 'client_id'         => TRUE,
                 'client_secret'     => TRUE,
-                // authorization code expires time, default is 2 minutes
-                'expires_in'        => 120
+                // authorization code expires time, default is 5 minutes
+                'expires_in'        => 300
             ),
             'token'                 => array(
                 'code'              => TRUE,
@@ -65,6 +65,8 @@ return array(
                 'client_secret'     => TRUE,
                 'scope'             => FALSE,
                 'state'             => FALSE,
+                'mac_key'           => FALSE,
+                'mac_algorithm'     => FALSE,
                 // token expires time, default is 1 hour
                 'expires_in'        => 3600
             ),
@@ -73,6 +75,8 @@ return array(
                 'password'          => TRUE,
                 'client_id'         => TRUE,
                 'client_secret'     => TRUE,
+                'mac_key'           => FALSE,
+                'mac_algorithm'     => FALSE,
                 // token expires time, default is 1 hour
                 'expires_in'        => 3600
             ),
@@ -80,6 +84,8 @@ return array(
                 'refresh_token'     => TRUE,
                 'client_id'         => TRUE,
                 'client_secret'     => TRUE,
+                'mac_key'           => FALSE,
+                'mac_algorithm'     => FALSE,
                 // refresh token expires time, default is 1 day
                 'expires_in'        => 86400
             ),

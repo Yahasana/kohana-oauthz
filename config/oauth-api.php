@@ -32,35 +32,21 @@ return array(
          */
         'bearer'    => array(
             'access_token'  => TRUE,
-            'scope'         => FALSE,
+            'scope'         => FALSE
         ),
 
-        'md5'    => array(
+        'mac'       => array(
             'access_token'  => TRUE,
-            'token_type'    => TRUE,
-            'refresh_token' => TRUE,
-            'scope'         => FALSE,
-        ),
-
-        'hmac-sha1'    => array(
-            'access_token'  => TRUE,
-            'token_type'    => TRUE,
-            'refresh_token' => TRUE,
-            'scope'         => FALSE,
-        ),
-
-        'rsa-sha1'    => array(
-            'access_token'  => TRUE,
-            'token_type'    => TRUE,
-            'refresh_token' => TRUE,
-            'scope'         => FALSE,
+            'mac_key'       => TRUE,
+            'mac_algorithm' => TRUE,
+            'scope'         => FALSE
         ),
 
         'max_requests'  => array(
             500,        // common client
             1000,       // first class client
-            1500,       // vip client
-        ),
+            1500        // vip client
+        )
 
     )
 

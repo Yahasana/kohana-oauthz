@@ -87,7 +87,8 @@ class Oauthz_Client extends Kohana_Controller {
                     $this->request->response = 'You have denied this request.';
                     break;
                 default:
-                    $this->request->response = 'There must be some errors happen in this connection, please contact our web master.'."[$error]";
+                    $this->request->response = 'There must be some errors happen in this connection, 
+                        please contact our web master.'."[$error]";
                     break;
             }
         }
@@ -135,7 +136,7 @@ class Oauthz_Client extends Kohana_Controller {
 
             if(isset($token['error']))
             {
-                throw new Oauthz_Exception($token['error']);
+                throw new Oauthz_Exception_Access($token['error'], $token);
             }
 
             // Store the client info into the token

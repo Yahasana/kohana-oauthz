@@ -116,7 +116,7 @@ CREATE TABLE t_oauth_tokens
 	user_id BIGINT UNSIGNED 
 		COMMENT 'Ref# from users table' NOT NULL,
 	code VARCHAR(127) NOT NULL,
-	access_token VARCHAR(63) NOT NULL,
+	access_token VARCHAR(63) NULL,
 	refresh_token VARCHAR(63) NULL,
 	expire_code INTEGER UNSIGNED DEFAULT 300
 		COMMENT 'authorization code expires in this timestamp' NOT NULL,
@@ -126,9 +126,9 @@ CREATE TABLE t_oauth_tokens
 		COMMENT 'refresh token expires in this timestamp' NOT NULL,
 	`timestamp` INTEGER UNSIGNED 
 		COMMENT 'authorization code request timestamp' NOT NULL,
-	token_type VARCHAR(31) 
+	token_type VARCHAR(127) 
 		COMMENT 'bearer, mac, etc.' NOT NULL,
-	option TEXT 
+	options TEXT 
 		COMMENT 'parameters for different token type extension in json format' NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -138,7 +138,10 @@ CREATE TABLE t_oauth_tokens
 ALTER TABLE t_oauth_tokens COMMENT = 'Table used to verify signed requests sent to a server by the consumer.When the verification is succesful then the associated user id is returned. ';
 
 /* Add Indexes for: t_oauth_tokens */
+CREATE INDEX idx_t_oauth_tokens_access_token ON t_oauth_tokens (access_token);
 CREATE INDEX idx_t_oauth_tokens_client_id ON t_oauth_tokens (client_id);
+CREATE INDEX idx_t_oauth_tokens_code ON t_oauth_tokens (code);
+CREATE INDEX idx_t_oauth_tokens_refresh_token ON t_oauth_tokens (refresh_token);
 
 
 /************ Add Foreign Keys to Database ***************/

@@ -32,7 +32,7 @@ class Model_Oauthz_Token extends Model_Oauthz {
 	 *
      * @return	array     token
      */
-    public function code($client_id, $token_type, $expires_in = 120, array $option = NULL)
+    public function code($client_id, $token_type, $expires_in = 120, array $options = NULL)
     {
         if($client_id AND $client = DB::select('client_secret','server_id','redirect_uri','user_id')
             ->from('t_oauth_clients')
@@ -43,33 +43,27 @@ class Model_Oauthz_Token extends Model_Oauthz {
         {
             // Initial code, access_token, refresh_token at the same time
             $client['code'] = uniqid();
-            $access_token   = sha1(md5($_SERVER['REQUEST_TIME']));
-            $refresh_token  = sha1(sha1(mt_rand()));
             $expires_in     = $_SERVER['REQUEST_TIME'] + $expires_in;
 
-            isset($option) AND $option = json_encode($option);
+            isset($options) AND $options = json_encode($options);
 
             DB::insert('t_oauth_tokens', array(
                     'client_id',
                     'code',
                     'user_id',
-                    'access_token',
                     'timestamp',
-                    'refresh_token',
                     'expire_code',
                     'token_type',
-                    'option'
+                    'options'
                 ))
                 ->values(array(
                     $client_id,
                     $client['code'],
                     0,                     // TODO the user_id should be the resource owner
-                    $access_token,
                     $_SERVER['REQUEST_TIME'],
-                    $refresh_token,
                     $expires_in,
                     $token_type,
-                    $option
+                    $options
                 ))
                 ->execute($this->_db);
 
@@ -100,7 +94,7 @@ class Model_Oauthz_Token extends Model_Oauthz {
             ->current())
         {
             if($token = DB::select('token_id','access_token','token_type','refresh_token'
-                    ,array('expire_token', 'expires_in'),'option','expire_code')
+                    ,array('expire_token', 'expires_in'),'options','expire_code')
                 ->from('t_oauth_tokens')
                 ->where('client_id' , '=', $client_id)
                 ->where('code' , '=', $code)
@@ -109,17 +103,25 @@ class Model_Oauthz_Token extends Model_Oauthz {
             {
                 if($token['expire_code'] >= $_SERVER['REQUEST_TIME'])
                 {
-                    if($token['expires_in'] == 0)
-                    {
-                        // Start access_token expire time counter
-                        $token['expires_in'] = $_SERVER['REQUEST_TIME'] + $expires_in;
+                    // Start access_token expire time counter
+                    $token['expires_in']    = $_SERVER['REQUEST_TIME'] + $expires_in;
 
-                        // Update the expire timestamp of access_token to newest AND expire the code
-                        DB::update('t_oauth_tokens')
-                            ->set(array('expire_code' => 0, 'expire_token' => $token['expires_in']))
-                            ->where('token_id', '=', $token['token_id'])
-                            ->execute($this->_db);
-                    }
+                    // Generate access_token
+                    $token['access_token']  = sha1(md5($_SERVER['REQUEST_TIME']));
+
+                    // Generate refresh_token
+                    $token['refresh_token'] = sha1(sha1(mt_rand()));
+
+                    // Update the expire timestamp of access_token to newest AND expire the code
+                    DB::update('t_oauth_tokens')
+                        ->set(array(
+                            'expire_code'   => 0,
+                            'expire_token'  => $token['expires_in'],
+                            'access_token'  => $token['access_token'],
+                            'refresh_token' => $token['refresh_token']
+                        ))
+                        ->where('token_id', '=', $token['token_id'])
+                        ->execute($this->_db);
 
                     // Don't expose these
                     unset($token['token_id'], $token['expire_code']);
@@ -135,7 +137,7 @@ class Model_Oauthz_Token extends Model_Oauthz {
     public function access_token($token)
     {
         if($token = DB::select('access_token','token_type','refresh_token'
-                ,array('expire_token', 'expires_in'),'option')
+                ,array('expire_token', 'expires_in'),'options')
             ->from('t_oauth_tokens')
             ->where('access_token', '=', $token)
             ->execute($this->_db)
@@ -151,7 +153,7 @@ class Model_Oauthz_Token extends Model_Oauthz {
     public function refresh_token($client_id, $token)
     {
         if($token = DB::select('access_token','token_type','refresh_token'
-                ,array('expire_token', 'expires_in'),'option')
+                ,array('expire_token', 'expires_in'),'options')
             ->from('t_oauth_tokens')
             ->where('client_id' , '=', $client_id)
             ->where('token' , '=', $token)

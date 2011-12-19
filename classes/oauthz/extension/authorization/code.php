@@ -135,7 +135,7 @@ class Oauthz_Extension_Authorization_Code extends Oauthz_Extension {
         $token->expires_in       = $client['expires_in'];
 
         // merge other token properties, e.g. {"mac_key":"adijq39jdlaska9asud","mac_algorithm":"hmac-sha-256"}
-        if($client['option'] AND $option = json_decode($client['option'], TRUE))
+        if($client['options'] AND $option = json_decode($client['options'], TRUE))
         {
             foreach($option as $key => $val)
             {

@@ -171,7 +171,7 @@ class Oauthz_Extension_Password extends Oauthz_Extension {
         $token->refresh_token    = $client['refresh_token'];
 
         // merge other token properties, e.g. {"mac_key":"adijq39jdlaska9asud","mac_algorithm":"hmac-sha-256"}
-        if($client['option'] AND $option = json_decode($client['option'], TRUE))
+        if($client['options'] AND $option = json_decode($client['options'], TRUE))
         {
             foreach($option as $key => $val)
             {

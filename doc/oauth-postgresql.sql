@@ -122,14 +122,14 @@ CREATE TABLE "t_oauth_tokens"
 	client_id VARCHAR(127) NOT NULL,
 	user_id BIGINT NOT NULL,
 	code VARCHAR(127) NOT NULL,
-	access_token VARCHAR(63) NOT NULL,
+	access_token VARCHAR(63) NULL,
 	refresh_token VARCHAR(63) NULL,
 	expire_code INTEGER DEFAULT 300 NOT NULL,
 	expire_token INTEGER DEFAULT 0 NOT NULL,
 	expire_refresh INTEGER DEFAULT 0 NOT NULL,
 	"timestamp" INTEGER NOT NULL,
-	token_type VARCHAR(31) NOT NULL,
-	option TEXT NULL
+	token_type VARCHAR(127) NOT NULL,
+	options TEXT NULL
 ) DEFAULT CHARSET=utf8;
 
 /* Table Items: "t_oauth_tokens" */
@@ -143,11 +143,15 @@ COMMENT ON COLUMN "t_oauth_tokens".expire_token IS 'access token expires in this
 COMMENT ON COLUMN "t_oauth_tokens".expire_refresh IS 'refresh token expires in this timestamp';
 COMMENT ON COLUMN "t_oauth_tokens"."timestamp" IS 'authorization code request timestamp';
 COMMENT ON COLUMN "t_oauth_tokens".token_type IS 'bearer, mac, etc.';
-COMMENT ON COLUMN "t_oauth_tokens".option IS 'parameters for different token type extension in json format';
+COMMENT ON COLUMN "t_oauth_tokens".options IS 'parameters for different token type extension in json format';
 COMMENT ON TABLE "t_oauth_tokens" IS 'Table used to verify signed requests sent to a server by the consumer.When the verification is succesful then the associated user id is returned. ';
 
 /* Add Indexes for: t_oauth_tokens */
+CREATE INDEX idx_t_oauth_tokens_access_token ON "t_oauth_tokens" (access_token);
 CREATE INDEX idx_t_oauth_tokens_client_id ON "t_oauth_tokens" (client_id);
+CREATE INDEX idx_t_oauth_tokens_code ON "t_oauth_tokens" (code);
+CREATE INDEX idx_t_oauth_tokens_refresh_token ON "t_oauth_tokens" (refresh_token);
+
 
 /************ Add Foreign Keys to Database ***************/
 

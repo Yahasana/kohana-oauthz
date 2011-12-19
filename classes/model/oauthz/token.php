@@ -128,6 +128,18 @@ class Model_Oauthz_Token extends Model_Oauthz {
 
                     $client += $token;
                 }
+                elseif($token['expire_code'] == 0)
+                {
+                    // revoke all tokens previously issued based on that authorization code.
+                    DB::update('t_oauth_tokens')
+                        ->set(array(
+                            'expire_code'    => 0,
+                            'expire_token'   => 0,
+                            'expire_refresh' => 0
+                        ))
+                        ->where('token_id', '=', $token['token_id'])
+                        ->execute($this->_db);
+                }
             }
         }
 

@@ -25,8 +25,7 @@ abstract class Oauthz_Extension {
      * @access	public
      * @param	string	$type
      * @param	array	$args
-     * @return	object
-     * @throw   Oauthz_Exception_Authorize  invalid_request
+     * @return	mix
      */
     public static function factory($type, array $args)
     {
@@ -37,7 +36,7 @@ abstract class Oauthz_Extension {
             return new $type($args);
         }
 
-        throw new Oauthz_Exception_Authorize('invalid_request');
+        return FALSE;
     }
 
     /**

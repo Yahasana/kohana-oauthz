@@ -31,17 +31,17 @@ class Controller_Api extends Oauthz_Api {
                 $methods[$method] = url::site('/api/'.$method, TRUE);
             }
         }
-        $this->request->response = json_encode($methods);
+        $this->request->response = str_replace('\\/', '/', json_encode($methods));
     }
 
-    public function action_get($id = 0)
+    public function action_get($id = NULL)
     {
         $data = array(
             array('Humm', 'Hah'),
             array('Zzz', 'Yaaa'),
             array('Giii', 'Neee')
         );
-        $this->request->response = json_encode(isset($data[$id]) ? $data[$id] : array('Hello', 'OAuth', '2.0'));
+        $this->request->response = json_encode(isset($data[$id]) ? $data[$id] : array('Hello OAuth 2.0, when you see this info, it means you successfully access protected resources',));
     }
 
     public function action_create()

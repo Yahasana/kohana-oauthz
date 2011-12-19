@@ -26,4 +26,9 @@ abstract class Oauthz extends Oauthz_Core {
         return $default;
     }
 
+    public static function is_login()
+    {
+        return Session::instance()->get('user') OR Cookie::get('user');
+    }
+
 } // END Oauthz

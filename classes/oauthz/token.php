@@ -37,7 +37,9 @@ class Oauthz_Token {
 
             isset($this->state) AND $json['state'] = $this->state;
         }
-        return json_encode($json);
+
+        // JSON_UNESCAPED_SLASHES
+        return str_replace('\\/', '/', json_encode($json));
     }
 
     public function as_xml()

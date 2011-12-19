@@ -88,7 +88,8 @@ class Oauthz_Exception extends Exception {
 
         empty($state) OR $params['error_uri'] .= '?'.http_build_query($state, '', '&');
 
-        return json_encode($params);
+        // JSON_UNESCAPED_SLASHES
+        return str_replace('\\/', '/', json_encode($params));
 	}
 
 	public function as_query()

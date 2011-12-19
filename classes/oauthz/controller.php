@@ -30,6 +30,10 @@ abstract class Oauthz_Controller extends Kohana_Controller {
 
                 if($extension = Oauthz_Extension::factory($response_type, $arguments))
                 {
+                    if( ! Oauthz::is_login())
+                    {
+                        $this->request->redirect(Oauthz::config('login_uri').'redirect='.rawurlencode($this->request->url().url::query()));
+                    }
                     $response = $extension->execute();
                 }
             }

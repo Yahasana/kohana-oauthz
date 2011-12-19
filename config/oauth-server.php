@@ -16,7 +16,12 @@ return array(
          * Only do this if you are using the follow formats or /format/xml in URLs
          */
         'http_accept'=> FALSE,
-        
+
+        // login uri for the resource owner, before he approves the client's request
+        // this uri will be appended the redirect parameter. therefore the last char must be '?' or '&'
+        // e.g. /user/signin?,  /user/signin?my=xxx&
+        'login_uri'  => '/oauth/signin?',
+
         // Error info base uri
         'error_uri'  => '/oauth/error/',
 

@@ -73,12 +73,12 @@ class Controller_Oauth extends Oauthz_Controller {
             );
             Cookie::set('user', json_encode($user));
             Session::instance()->set('user', $user);
-            $this->request->redirect('server/index');
+            $this->request->redirect(arr::get($_GET, 'redirect', 'server/index'));
         }
-        elseif($user = Cookie::get('user'))
+        elseif($user = Oauthz::is_login())
         {
             Session::instance()->set('user', json_decode($user, TRUE));
-            $this->request->redirect('server/index');
+            $this->request->redirect(arr::get($_GET, 'redirect', 'server/index'));
         }
 
         $template = new View('oauthz-template');
@@ -89,8 +89,8 @@ class Controller_Oauth extends Oauthz_Controller {
 
     public function action_logout()
     {
-        Session::instance()->delete('user');
         Cookie::delete('user');
+        Session::instance()->delete('user');
         $this->request->redirect('oauth/index');
     }
 

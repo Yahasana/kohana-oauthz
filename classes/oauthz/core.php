@@ -11,6 +11,8 @@
  */
 abstract class Oauthz_Core {
 
+    const VERSION = '0.22-eva';
+
     /**
      * OAuth server configuration group name
      *

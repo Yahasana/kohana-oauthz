@@ -34,7 +34,7 @@
 
   then drop this file into the right place
 
- 2) Complex one, e.g. [assersion](/Yahasana/kohana-Oauthy/blob/master/classes/extension/assersion.php)
+ 2) Complex one, e.g. [assersion](/Yahasana/kohana-Oauthy/blob/master/classes/oauthz/extension/assersion.php)
 
 ### Develop web service API protected by OAuth2 ###
 

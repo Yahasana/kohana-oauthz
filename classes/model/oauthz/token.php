@@ -82,6 +82,15 @@ class Model_Oauthz_Token extends Model_Oauthz {
         return NULL;
     }
 
+    /**
+     * Get the access_token and expire authorization_code
+     *
+     * @access	public
+     * @param	string	$client_id
+     * @param	string	$code
+     * @param	int 	$expires_in	default [ 3600 ]
+     * @return	mix
+     */
     public function token($client_id, $code, $expires_in = 3600)
     {
         if($client = DB::select('server_id','client_secret','redirect_uri','user_id')
@@ -98,30 +107,29 @@ class Model_Oauthz_Token extends Model_Oauthz {
                 ->execute($this->_db)
                 ->current())
             {
-                if($token['expire_code'] >= $_SERVER['REQUEST_TIME'] AND $token['expires_in'] == 0)
+                if($token['expire_code'] >= $_SERVER['REQUEST_TIME'])
                 {
-                    // Start access_token expire time counter
-                    $token['expires_in'] = $_SERVER['REQUEST_TIME'] + $expires_in;
+                    if($token['expires_in'] == 0)
+                    {
+                        // Start access_token expire time counter
+                        $token['expires_in'] = $_SERVER['REQUEST_TIME'] + $expires_in;
 
-                    // Update the expire timestamp of access_token to newest
-                    DB::update('t_oauth_tokens')
-                        ->set(array('expire_token' => $token['expires_in']))
-                        ->where('token_id', '=', $token['token_id'])
-                        ->execute($this->_db);
+                        // Update the expire timestamp of access_token to newest AND expire the code
+                        DB::update('t_oauth_tokens')
+                            ->set(array('expire_code' => 0, 'expire_token' => $token['expires_in']))
+                            ->where('token_id', '=', $token['token_id'])
+                            ->execute($this->_db);
+                    }
+
+                    // Don't expose these
+                    unset($token['token_id'], $token['expire_code']);
+
+                    $client += $token;
                 }
-
-                // Don't expose these
-                unset($token['token_id'], $token['expire_code']);
-
-                $client += $token;
-            }
-            else
-            {
-                $client = NULL;
             }
         }
 
-        return $client;
+        return isset($client['access_token']) ? $client : NULL;
     }
 
     public function access_token($token)

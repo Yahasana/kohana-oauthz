@@ -53,7 +53,7 @@ class Oauthz_Server extends Kohana_Controller {
     {
         $client = new Model_Oauthz_Client;
 
-        $data = $client->lists();
+        $data = $client->lists(array('user_id' => $_SESSION['user']['uid']));
 
         $this->template->content = new View('oauthz-server-client', $data);
 

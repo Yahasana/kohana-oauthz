@@ -15,7 +15,7 @@ class Model_Oauthz_Token extends Model_Oauthz {
     public function get($token_id)
     {
         return ctype_digit((string) $token_id)
-            ? DB::select('token_id','client_id','code','access_token','refresh_token','expires_in','timestamp','nonce','user_id')
+            ? DB::select('*')
                 ->from('t_oauth_tokens')
                 ->where('token_id', '=', $token_id)
                 ->execute($this->_db)
@@ -42,8 +42,8 @@ class Model_Oauthz_Token extends Model_Oauthz {
             ->current())
         {
             // Initial code, access_token, refresh_token at the same time
-            $client['code'] = uniqid();
-            $expires_in     = $_SERVER['REQUEST_TIME'] + $expires_in;
+            $client['code']       = uniqid();
+            $client['expires_in'] = $_SERVER['REQUEST_TIME'] + $expires_in;
 
             isset($options) AND $options = json_encode($options);
 
@@ -61,14 +61,13 @@ class Model_Oauthz_Token extends Model_Oauthz {
                     $client['code'],
                     0,                     // TODO the user_id should be the resource owner
                     $_SERVER['REQUEST_TIME'],
-                    $expires_in,
+                    $client['expires_in'],
                     $token_type,
                     $options
                 ))
                 ->execute($this->_db);
 
             $client['token_type'] = $token_type;
-            $client['expires_in'] = $expires_in;
 
             return $client;
         }
@@ -128,7 +127,7 @@ class Model_Oauthz_Token extends Model_Oauthz {
 
                     $client += $token;
                 }
-                elseif($token['expire_code'] == 0)
+                elseif($token['expire_code'] == 0 AND $token['expires_in'] != 0)
                 {
                     // revoke all tokens previously issued based on that authorization code.
                     DB::update('t_oauth_tokens')

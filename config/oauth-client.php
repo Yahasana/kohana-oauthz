@@ -5,9 +5,14 @@ return array(
      * group definition parameters for each provider
      */
     'default' => array(
+        // uri to obtain authorization code
         'oauth-uri'     => 'http://docs/oauth/code',
+
+        // uri to obtain the access token
         'token-uri'     => 'http://docs/oauth/token',
-        'resource-uri'  => 'http://docs/api/get',
+
+        // Restful web service api base url
+        'api-uri'       => 'http://docs/api/',
 
         // Must be code, token, password, client_credentials
         'protocol-flow' => 'code',

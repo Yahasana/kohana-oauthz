@@ -68,14 +68,33 @@ class Oauthz_Client extends Kohana_Controller {
     {
         try
         {
-            $access_token = $this->token($uri);
+            $token = $this->token($uri);
 
-            // Resource in json format
-            $this->request->response = Remote::get($this->_configs['resource-uri'], array(
+            $param = array(
                 CURLOPT_POST        => TRUE,
                 CURLOPT_HTTPHEADER  => array('Content-Type: application/x-www-form-urlencoded;charset=utf-8'),
-                CURLOPT_POSTFIELDS  => http_build_query($access_token, '', '&')
-            ));
+                CURLOPT_POSTFIELDS  => http_build_query($token, '', '&')
+            );
+
+            // Resource in json format
+            $api_uri = $this->_configs['api-uri'].'get';
+            $hello   = Remote::get($api_uri, $param);
+            $resaults['first'] = array(
+                'uri'   => $api_uri,
+                'info'  => $hello,
+                'token' => $token['access_token']
+            );
+
+            // we try to use this token to request another more information
+            $api_uri = $this->_configs['api-uri'].'get/1';
+            $world   = Remote::get($api_uri, $param);
+            $resaults['second'] = array(
+                'uri'   => $api_uri,
+                'info'  => $world,
+                'token' => $token['access_token']
+            );
+
+            $this->request->response = new View('oauthz-client-response', $resaults);
         }
         catch(Exception $e)
         {
@@ -87,7 +106,7 @@ class Oauthz_Client extends Kohana_Controller {
                     $this->request->response = 'You have denied this request.';
                     break;
                 default:
-                    $this->request->response = 'There must be some errors happen in this connection, 
+                    $this->request->response = 'There must be some errors happen in this connection,
                         please contact our web master.'."[$error]";
                     break;
             }

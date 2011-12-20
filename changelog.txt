@@ -1,1 +1,4 @@
-Refactor to Oauth 2.0 rev 12
+
+Dec 20, 2011
+1) Refactor to Oauth 2.0 rev 22
+2) authorization code with bearer token_type support

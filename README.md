@@ -4,8 +4,11 @@
 
 ### Requirement ###
  1) php v5.2+, curl extension to run the demo
+
  2) MySQL, SQLite, MSSQL or NOSQL database
+
  3) Kohana [v3.0.x](http://dev.kohanaframework.org/attachments/download/1649/kohana-3.0.10.zip), I have no plan to support v3.1+ ATM
+
  4) Apache, Nignx, a web server
 
 ## Server ##

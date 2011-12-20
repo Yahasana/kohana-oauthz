@@ -1,11 +1,11 @@
-#Kohana OAuth 2 Module![project status](http://stillmaintained.com/Yahasana/kohana-oauthy.png)#
+#Kohana OAuth 2 Module! [project status](http://stillmaintained.com/Yahasana/kohana-oauthy.png)#
 
-#OAuth protocal v2 22[draft 22](http://tools.ietf.org/wg/oauth/)
+#OAuth protocal v2 [draft 22](http://tools.ietf.org/wg/oauth/)
 
 ### Requirement ###
  1) php v5.2+, curl extension to run the demo
  2) MySQL, SQLite, MSSQL or NOSQL database
- 3) Kohana (v3.0.x)[http://dev.kohanaframework.org/attachments/download/1649/kohana-3.0.10.zip], I have no plan to support v3.1+ ATM
+ 3) Kohana [v3.0.x](http://dev.kohanaframework.org/attachments/download/1649/kohana-3.0.10.zip), I have no plan to support v3.1+ ATM
  4) Apache, Nignx, a web server
 
 ## Server ##

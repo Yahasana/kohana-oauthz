@@ -1,4 +1,4 @@
-#Kohana OAuth 2 Module! [project status](http://stillmaintained.com/Yahasana/kohana-oauthy.png)#
+#Kohana OAuth 2 Module ![project status](http://stillmaintained.com/Yahasana/kohana-oauthy.png)#
 
 #OAuth protocal v2 [draft 22](http://tools.ietf.org/wg/oauth/)
 

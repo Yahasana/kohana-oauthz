@@ -47,7 +47,9 @@ class Oauthz_Client extends Kohana_Controller {
             }
             else
             {
-                return $this->request->response = 'Unsupported protocal flow, please check your oauth-client.php config.';
+                $template = new View('oauthz-template');
+                $template->content = 'Unsupported protocal flow, please check your oauth-client.php config.';
+                return $this->request->response = $template;
             }
         }
 
@@ -66,6 +68,8 @@ class Oauthz_Client extends Kohana_Controller {
     /* Request an access token and then access the protected resource */
     public function action_do($uri = NULL)
     {
+        $template = new View('oauthz-template');
+
         try
         {
             $token = $this->token($uri);
@@ -94,7 +98,7 @@ class Oauthz_Client extends Kohana_Controller {
                 'token' => $token['access_token']
             );
 
-            $this->request->response = new View('oauthz-client-response', $resaults);
+            $template->content = new View('oauthz-client-response', $resaults);
         }
         catch(Exception $e)
         {
@@ -103,14 +107,16 @@ class Oauthz_Client extends Kohana_Controller {
             switch($error)
             {
                 case 'access_denied':
-                    $this->request->response = 'You have denied this request.';
+                    $template->content = 'You have denied this request.';
                     break;
                 default:
-                    $this->request->response = 'There must be some errors happen in this connection,
-                        please contact our web master.'."[$error]";
+                    $template->content = "There must be some errors happen in this connection,
+                        please contact our web master. <br />error code : [$error]";
+                    empty($e->error_description) OR $template->content .= ",<br />description : [$e->error_description]";
                     break;
             }
         }
+        $this->request->response = $template;
     }
 
     /* Obtain an Access Token */

@@ -14,7 +14,7 @@ Note: before runing these steps, you have to setup the OAuth server. see README
  
         'oauth-uri'     => 'http://example.com/oauth/code',       // the uri for requesting authorization_code
         'token-uri'     => 'http://example.com/oauth/token',      // the uri for requesting access_token
-        'access-uri'    => 'http://example.com/api/',             // the uri for requesting protected resource
+        'api-uri'       => 'http://example.com/api/',             // the uri for requesting protected resource
         'redirect_uri'  => 'http://my-web-server.com/client/do'   // the uri holded by yourself
 
  2. Config the OAuth client ID and secrect `config/oauth-client.php` with the `client_id` and `client_secrect` above.

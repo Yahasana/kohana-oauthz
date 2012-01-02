@@ -24,45 +24,49 @@
  1) Client have to register an account before they access the protected resources. they can also manage their account
 
  2) Resource owners personal information management.
+```php
+class Controller_Oauth extends Oauthz_Server {
 
-    class Controller_Oauth extends Oauthz_Server {}
-
+}
+```
  See [more](/Yahasana/kohana-Oauthy/blob/master/guide/oauthz/server.md)
 
 ### Develop grant type or response type handler extensions ###
 
  1) Simpler way `myextension.php`
+```php
+class Oauthz_Extension_MyExtension extends Oauthz_Extension {
 
-    class Oauthz_Extension_MyExtension extends Oauthz_Extension {
-
-        public function execute()
-        {
-            // todo
-        }
+    public function execute()
+    {
+        // todo
     }
-
+}
+```
   then drop this file into the right place
 
  2) Complex one, e.g. [assersion](/Yahasana/kohana-Oauthy/blob/master/classes/oauthz/extension/assersion.php)
 
 ### Develop web service API protected by OAuth2 ###
+```php
+class Controller_Api extends Oauthz_Api {
 
-    class Controller_Api extends Oauthz_Api {}
-
+}
+```
  See [more](/Yahasana/kohana-Oauthy/blob/master/guide/oauthz/api.md)
 
 ### Overlay standard grant type or response type handler ###
 
  Not recommend but you can, here is
+```php
+class Oauthz_MyController extends Oauthz_Controller {
 
-    class Oauthz_MyController extends Oauthz_Controller {
-
-        protected function code()
-        {
-            // todo
-        }
+    protected function code()
+    {
+        // todo
     }
-
+}
+```
 ## Client ##
 
 ### Install and configuration ###

@@ -25,7 +25,7 @@
 
  2) Resource owners personal information management.
  
-```php
+``` php
 class Controller_Oauth extends Oauthz_Server {
 
 }
@@ -36,7 +36,7 @@ class Controller_Oauth extends Oauthz_Server {
 
  1) Simpler way `myextension.php`
  
-```php
+``` php
 class Oauthz_Extension_MyExtension extends Oauthz_Extension {
 
     public function execute()
@@ -51,7 +51,7 @@ class Oauthz_Extension_MyExtension extends Oauthz_Extension {
 
 ### Develop web service API protected by OAuth2 ###
 
-```php
+``` php
 class Controller_Api extends Oauthz_Api {
 
 }
@@ -62,7 +62,7 @@ class Controller_Api extends Oauthz_Api {
 
  Not recommend but you can, here is
  
-```php
+``` php
 class Oauthz_MyController extends Oauthz_Controller {
 
     protected function code()
@@ -79,7 +79,7 @@ class Oauthz_MyController extends Oauthz_Controller {
 
 ### Develop resources request handler ###
  
-```php
+``` php
 class Controller_Client extends Oauthz_Client {
 
 }
